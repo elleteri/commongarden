@@ -1,0 +1,64 @@
+---
+title: "Chemistry_2012_data_cleaning_OCG"
+author: "Elle Horwath"
+date: "2023-12-07"
+output: 
+  html_document:
+    theme: journal
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+# Orchard Common Garden Chemistry data cleaning
+## Set working directory and load necessary packages for reading in and tidying the data.
+```{r, load packages needed for reading in and tidying data}
+if (!require("readr")) {install.packages("readr"); require("readr")}
+if (!require("dplyr")) {install.packages("dplyr"); require("dplyr")}
+if (!require("tidyr")) {install.packages("tidyr"); require("tidyr")}
+if (!require("readxl")) {install.packages("readxl"); require("readxl")}
+```
+
+## Read data in
+The data being read is the metadata and the 2012 Orchard Common Garden plant chemistry GC data. The chemistry data has retention time removed consists of compound number, plant ID number and area under the curve (AUC). 
+
+```{r, read in metadata}
+#read in metadata####
+mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T)
+```
+
+```{r, read in chemistry data}
+OCG_AUC <- read.csv("data_csv/OCG_AUC_2012.csv", head=T, row.names = 1,check.names = F,stringsAsFactors = T) #This data has AUC 
+```
+
+## Subset to have the plants from metadata in chemistry data
+Since the metadata contains plant sampled from both 2012 and 2021. I need to get rid of the 2021 plants from the metadata.
+
+```{r, subset metadata}
+#First I need to subset the md to only have observations from 2012 to avoid duplicates
+mdITS_OCG_2012 <- subset(mdITS_OCG, mdITS_OCG$Year=="2012") #96 observations and 22 variables
+```
+
+Next, I have to make the Plant ID column name match in the metadata and the AUC data so I can join them by plant ID.
+
+```{r, matching names}
+names(OCG_AUC)[names(OCG_AUC) == 'garden_Plant_ID'] <- 'Garden Plant ID' #renaming the ID column to be the same in both datasets: Garden Plant ID
+
+OCG_AUC$`Garden Plant ID` <- as.integer(OCG_AUC$`Garden Plant ID`) #as integer so I can combine them
+```
+
+Now, subset AUC data
+
+```{r, subset}
+OCG_AUC_subset <- left_join(mdITS_OCG_2012, OCG_AUC, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 96 of 73 variables
+
+OCG_AUC_subset <- OCG_AUC_subset[,-c(1,3:24)] #removing everything except area under the curve for each compound and garden plant ID number
+```
+
+##Save the csv
+```{r, save the csv for AUC and metadata for 2012}
+##Save this csv so I can re-read in the data with row 1 being plant ID
+write.csv(OCG_AUC_subset, file = "data_csv/OCG_AUC_subset_2012.csv",row.names = FALSE)
+write.csv(mdITS_OCG_2012, file = "data_csv/md_OCG_2012.csv",row.names = FALSE)
+```
+
+
