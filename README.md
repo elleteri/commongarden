@@ -18,4 +18,8 @@ Scripts:
    - GC samples prepared from 2012 are cleaned and subsetted to just the plants that were part of the fungal amplicon sequencing collection.
 4. Chemistry_2012_OCG_data_analyses_&_visualization.Rmd
    - Using the cleaned GC data, PCA plots, correlation tests and plots, PERMANOVAS, Pairwise adonis, and NMDS plots were done to look at the differences found between subspecies, ploidy number, and subspecies ploidy combined in their GC chemistry composition.
-5. References
+
+
+At the end of each script in a references section to include any and all packges used to generate these reports. 
+
+
