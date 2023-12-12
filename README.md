@@ -16,6 +16,6 @@ Scripts:
    - Using the cleaned and subsetted asv table and metadata, statistical analyses (Pairwise adonis and PERMANOVAS) were done to look at differences between different subspecies, ploidy number, and subspecies ploidy combined in their microbial community composition. 
 3. Chemistry_2012_data_cleaning_OCG.Rmd
    - GC samples prepared from 2012 are cleaned and subsetted to just the plants that were part of the fungal amplicon sequencing collection.
-4.  Chemistry_2012_OCG_data_analyses_&_visualization.Rmd
+4. Chemistry_2012_OCG_data_analyses_&_visualization.Rmd
    - Using the cleaned GC data, PCA plots, correlation tests and plots, PERMANOVAS, Pairwise adonis, and NMDS plots were done to look at the differences found between subspecies, ploidy number, and subspecies ploidy combined in their GC chemistry composition.
 5. References
