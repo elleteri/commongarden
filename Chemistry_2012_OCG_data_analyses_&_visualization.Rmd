@@ -8,6 +8,10 @@ output:
     toc: yes
     toc_float:
       collapsed: true
+link-citations: yes
+fontsize: 12pt
+bibliography: Bibliography_Reproducible_Science_2.bib 
+csl: AmJBot.csl
 ---
 # OCG 2012 chemistry data analyses and visualization
 
@@ -260,5 +264,9 @@ OCG_AUC_subspploidy #subspecies ploidy significant
 OCG_AUC_subsp_ploidy.pw <- pairwise.adonis(OCG_AUC_subset, mdITS_OCG$Subsp_ploidy)
 OCG_AUC_subsp_ploidy.pw #T_4n vs T_2n=0.02, T_2n vs V_2n = 0.01, T_2n vs V_4n = 0.01, T_2n vs W_4n = 0.01, V_4n vs W_4n = 0.06, and V_2n vs W_4n= 0.01.
 ```
-
+# Appendix
+```{r, cite packages, echo = FALSE}
+# Load and provide all packages and versions
+sessionInfo()
+```
 

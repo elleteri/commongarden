@@ -8,6 +8,10 @@ output:
     toc: yes
     toc_float:
       collapsed: true
+link-citations: yes
+fontsize: 12pt
+bibliography: Bibliography_Reproducible_Science_2.bib 
+csl: AmJBot.csl
 ---
 # Orchard Common Garden Chemistry data cleaning
 ## Set working directory and load necessary packages for reading in and tidying the data.
@@ -59,6 +63,12 @@ OCG_AUC_subset <- OCG_AUC_subset[,-c(1,3:24)] #removing everything except area u
 ##Save this csv so I can re-read in the data with row 1 being plant ID
 write.csv(OCG_AUC_subset, file = "data_csv/OCG_AUC_subset_2012.csv",row.names = FALSE)
 write.csv(mdITS_OCG_2012, file = "data_csv/md_OCG_2012.csv",row.names = FALSE)
+```
+
+# Appendix
+```{r, cite packages, echo = FALSE}
+# Load and provide all packages and versions
+sessionInfo()
 ```
 
 

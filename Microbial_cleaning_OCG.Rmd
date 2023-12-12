@@ -8,6 +8,10 @@ output:
     toc: yes
     toc_float:
       collapsed: true
+link-citations: yes
+fontsize: 12pt
+bibliography: Bibliography_Reproducible_Science_2.bib 
+csl: AmJBot.csl
 ---
 # Orchard Common Garden - Microbial data cleaning
 ## Set working directory and load necessary packages for reading in and tidying the data.
@@ -115,4 +119,10 @@ mdITS.OCG <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.OCG))
 #Write csv for metadata and asv table####
 write.csv(asvITS.OCG, file = "data_csv/asvITS.OCG.csv") #write csv for asv table of OCG only
 write.csv(mdITS.OCG, file = "data_csv/metadata_OCG.csv") #write csv for metadata of OCG only
+```
+
+# Appendix
+```{r, cite packages, echo = FALSE}
+# Load and provide all packages and versions
+sessionInfo()
 ```

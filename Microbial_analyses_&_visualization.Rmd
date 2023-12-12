@@ -8,6 +8,10 @@ output:
     toc: yes
     toc_float:
       collapsed: true
+link-citations: yes
+fontsize: 12pt
+bibliography: Bibliography_Reproducible_Science_2.bib 
+csl: AmJBot.csl
 ---
 # Analysis and visualization using NMDS plots
 
@@ -144,6 +148,7 @@ asvITS.OCG.subsp_ploi #subspecies ploidy is significant
 asvITS.OCG.subsp.pw <- pairwise.adonis(asvITS.OCG.r, mdITS_OCG$Subsp_ploidy)
 asvITS.OCG.subsp.pw #T_4n vs T_2n= 0.47, T_4n vs V_2n = 0.02, T_4n vs V_4n = 0.02, T_4n vs W_4n = 0.02, T_2n vs V_2n = 0.03, T_2n vs V_4n = 0.46, T_2n vs W_4n = 0.46, V_2n vs V_4n = 1.00, V_2n vs W_4n = 0.90, V_4n vs W_4n = 1.00
 ```
+
 ### NMDS and analysis for year
 ```{r, nmds by year}
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -224,6 +229,48 @@ asvITS.2012.ad #subspecies significant
 asvITS.2012.subsp.pw <- pairwise.adonis(asvITS.2012.r, mdITS.2012$Subspecies)
 asvITS.2012.subsp.pw #T vs V= 0.003, T vs W= 0.003, and W vs V= 1.000.
 ```
+#### Procrustes test againt 2012 GC with 2012 asv data ####
+This will be a next step in the data analysis. 
+
+load("nmds/asvITS.2012.nmds.rda") # asv 2012 nmds
+load("nmds/Plant_ID_OCG_AUC.nmds.rda") # 2012 GC plant nmds
+load("nmds/OCG_AUC_subset.nmds.rda") # GC 2012 compound nmds
+
+asv_GC.pro <- protest(asvITS.2012.nmds, Plant_ID_OCG_AUC.nmds, symmetric=T)
+asv_GC.pro ## Correlation in a symmetric Procrustes rotation: 0.2092, Significance:  0.036 
+summary(asv_GCplant.pro)
+plot(asv_GCplant.pro)
+
+## Re-plotting the procrustes 
+prodat <- as.data.frame(asv_GCplant.pro$X)
+prodat <- cbind(prodat,asv_GCplant.pro$Yrot)
+colnames(prodat)[colnames(prodat)=="1"] <- "Xend"
+colnames(prodat)[colnames(prodat)=="2"] <- "Yend"
+# 
+ggplotcol10 <- c("#F8766D","#D89000","#A3A500","#39B600","#00BF7D","#00BFC4","#00B0F6","#9590FF","#E76BF3","#FF62BC")
+# 
+ggplot() + 
+  geom_segment(data=prodat, mapping=aes(x=NMDS1, y=NMDS2, xend=Xend, yend=Yend), size=0.8) + 
+  geom_point(data=prodat, mapping=aes(x=NMDS1, y=NMDS2), size=4, shape=19) +
+  geom_point(data=prodat, mapping=aes(x=Xend, y=Yend), size=4, shape=17) +
+  labs(x="Procrustes axis 1", y="Procrustes axis 2") +
+  theme_classic() 
+
+OCG_AUC_subset.t <- as.data.frame(OCG_AUC_subset.t)
+
+## Mantel test measuring correlation between the distance matrices
+asvITS.2012.dist <- vegdist(asvITS.2012)
+OCG_AUC_subset.t.dist <- vegdist(OCG_AUC_subset.t)
+asv_GC.mant <- mantel(asvITS.2012.dist,OCG_AUC_subset.t.dist, permutations = 9999) # doesnt work
+asv_GC.mant ## r = 
+
+#make the names the same in asv table and gc plant ID. Organize the metadata by garden plant ID. 
+
+asvITS.2012.dist <- vegdist(asvITS.2012)
+OCG_AUC_subset.dist <- vegdist(OCG_AUC_subset)
+asv_GC.mant <- mantel(asvITS.2012.dist,OCG_AUC_subset.dist, permutations = 9999) 
+asv_GC.mant ## r = -0.03859 , p = 0.7585
+
 
 ##Just 2021 NMDS and Analysis for subspecies
 ```{r, subset to 2021}
@@ -278,4 +325,10 @@ asvITS.2021.ad #subspecies not significant
 #pairwiseadonis
 asvITS.2021.subsp.pw <- pairwise.adonis(asvITS.2021.r, mdITS.2021$Subspecies)
 asvITS.2021.subsp.pw #T vs V= 1.000, T vs W= 0.528, and W vs V= 1.000.
+```
+
+# Appendix
+```{r, cite packages, echo = FALSE}
+# Load and provide all packages and versions
+sessionInfo()
 ```
