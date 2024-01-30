@@ -13,7 +13,7 @@ fontsize: 12pt
 bibliography: Bibliography_Reproducible_Science_2.bib 
 csl: AmJBot.csl
 ---
-# Orchard Common Garden Chemistry data cleaning
+# Orchard Common Garden Chemistry 2012 GC data cleaning
 ## Set working directory and load necessary packages for reading in and tidying the data.
 ```{r, load packages needed for reading in and tidying data}
 if (!require("readr")) {install.packages("readr"); require("readr")}

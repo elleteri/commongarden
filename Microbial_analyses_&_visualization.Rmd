@@ -30,15 +30,15 @@ if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairw
 ## Read in the data
 
 ```{r, read in the data}
-mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T)
+mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in
 head(mdITS_OCG)
 
-asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T)
+asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #asv table read in
 head(asvITS.OCG)
 summary(rowSums(asvITS.OCG)) #1021
 summary(colSums(asvITS.OCG)) #2
 
-tax.ITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F)
+tax.ITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in
 ```
 
 ## Rarefy
@@ -92,7 +92,7 @@ ordispider(asvITS.OCG.nmds,groups = mdITS_OCG$Subspecies, show.groups = "W", col
 ```{r, permanovas and pairwise adonis for subspecies}
 ### PERMANOVAs####
 asvITS.OCG.subsp <- adonis2(asvITS.OCG.r ~ mdITS_OCG$Subspecies,by="margin") # Bray-Curtis is the default metric
-asvITS.OCG.subsp #subspecies significant
+asvITS.OCG.subsp #subspecies significant p=0.001
 
 #pairwiseadonis
 asvITS.OCG.subsp.pw <- pairwise.adonis(asvITS.OCG.r, mdITS_OCG$Subspecies)
@@ -161,7 +161,7 @@ legend("topleft",
        pch=19,
        cex=0.8,
        bty = "n")
-ordiarrows(asvITS.OCG.nmds, mdITS_OCG$Plant)
+ordiarrows(asvITS.OCG.nmds$points, mdITS_OCG$Plant)
 ```
 
 #### Permanova for year
