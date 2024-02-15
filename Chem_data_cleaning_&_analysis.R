@@ -32,25 +32,55 @@ mdITS_OCG_2021 <- subset(mdITS_OCG, mdITS_OCG$Year=="2021")
 
 ## 2012 GC raw data read in####
 #read in 2012 GC chemistry data
-OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012.csv", head=T, row.names = 1,check.names = F,stringsAsFactors = T) #This data has AUC. 167 of 52 variables
+OCG_AUC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #227 obs of 221 var
 
 ## 2012 GC Cleaning ####
-names(OCG_AUC_2012)[names(OCG_AUC_2012) == 'garden_Plant_ID'] <- 'Garden Plant ID' #renaming the ID column to be the same in both datasets: Garden Plant ID
+# Remove the second column since it is empty
+OCG_AUC_2012 <- OCG_AUC_2012[, -2]
+names(OCG_AUC_2012)[1] <- "Plant_ID"
+
+sum(duplicated(OCG_AUC_2012$Plant_ID)) #48 duplicates (100 and then cocktails and blanks)
+
+# Remove duplicates
+OCG_AUC_2012 <- distinct(OCG_AUC_2012) #180 of 220
+
+# Remove rows where "empty", "Empty", "Ct, "CT", "M", "w"  occur
+OCG_AUC_2012 <- OCG_AUC_2012[!(apply(OCG_AUC_2012, 1, function(row) any(grepl("^empty|^Empty|^Ct|^CT |^M|w", row)))), ] #167 of 220 variables
+
+#head(OCG_AUC_2021)
+
+#subset to only columns that contain "Peak Area" and "Plant ID". This removes "RT". 
+OCG_AUC_2012 <- OCG_AUC_2012 [, grepl("Peak.Area|Plant_ID", colnames(OCG_AUC_2012))] #167 obs of 147 variables
+
+#subset to remove columns that contain Peak Area Percent and just keep Peak Area.
+OCG_AUC_2012 <- OCG_AUC_2012 [, !grepl("Peak.Area.Percent", colnames(OCG_AUC_2012))] #167 obs of 74 variables
+
+#subset to have just the columns that contain "Peak Area" 1:73 #shifted by one compared to 2021 since there was no compound 1. should fix. 
+peak_area_cols <- grep("Peak.Area", colnames(OCG_AUC_2012)) 
+
+#the new column names I want to generate will replace the repeating "Peak.Area" names to be "C001" through "C0073" increasing sequentially. 
+new_col_names <- paste0("C", sprintf("%03d", seq_along(peak_area_cols)))
+
+#Rename the columns containing "Peak Area" to compound number
+colnames(OCG_AUC_2012)[peak_area_cols] <- new_col_names #167 of 74 variables
+
+names(OCG_AUC_2012)[names(OCG_AUC_2012) == 'Plant_ID'] <- 'Garden Plant ID' #renaming the ID column to be the same in both datasets: Garden Plant ID
 
 OCG_AUC_2012$`Garden Plant ID` <- as.integer(OCG_AUC_2012$`Garden Plant ID`) #as integer so I can combine them
 
-OCG_AUC_2012 <- merge(mdITS_OCG_2012, OCG_AUC_2012, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 96 of 73 variables
+OCG_AUC_2012 <- merge(mdITS_OCG_2012, OCG_AUC_2012, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 31 obs of 95 variables
 
-OCG_AUC_2012 <- OCG_AUC_2012[,-c(2:24)] #removing everything except area under the curve for each compound and garden plant ID number
-#96 obs of 50 variables
+OCG_AUC_2012 <- OCG_AUC_2012[,-c(1:6,8:22)] #removing everything except area under the curve for each compound and garden plant ID number
+#31 obs of 74 variables
 
 ##Save this csv so I can re-read in the data with row 1 being plant ID
-write.csv(OCG_AUC_2012, file = "data_csv/OCG_AUC_2012.csv",row.names = FALSE)
+write.csv(OCG_AUC_2012, file = "data_csv/OCG_AUC_2012_cleaned.csv",row.names = FALSE)
 
 ## 2012 cleaned GC data read in####
 #read in cleaned 2012 GC data with row 1 being plant ID
-OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012.csv", row.names = 1) 
-#96 of 49 variables
+OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012_cleaned.csv", row.names = 1) 
+#31 obs of 73 variables
+
 
 ## 2021 GC raw data read in####
 #read in 2021 GC chemistry data#
@@ -61,7 +91,7 @@ sum(duplicated(OCG_AUC_2021$Plant_ID)) #3 duplicates (100 and then cocktails and
 
 #head(OCG_AUC_2021)
 
-#sample 100 was ionized suring the first run but then we ran out of gas and the second run is the 100 we actually want to keep so we can remove the first row
+#sample 100 was ionized during the first run but then we ran out of gas and the second run is the 100 we actually want to keep so we can remove the first row
 OCG_AUC_2021 <- OCG_AUC_2021[-1, ]  # Remove the first row #99 of 225 variables
 
 # Remove rows where "Blank" or "Cocktail" or 429 or 333 appear in Plant ID column 
@@ -89,7 +119,7 @@ mdITS_OCG_2021$`Garden Plant ID` <- as.character(mdITS_OCG_2021$`Garden Plant ID
 OCG_AUC_2021 <- merge(mdITS_OCG_2021, OCG_AUC_2021, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 39 obs of 96 variables
 
 #Going to remove everything except chem data and plant ID
-OCG_AUC_2021 <- OCG_AUC_2021[,-c(2:22)] #39 obs of 75 variables
+OCG_AUC_2021 <- OCG_AUC_2021[,-c(1:6, 8:22)] #39 obs of 75 variables
 
 ##Save this csv so I can re-read in the data with row 1 being plant ID
 write.csv(OCG_AUC_2021, file = "data_csv/OCG_AUC_2021.csv",row.names = FALSE)
@@ -98,10 +128,7 @@ write.csv(OCG_AUC_2021, file = "data_csv/OCG_AUC_2021.csv",row.names = FALSE)
 #read in 2021 chemistry data
 OCG_AUC_2021 <- read.csv("data_csv/OCG_AUC_2021.csv", row.names = 1) 
 #39 obs of 74 variables
-# Replace NA values with zeroes
-OCG_AUC_2021[is.na(OCG_AUC_2021)] <- 0
-
-colSums(is.na(OCG_AUC_2021)) #all zeroes for each column which indicates there are no NA values
+#all zeroes for each column which indicates there are no NA values
 
 ## 2012/2021 LCMS raw data read in ####
 OCG_LCMS_1uL <- read.csv("data_csv/1uL_Injection_Results_LCMS.csv", head=T, check.names = F,stringsAsFactors = T, skip = 1) #120 of 930 variables
@@ -272,9 +299,32 @@ OCG_LCMS_3uL_2021 <- OCG_LCMS_3uL_2021[, -1]  # Remove the first column after se
 ## 2012 GC data cleaning ####
 colSums(is.na(OCG_AUC_2012)) #checking for null values since pca wont run with NAs. All zeroes for each column which indicates there are no NA values
 
-## 2021 GC data cleaning ####
 #So now the data needs to be cleaned to only contain compounds that occur in more than 20% of the samples (plants). AKA columns need to be removed that don't have at least 20% of the rows containing a number=NA
 
+#Calculate proportion of NA values that are in each column
+na_proportion <- colMeans(is.na(OCG_AUC_2012))
+print(na_proportion)
+
+#Now define the threshold of 20% - there are 19 compounds that remain after this
+threshold <- 0.2
+
+#identify which columns I need to keep
+columns_to_keep <- na_proportion <= threshold
+
+# Subset dataframe to keep only columns with NA proportion <= threshold
+OCG_AUC_2012_subset <- OCG_AUC_2012[, columns_to_keep] #39 of 19 variables
+
+# Replace NA values with zeroes
+OCG_AUC_2012_subset[is.na(OCG_AUC_2012_subset)] <- 0
+
+colSums(is.na(OCG_AUC_2012_subset)) #all zeroes for each column which indicates there are no NA values
+
+# Replace NA values with zeroes
+OCG_AUC_2012_subset[is.na(OCG_AUC_2012_subset)] <- 0
+
+## 2021 GC data cleaning ####
+#So now the data needs to be cleaned to only contain compounds that occur in more than 20% of the samples (plants). AKA columns need to be removed that don't have at least 20% of the rows containing a number=NA
+colSums(is.na(OCG_AUC_2012))
 #Calculate proportion of NA values that are in each column
 na_proportion <- colMeans(is.na(OCG_AUC_2021))
 print(na_proportion)
@@ -316,12 +366,12 @@ OCG_LCMS_3uL_2021[is.na(OCG_LCMS_3uL_2021)] <- 0
 #Scaling####
 ## 2012 GC scaling ####
 #Compound
-data_normalized_2012 <- scale(OCG_AUC_2012) #so this will center the data.... able to code this instead of using excel to do this
+data_normalized_2012 <- scale(OCG_AUC_2012_subset) #so this will center the data.... able to code this instead of using excel to do this
 head(data_normalized_2012) #looks good
 
 #Plant ID
 #transpose the data first to put plant ID as columns and compound as row
-OCG_AUC_2012_subset.t <- t(OCG_AUC_2012) # transpose rows and columns
+OCG_AUC_2012_subset.t <- t(OCG_AUC_2012_subset) # transpose rows and columns
 
 #only works with numeric data
 colSums(is.na(OCG_AUC_2012_subset.t)) #checking for null values
@@ -632,25 +682,23 @@ mdITS_OCG_2012$Year <- as.factor(mdITS_OCG_2012$Year)
 mdITS_OCG_2012$Ploidy <- as.factor(mdITS_OCG_2012$Ploidy)
 
 #turn abundance data frame into a matrix
-m_OCG_AUC_2012_subset = as.matrix(OCG_AUC_2012)
+m_OCG_AUC_2012_subset = as.matrix(OCG_AUC_2012_subset)
 
 set.seed(65)
-#OCG_AUC_2012_subset.nmds <- metaMDS(t(m_OCG_AUC_2012_subset), trymax=500) #solution reached.
-#save(OCG_AUC_2012_subset.nmds, file = "nmds/OCG_AUC_2012_subset.nmds.rda")
+OCG_AUC_2012_subset.nmds <- metaMDS(t(m_OCG_AUC_2012_subset), trymax=500) #solution reached.
+save(OCG_AUC_2012_subset.nmds, file = "nmds/OCG_AUC_2012_subset.nmds.rda")
 load("nmds/OCG_AUC_2012_subset.nmds.rda")
 
 ordiplot(OCG_AUC_2012_subset.nmds, type = "t",display = "sites",cex = .6) 
 
 ## 2012 GC NMDS by plant ID ####
-OCG_AUC_2012_subset.t <- t(OCG_AUC_2012)
+OCG_AUC_2012_subset.t <- t(OCG_AUC_2012_subset)
 m_OCG_AUC_2012_subset.t = as.matrix(OCG_AUC_2012_subset.t)
 
 set.seed(57)
-Plant_ID_OCG_AUC_2012.nmds <- metaMDS(t(m_OCG_AUC_2012_subset.t), trymax=500) #
-#save(Plant_ID_OCG_AUC_2012.nmds, file = "nmds/Plant_ID_OCG_AUC_2012.nmds")
+#Plant_ID_OCG_AUC_2012.nmds <- metaMDS(t(m_OCG_AUC_2012_subset.t), trymax=500) #solution reached
+#save(Plant_ID_OCG_AUC_2012.nmds, file = "nmds/Plant_ID_OCG_AUC_2012.nmds.rda")
 load("nmds/Plant_ID_OCG_AUC_2012.nmds.rda")
-
-Plant_ID_OCG_AUC_2012.nmds
 
 ordiplot(Plant_ID_OCG_AUC_2012.nmds, type = "t",display = "sites",cex = .7)
 
@@ -694,6 +742,7 @@ OCG_LCMS_3uL_2021_ID.nmds <- load("nmds/OCG_LCMS_3uL_2021_ID.nmds.rda")
 
 ordiplot(OCG_LCMS_3uL_2021_ID.nmds, type = "t",display = "sites",cex = .7)
 
+
 ### Ploidy NMDS####
 #mdITS_OCG_2012$Ploidy<- droplevels(mdITS_OCG_2012$Ploidy)
 levels(mdITS_OCG_2012$Ploidy) #Always smart to check levels before plotting. If there are too many or too few levels, the nmds plots wont line up with the ordispider function.
@@ -714,6 +763,7 @@ ordispider(Plant_ID_OCG_AUC_2012.nmds,groups = mdITS_OCG_2012$Ploidy, show.group
 #### PERMANOVA for 2012 ploidy ####
 OCG_AUC_2012_ploidy <- adonis2(OCG_AUC_2012 ~ mdITS_OCG_2012$Ploidy,by="margin") # Bray-Curtis is the default metric
 OCG_AUC_2012_ploidy #ploidy is not significant 0.32
+
 
 ### Subspecies NMDS ####
 #mdITS_OCG_2012$Subspecies<- droplevels(mdITS_OCG_2012$Subspecies)
@@ -740,6 +790,7 @@ OCG_AUC_2012_subsp #subspecies is not significant 0.587
 #pairwiseadonis
 OCG_AUC_2012_subsp.pw <- pairwise.adonis(OCG_AUC_2012, mdITS_OCG_2012$Subspecies)
 OCG_AUC_2012_subsp.pw# no significance between subspecies
+
 
 ### Subspecies ploidy NMDS ####
 #mdITS_OCG_2012$Subsp_ploidy<- droplevels(mdITS_OCG_2012$Subsp_ploidy)
@@ -768,6 +819,7 @@ OCG_AUC_2012_subspploidy #subspecies ploidy not significant
 #pairwiseadonis
 OCG_AUC_2012_subsp_ploidy.pw <- pairwise.adonis(OCG_AUC_2012, mdITS_OCG_2012$Subsp_ploidy)
 OCG_AUC_2012_subsp_ploidy.pw #
+
 
 ## 2021 NMDS by Compound####
 mdITS_OCG_2021$Subspecies <- as.factor(mdITS_OCG_2021$Subspecies)
