@@ -293,6 +293,26 @@ OCG_AUC_2021_subset[is.na(OCG_AUC_2021_subset)] <- 0
 
 colSums(is.na(OCG_AUC_2021_subset)) #all zeroes for each column which indicates there are no NA values
 
+## 2012 1uL LCMS data cleaning ####
+colSums(is.na(OCG_LCMS_1uL_2012)) #checking for null values
+# Replace NA values with zeroes
+OCG_LCMS_1uL_2012[is.na(OCG_LCMS_1uL_2012)] <- 0
+
+## 2021 1uL LCMS data cleaning ####
+colSums(is.na(OCG_LCMS_1uL_2021)) #checking for null values
+# Replace NA values with zeroes
+OCG_LCMS_1uL_2021[is.na(OCG_LCMS_1uL_2021)] <- 0
+
+## 2012 3uL LCMS data cleaning ####
+colSums(is.na(OCG_LCMS_3uL_2012)) #checking for null values
+# Replace NA values with zeroes
+OCG_LCMS_3uL_2012[is.na(OCG_LCMS_3uL_2012)] <- 0
+
+## 2021 3uL LCMS data cleaning ####
+colSums(is.na(OCG_LCMS_3uL_2021)) #checking for null values
+# Replace NA values with zeroes
+OCG_LCMS_3uL_2021[is.na(OCG_LCMS_3uL_2021)] <- 0
+
 #Scaling####
 ## 2012 GC scaling ####
 #Compound
@@ -324,6 +344,62 @@ colSums(is.na(OCG_AUC_2021_subset.t)) #checking for null values
 data_normalized_2021.ID <- scale(OCG_AUC_2021_subset.t) 
 head(data_normalized_2021.ID) 
 
+## 2012 1uL LCMS scaling####
+data_LCMS1_normalized_2012 <- scale(OCG_LCMS_1uL_2012) #this will center the data
+head(data_LCMS1_normalized_2012) 
+
+#Plant correlation plot
+#transpose the data first to put plant ID as columns and compound as row 
+OCG_LCMS_1uL_2012.t <- t(OCG_LCMS_1uL_2012) # transpose rows and columns
+
+#only works with numeric data
+colSums(is.na(OCG_LCMS_1uL_2012.t)) #checking for null values
+
+data_LCMS1_normalized_2012.ID <- scale(OCG_LCMS_1uL_2012.t) 
+head(data_LCMS1_normalized_2012.ID) 
+
+## 2021 1uL LCMS scaling####
+data_LCMS1_normalized_2021 <- scale(OCG_LCMS_1uL_2021) #this will center the data
+head(data_LCMS1_normalized_2021) 
+
+#Plant correlation plot
+#transpose the data first to put plant ID as columns and compound as row 
+OCG_LCMS_1uL_2021.t <- t(OCG_LCMS_1uL_2021) # transpose rows and columns
+
+#only works with numeric data
+colSums(is.na(OCG_LCMS_1uL_2021.t)) #checking for null values
+
+data_LCMS1_normalized_2021.ID <- scale(OCG_LCMS_1uL_2021.t) 
+head(data_LCMS1_normalized_2012.ID) 
+
+## 2012 3uL LCMS scaling####
+data_LCMS3_normalized_2012 <- scale(OCG_LCMS_3uL_2012) #this will center the data
+head(data_LCMS3_normalized_2012) 
+
+#Plant correlation plot
+#transpose the data first to put plant ID as columns and compound as row 
+OCG_LCMS_3uL_2012.t <- t(OCG_LCMS_3uL_2012) # transpose rows and columns
+
+#only works with numeric data
+colSums(is.na(OCG_LCMS_3uL_2012.t)) #checking for null values
+
+data_LCMS3_normalized_2012.ID <- scale(OCG_LCMS_3uL_2012.t) 
+head(data_LCMS3_normalized_2012.ID) 
+
+## 2021 3uL LCMS scaling####
+data_LCMS3_normalized_2021 <- scale(OCG_LCMS_3uL_2021) #this will center the data
+head(data_LCMS3_normalized_2021) 
+
+#Plant correlation plot
+#transpose the data first to put plant ID as columns and compound as row 
+OCG_LCMS_3uL_2021.t <- t(OCG_LCMS_3uL_2021) # transpose rows and columns
+
+#only works with numeric data
+colSums(is.na(OCG_LCMS_3uL_2021.t)) #checking for null values
+
+data_LCMS3_normalized_2021.ID <- scale(OCG_LCMS_3uL_2021.t) 
+head(data_LCMS3_normalized_2021.ID)
+
 # Data visualization####
 ## Correlation plots####
 ### 2012 GC correlation plots ####
@@ -342,6 +418,42 @@ ggcorrplot(corr_matrix_2021)
 
 #corr plot for plant ID
 corr_matrix_2021.ID <- cor(data_normalized_2021.ID)
+#ggcorrplot(corr_matrix_2021.ID)
+
+### 2012 1uL LCMS correlation plots ####
+#corr plot for compound
+corr_matrix_LCMS1_2012 <- cor(data_LCMS1_normalized_2012)
+ggcorrplot(corr_matrix_LCMS1_2012)
+
+#corr plot for plant ID
+corr_matrix_LCMS1_2012.ID <- cor(data_LCMS1_normalized_2012.ID)
+#ggcorrplot(corr_matrix_LCMS1_2012.ID)
+
+### 2021 1uL LCMS correlation plots ####
+#corr plot for compound
+corr_matrix_LCMS1_2021 <- cor(data_LCMS1_normalized_2021)
+ggcorrplot(corr_matrix_LCMS1_2021)
+
+#corr plot for plant ID
+corr_matrix_LCMS1_2021.ID <- cor(data_LCMS1_normalized_2021.ID)
+#ggcorrplot(corr_matrix_2021.ID)
+
+### 2012 3uL LCMS correlation plots ####
+#corr plot for compound
+corr_matrix_LCMS3_2012 <- cor(data_LCMS3_normalized_2012)
+ggcorrplot(corr_matrix_LCMS3_2012)
+
+#corr plot for plant ID
+corr_matrix_LCMS3_2012.ID <- cor(data_LCMS3_normalized_2012.ID)
+#ggcorrplot(corr_matrix_2021.ID)
+
+### 2021 3uL LCMS correlation plots ####
+#corr plot for compound
+corr_matrix_LCMS3_2021 <- cor(data_LCMS3_normalized_2021)
+ggcorrplot(corr_matrix_LCMS3_2021)
+
+#corr plot for plant ID
+corr_matrix_LCMS3_2021.ID <- cor(data_LCMS3_normalized_2021.ID)
 #ggcorrplot(corr_matrix_2021.ID)
 
 # PCA ####
@@ -429,6 +541,89 @@ fviz_pca_var(data.pca_2021_ID, col.var = "cos2",
              gradient.cols = c("black", "orange", "green"),
              repel = TRUE)
 
+## 2012 1uL LCMS PCA by Plant ID####
+data.pca_LCMS1_2012.ID <- princomp(corr_matrix_LCMS1_2012.ID)
+summary(data.pca_LCMS1_2012.ID)
+
+data.pca_LCMS1_2012.ID$loadings[, 1:2]
+
+fviz_eig(data.pca_LCMS1_2012.ID, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain.
+
+#With the biplot, it is possible to visualize the similarities and dissimilarities between the samples, and further shows the impact of each attribute on each of the principal components.
+
+# Graph of the compounds
+fviz_pca_var(data.pca_LCMS1_2012.ID, col.var = "black")
+
+#Contribution of each compound
+fviz_cos2(data.pca_LCMS1_2012.ID, choice = "var", axes = 1:2)
+
+#Biplot combined with cos2
+fviz_pca_var(data.pca_LCMS1_2012.ID, col.var = "cos2",
+             gradient.cols = c("black", "orange", "green"),
+             repel = TRUE)
+
+## 2021 1uL LCMS PCA by Plant ID####
+data.pca_LCMS1_2021.ID <- princomp(corr_matrix_LCMS1_2021.ID)
+summary(data.pca_LCMS1_2021.ID)
+
+data.pca_LCMS1_2021.ID$loadings[, 1:2]
+
+fviz_eig(data.pca_LCMS1_2021.ID, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain.
+
+#With the biplot, it is possible to visualize the similarities and dissimilarities between the samples, and further shows the impact of each attribute on each of the principal components.
+
+# Graph of the compounds
+fviz_pca_var(data.pca_LCMS1_2021.ID, col.var = "black")
+
+#Contribution of each compound
+fviz_cos2(data.pca_LCMS1_2021.ID, choice = "var", axes = 1:2)
+
+#Biplot combined with cos2
+fviz_pca_var(data.pca_LCMS1_2021.ID, col.var = "cos2",
+             gradient.cols = c("black", "orange", "green"),
+             repel = TRUE)
+## 2012 3uL LCMS PCA by Plant ID####
+data.pca_LCMS3_2012.ID <- princomp(corr_matrix_LCMS3_2012.ID)
+summary(data.pca_LCMS3_2012.ID)
+
+data.pca_LCMS3_2012.ID$loadings[, 1:2]
+
+fviz_eig(data.pca_LCMS3_2012.ID, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain.
+
+#With the biplot, it is possible to visualize the similarities and dissimilarities between the samples, and further shows the impact of each attribute on each of the principal components.
+
+# Graph of the compounds
+fviz_pca_var(data.pca_LCMS3_2012.ID, col.var = "black")
+
+#Contribution of each compound
+fviz_cos2(data.pca_LCMS3_2012.ID, choice = "var", axes = 1:2)
+
+#Biplot combined with cos2
+fviz_pca_var(data.pca_LCMS3_2012.ID, col.var = "cos2",
+             gradient.cols = c("black", "orange", "green"),
+             repel = TRUE)
+
+## 2021 3uL LCMS PCA by Plant ID####
+data.pca_LCMS3_2021.ID <- princomp(corr_matrix_LCMS3_2021.ID)
+summary(data.pca_LCMS3_2021.ID)
+
+data.pca_LCMS3_2021.ID$loadings[, 1:2]
+
+fviz_eig(data.pca_LCMS3_2021.ID, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain.
+
+#With the biplot, it is possible to visualize the similarities and dissimilarities between the samples, and further shows the impact of each attribute on each of the principal components.
+
+# Graph of the compounds
+fviz_pca_var(data.pca_LCMS3_2021.ID, col.var = "black")
+
+#Contribution of each compound
+fviz_cos2(data.pca_LCMS3_2021.ID, choice = "var", axes = 1:2)
+
+#Biplot combined with cos2
+fviz_pca_var(data.pca_LCMS3_2021.ID, col.var = "cos2",
+             gradient.cols = c("black", "orange", "green"),
+             repel = TRUE)
+
 ## NMDS plots####
 ## 2012 GC NMDS by Compound ####
 mdITS_OCG_2012$Subspecies <- as.factor(mdITS_OCG_2012$Subspecies)
@@ -458,6 +653,46 @@ load("nmds/Plant_ID_OCG_AUC_2012.nmds.rda")
 Plant_ID_OCG_AUC_2012.nmds
 
 ordiplot(Plant_ID_OCG_AUC_2012.nmds, type = "t",display = "sites",cex = .7)
+
+## 2012 1uL LCMS NMDS by plant ID ####
+OCG_LCMS_1uL_2012.t <- t(OCG_LCMS_1uL_2012)
+m_OCG_LCMS_1uL_2012.t = as.matrix(OCG_LCMS_1uL_2012.t)
+
+set.seed(53)
+OCG_LCMS_1uL_2012_ID.nmds <- metaMDS(t(m_OCG_LCMS_1uL_2012.t), trymax=500) #insufficient data for nmds even though solutiin technically reached
+
+ordiplot(OCG_LCMS_1uL_2012_ID.nmds, type = "t",display = "sites",cex = .7)
+
+## 2021 1uL LCMS NMDS by plant ID ####
+OCG_LCMS_1uL_2021.t <- t(OCG_LCMS_1uL_2021)
+m_OCG_LCMS_1uL_2021.t = as.matrix(OCG_LCMS_1uL_2021.t)
+
+#set.seed(453)
+#OCG_LCMS_1uL_2021_ID.nmds <- metaMDS(t(m_OCG_LCMS_1uL_2021.t), trymax=500) #solution reached
+#save(OCG_LCMS_1uL_2021_ID.nmds, file = "nmds/OCG_LCMS_1uL_2021_ID.nmds.rda")
+load("nmds/OCG_LCMS_1uL_2021_ID.nmds.rda")
+
+ordiplot(OCG_LCMS_1uL_2021_ID.nmds, type = "t",display = "sites",cex = .7)
+
+## 2012 3uL LCMS NMDS by plant ID ####
+OCG_LCMS_3uL_2012.t <- t(OCG_LCMS_3uL_2012)
+m_OCG_LCMS_3uL_2012.t = as.matrix(OCG_LCMS_3uL_2012.t)
+
+set.seed(86)
+OCG_LCMS_3uL_2012_ID.nmds <- metaMDS(t(m_OCG_LCMS_3uL_2012.t), trymax=500) #insufficient data for nmds even though solution technically reached
+
+ordiplot(OCG_LCMS_3uL_2012_ID.nmds, type = "t",display = "sites",cex = .7)
+
+## 2021 3uL LCMS NMDS by plant ID ####
+OCG_LCMS_3uL_2021.t <- t(OCG_LCMS_3uL_2021)
+m_OCG_LCMS_3uL_2021.t = as.matrix(OCG_LCMS_3uL_2021.t)
+
+# set.seed(69)
+# OCG_LCMS_3uL_2021_ID.nmds <- metaMDS(t(m_OCG_LCMS_3uL_2021.t), trymax=500) #solution reached
+# save(OCG_LCMS_3uL_2021_ID.nmds, file = "nmds/OCG_LCMS_3uL_2021_ID.nmds.rda")
+OCG_LCMS_3uL_2021_ID.nmds <- load("nmds/OCG_LCMS_3uL_2021_ID.nmds.rda")
+
+ordiplot(OCG_LCMS_3uL_2021_ID.nmds, type = "t",display = "sites",cex = .7)
 
 ### Ploidy NMDS####
 #mdITS_OCG_2012$Ploidy<- droplevels(mdITS_OCG_2012$Ploidy)
