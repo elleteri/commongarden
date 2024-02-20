@@ -30,6 +30,7 @@ mdITS_OCG_2012 <- subset(mdITS_OCG, mdITS_OCG$Year=="2012")
 mdITS_OCG_2021 <- subset(mdITS_OCG, mdITS_OCG$Year=="2021") 
 #43 observations and 22 variables
 
+
 ## 2012 GC raw data read in####
 #read in 2012 GC chemistry data
 OCG_AUC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #227 obs of 221 var
@@ -82,6 +83,7 @@ OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012_cleaned.csv", row.names = 1)
 #31 obs of 73 variables
 
 
+
 ## 2021 GC raw data read in####
 #read in 2021 GC chemistry data#
 OCG_AUC_2021 <- read.csv("data_csv/OCG_2021_GCData.csv", head=T, skip = 1) #100 of 225 variables
@@ -129,6 +131,7 @@ write.csv(OCG_AUC_2021, file = "data_csv/OCG_AUC_2021.csv",row.names = FALSE)
 OCG_AUC_2021 <- read.csv("data_csv/OCG_AUC_2021.csv", row.names = 1) 
 #39 obs of 74 variables
 #all zeroes for each column which indicates there are no NA values
+
 
 ## 2012/2021 LCMS raw data read in ####
 OCG_LCMS_1uL <- read.csv("data_csv/1uL_Injection_Results_LCMS.csv", head=T, check.names = F,stringsAsFactors = T, skip = 1) #120 of 930 variables
@@ -221,7 +224,8 @@ OCG_LCMS_1uL_2012 <- OCG_LCMS_1uL_2012[, -1]  # Remove the first column after se
 OCG_LCMS_1uL_2021 <- read.csv("data_csv/OCG_LCMS_1uL_2021.csv", head=T)
 rownames(OCG_LCMS_1uL_2021) <- OCG_LCMS_1uL_2021[, 1] #this will set row.names equal to one since it didnt change it when I read it is
 OCG_LCMS_1uL_2021 <- OCG_LCMS_1uL_2021[, -1]  # Remove the first column after setting row names
-#38 obs of 309 variables
+#38 obs of 309 variables 
+
 
 ## LCMS 3ul cleaning####
 head(OCG_LCMS_3uL)
@@ -295,6 +299,7 @@ rownames(OCG_LCMS_3uL_2021) <- OCG_LCMS_3uL_2021[, 1] #this will set row.names e
 OCG_LCMS_3uL_2021 <- OCG_LCMS_3uL_2021[, -1]  # Remove the first column after setting row names 
 #38 obs of 308 variables
 
+
 #Cleaning for PCA####
 ## 2012 GC data cleaning ####
 colSums(is.na(OCG_AUC_2012)) #checking for null values since pca wont run with NAs. All zeroes for each column which indicates there are no NA values
@@ -362,6 +367,7 @@ OCG_LCMS_3uL_2012[is.na(OCG_LCMS_3uL_2012)] <- 0
 colSums(is.na(OCG_LCMS_3uL_2021)) #checking for null values
 # Replace NA values with zeroes
 OCG_LCMS_3uL_2021[is.na(OCG_LCMS_3uL_2021)] <- 0
+
 
 #Scaling####
 ## 2012 GC scaling ####
@@ -450,7 +456,9 @@ colSums(is.na(OCG_LCMS_3uL_2021.t)) #checking for null values
 data_LCMS3_normalized_2021.ID <- scale(OCG_LCMS_3uL_2021.t) 
 head(data_LCMS3_normalized_2021.ID)
 
+
 # Data visualization####
+
 ## Correlation plots####
 ### 2012 GC correlation plots ####
 #corr plot for compound
@@ -505,6 +513,7 @@ ggcorrplot(corr_matrix_LCMS3_2021)
 #corr plot for plant ID
 corr_matrix_LCMS3_2021.ID <- cor(data_LCMS3_normalized_2021.ID)
 #ggcorrplot(corr_matrix_2021.ID)
+
 
 # PCA ####
 ## 2012 GC PCA by compound####
@@ -673,6 +682,7 @@ fviz_cos2(data.pca_LCMS3_2021.ID, choice = "var", axes = 1:2)
 fviz_pca_var(data.pca_LCMS3_2021.ID, col.var = "cos2",
              gradient.cols = c("black", "orange", "green"),
              repel = TRUE)
+
 
 ## NMDS plots####
 ## 2012 GC NMDS by Compound ####

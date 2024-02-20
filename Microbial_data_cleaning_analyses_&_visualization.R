@@ -10,6 +10,7 @@ if (!require("vegan")) {install.packages("vegan"); require("vegan")}
 if (!require("effects")) {install.packages("effects"); require("effects")}
 if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"); require("pairwiseAdonis")}
 
+
 #Read in data ####
 ## Read ASV data in ####
 #Amplicon Sequence Variant table read in.
@@ -33,6 +34,7 @@ colnames(asvITS) == row.names(mdITS) # sanity check: a check to make sure someth
 #taxonomy table is used to match to amplicon sequence variant table to fungal ID.
 tax.ITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #5983 obs of 2 variables
 row.names(asvITS) == row.names(tax.ITS) # sanity check: TRUE
+
 
 #Cleaning data####
 ##ASV table cleaning ####
@@ -97,6 +99,7 @@ write.csv(mdITS.OCG, file = "data_csv/metadata_OCG.csv") #write csv for metadata
 
 #Clear Global Environment #############################
 
+
 #Read in cleaned data ####
 mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in #139 of 22 variables
 head(mdITS_OCG)
@@ -117,6 +120,7 @@ mdITS_OCG <- droplevels(mdITS.OCG) #drop levels for NMDS
 #asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=1000) ### Solution reached! gives me a warning
 #save(asvITS.OCG.nmds, file = "nmds/asvITS_OCG_nmds.rda") #save the nmds so you won't need to run it again
 load("nmds/asvITS_OCG_nmds.rda") #load it to use in code anytime after the initial run
+
 
 
 #NMDS ####
