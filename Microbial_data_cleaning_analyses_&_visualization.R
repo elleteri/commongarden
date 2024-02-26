@@ -1,4 +1,4 @@
-# Orchard Common Garden - Microbial data cleaning, analysis, and visualizaition####
+# Orchard Common Garden - Microbial data cleaning, analysis, and visualization####
 # Set working directory and load necessary packages####
 setwd("/Users/ellehorwath/Documents/Orchard_Common _Garden/commongarden")
 if (!require("readr")) {install.packages("readr"); require("readr")}
@@ -10,7 +10,6 @@ if (!require("vegan")) {install.packages("vegan"); require("vegan")}
 if (!require("effects")) {install.packages("effects"); require("effects")}
 if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"); require("pairwiseAdonis")}
 
-
 #Read in data ####
 ## Read ASV data in ####
 #Amplicon Sequence Variant table read in.
@@ -18,17 +17,21 @@ if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairw
 
 asvITS<- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) #read in Amplicon Sequence Variant table. 5983 obs of 463 variable
 asvITS<- asvITS[,order(colnames(asvITS))] # order samples alphabetically
-summary(rowSums(asvITS))
-summary(colSums(asvITS)) 
+summary(rowSums(asvITS)) #1.0
+summary(colSums(asvITS)) #0
 
 ##Full metadata read in####
 #Data includes metadata from numerous projects. I will be subsetting for just the orchard common garden plants. The data will include plant ID number, location of origin, year of sampling (2012 or 2021), subspecies, ploidy, and subspecies ploidy.
 
-mdITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) #set to correct file path 480 obs of 22 variables.
+mdITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) #set to correct file path 480 obs of 15 variables.
 mdITS <- mdITS[order(row.names(mdITS)),] # order samples alphabetically
-mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) #463 of 22 variables
+mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) #463 of 15 variables
 colnames(asvITS) == row.names(mdITS) # sanity check: a check to make sure something does not contain elementary mistakes or impossibilities and is not based on invalid assumptions
 #This sanity check reads true.
+
+#change plant description ID to end in 2021 not 2020
+# Replace "2020" with "2021" at the end of the strings
+mdITS$Description <- sub("_2020$", "_2021", mdITS$Description)
 
 ##Taxonomy table read in####
 #taxonomy table is used to match to amplicon sequence variant table to fungal ID.
@@ -40,13 +43,15 @@ row.names(asvITS) == row.names(tax.ITS) # sanity check: TRUE
 ##ASV table cleaning ####
 #asvITS[asvITS < 10] <- 0 # each observation needs at least 10 seqs.
 asvITS <- asvITS[rowSums(asvITS) > 0,] #showing me the values that are greater than zero
-summary(rowSums(asvITS))
-summary(colSums(asvITS)) 
+summary(rowSums(asvITS)) #1
+summary(colSums(asvITS)) #0
 
-asvITS <- asvITS[,colSums(asvITS) > 999] # each sample needs at least 1000 seqs. how low can I go for the ordiarrows to have them all have a pair. #5983 of 361 var
+asvITS <- asvITS[,colSums(asvITS) > 499] # each sample needs at least 500 seqs. how low can I go for the ordiarrows to have them all have a pair. #5983 of 385 var
 
-summary(colSums(asvITS)) 
-summary(rowSums(asvITS))
+#asvITS <- asvITS[,colSums(asvITS) > 999] # each sample needs at least 1000 seqs. how low can I go for the ordiarrows to have them all have a pair. #5983 of 361 var
+
+summary(colSums(asvITS)) #507
+summary(rowSums(asvITS)) #0
 
 asvITS.t <- t(asvITS) # transpose rows and columns
 asvITS.t <- asvITS.t[order(row.names(asvITS.t)),] # order samples alphabetically
@@ -57,71 +62,92 @@ summary(colSums(asvITS.t))
 
 mdITS <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t)) #subsetting metadata to match what is left in the asv table
 
-asvITS.t2 <- asvITS.t[!(row.names(asvITS.t) %in% c("NEG_9-30-21","AH1919","AHM20207","AHM20125")),] #outliers that need to be removed
+asvITS.t2 <- asvITS.t[!(row.names(asvITS.t) %in% c("NEG_9-30-21","AH1919","AHM20207","AHM20125","UTW.1.4_2021")),] #outliers that need to be removed
 
 asvITS.t2 <- asvITS.t2[,colSums(asvITS.t2) > 0] #keeping samples greater than 0
 
-summary(rowSums(asvITS.t2)) #1021
+summary(rowSums(asvITS.t2)) #507
 summary(colSums(asvITS.t2)) #2.0
 
-mdITS2 <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t2)) # again subsetting metadata to match what is in the asv table #357 obs of 22 var
+mdITS2 <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t2)) # again subsetting metadata to match what is in the asv table #380 obs of 15 var
 
 ### Subsetting to just the plant in the common garden (OCG)####
 asvITS.OCG <- subset(asvITS.t2, mdITS2$Project=="OCG") #subsetting to just the Orchard common garden plants
 asvITS.OCG <- asvITS.OCG[,colSums(asvITS.OCG) > 0]
 
-summary(rowSums(asvITS.OCG)) #1021
+summary(rowSums(asvITS.OCG)) #507
 summary(colSums(asvITS.OCG)) #2.0
 
-### Remove duplicates####
-asvITS.OCG <- asvITS.OCG[grep("v2", row.names(asvITS.OCG), invert = T),]
+### Remove duplicates from asv####
+rows_to_remove <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1')
+asvITS.OCG <- asvITS.OCG[!rownames(asvITS.OCG) %in% rows_to_remove, ]
+
+# ## Extract row names
+# row_names <- rownames(asvITS.OCG)
+# 
+# # Remove 'v1' or 'v2' at the end of the row names
+# cleaned_row_names <- sub("v[1-2]$", "", row_names)
+# 
+# # Assign the cleaned row names back to the data frame
+# rownames(asvITS.OCG) <- cleaned_row_names
+
+# asvITS.OCG <- asvITS.OCG[grep("v2", row.names(asvITS.OCG), invert = T),]
 
 ## Remove negative control
 asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "NEG_8-28-21"),]
 
 ## Remove MTW.3.7.R_2012
-asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "MTW.3.7.R_2012"),]
+asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "MTW.3.7.R_2012"),] #we arent sure what the R represents. 
 
 ## subset metadata to match asv table samples
 asvITS.OCG <- asvITS.OCG[,colSums(asvITS.OCG) > 0]
-summary(rowSums(asvITS.OCG)) #1021
+summary(rowSums(asvITS.OCG)) #507
 summary(colSums(asvITS.OCG)) #2.0
 
-mdITS.OCG <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.OCG)) #subset md to match asv table samples #139 of 22 var
+# ###Remove duplicates from md####
+# rows_to_remove_md <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1')
+# asvITS.OCG <- mdITS[!rownames(asvITS.OCG) %in% rows_to_remove_md, ]
+# 
+# ## Extract row names from md
+# row_names_md <- rownames(mdITS)
+# 
+# # Remove 'v1' or 'v2' at the end of the row names
+# cleaned_row_names_md <- sub("v[1-2]$", "", row_names_md)
+# 
+# # Assign the cleaned row names back to the data frame
+# rownames(asvITS.OCG) <- cleaned_row_names_md
 
-summary(rowSums(asvITS.OCG)) #1021
-summary(colSums(asvITS.OCG)) #2.0
+mdITS.OCG <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.OCG)) #subset md to match asv table samples #154 of 15 var
 
 #Write csv for cleaned metadata and asv table####
 write.csv(asvITS.OCG, file = "data_csv/asvITS.OCG.csv") #write csv for asv table of OCG only
 write.csv(mdITS.OCG, file = "data_csv/metadata_OCG.csv") #write csv for metadata of OCG only
 
-
 #Clear Global Environment #############################
 
-
 #Read in cleaned data ####
-mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in #139 of 22 variables
+mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in #154 of 15 variables
 head(mdITS_OCG)
 
-asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #asv table read in 139 obs of 2029 variables
+asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #asv table read in 154 obs of 2135 variables
 head(asvITS.OCG)
-summary(rowSums(asvITS.OCG)) #1021
+summary(rowSums(asvITS.OCG)) #507
 summary(colSums(asvITS.OCG)) #2
+
+row.names(asvITS.OCG) == row.names(mdITS_OCG) # sanity check:TRUE
 
 tax.ITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in
 
 ##Rarefying####
-asvITS.OCG.r <- rrarefy(asvITS.OCG,1021) ## rarefy: Warning message
 
-mdITS_OCG <- droplevels(mdITS.OCG) #drop levels for NMDS
+asvITS.OCG.r <- rrarefy(asvITS.OCG,507) ## rarefy: Warning message
 
-#set.seed(41)
-#asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=1000) ### Solution reached! gives me a warning
-#save(asvITS.OCG.nmds, file = "nmds/asvITS_OCG_nmds.rda") #save the nmds so you won't need to run it again
+mdITS_OCG <- droplevels(mdITS_OCG) #drop levels for NMDS
+
+set.seed(41)
+#asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=500) ### Solution reached! gives me a warning
+# save(asvITS.OCG.nmds, file = "nmds/asvITS_OCG_nmds.rda") #save the nmds so you won't need to run it again
 load("nmds/asvITS_OCG_nmds.rda") #load it to use in code anytime after the initial run
-
-
 
 #NMDS ####
 ordiplot(asvITS.OCG.nmds, type = "t",display = "sites",cex = .6)
@@ -154,7 +180,7 @@ asvITS.OCG.subsp #subspecies significant
 
 #pairwiseadonis
 asvITS.OCG.subsp.pw <- pairwise.adonis(asvITS.OCG.r, mdITS_OCG$Subspecies)
-asvITS.OCG.subsp.pw #T vs V= 0.006, T vs W= 0.03, and W vs V= 0.477.
+asvITS.OCG.subsp.pw #T vs V= 0.003, T vs W= 0.111, and W vs V= 0.366.
 
 ## NMDS for fungal community by ploidy ####
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -193,11 +219,11 @@ ordispider(asvITS.OCG.nmds,groups = mdITS_OCG$Subsp_ploidy, show.groups = "W_4n"
 
 ### PERMANOVA and adonis for subspecies ploidy ####
 asvITS.OCG.subsp_ploi <- adonis2(asvITS.OCG.r ~ mdITS_OCG$Subsp_ploidy) 
-asvITS.OCG.subsp_ploi #subspecies ploidy is significant 0.001
+asvITS.OCG.subsp_ploi #subspecies ploidy is significant 0.002
 
 #pairwiseadonis
 asvITS.OCG.subsp.pw <- pairwise.adonis(asvITS.OCG.r, mdITS_OCG$Subsp_ploidy)
-asvITS.OCG.subsp.pw #p-adjusted: T_4n vs T_2n= 0.71, T_4n vs V_2n = 0.01, T_4n vs V_4n = 0.08, T_4n vs W_4n = 0.04, T_2n vs V_2n = 0.02, T_2n vs V_4n = 0.46, T_2n vs W_4n = 0.46, V_2n vs V_4n = 1.00, V_2n vs W_4n = 1.00, V_4n vs W_4n = 1.00
+asvITS.OCG.subsp.pw #p-adjusted:T_4n vs V_2n = 0.04, T_4n vs V_4n = 0.03, T_4n vs W_4n = 0.09
 
 ## NMDS for fungal community by year ####
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -226,20 +252,20 @@ asvITS.OCG.yr #year is significant
 
 
 ## 2012 NMDS fungal community by subspecies####
-asvITS.2012 <- subset(asvITS.OCG, mdITS_OCG$Year=="2012") #96 of 1377 variables
+asvITS.2012 <- subset(asvITS.OCG, mdITS_OCG$Year=="2012") #105 of 1377 variables
 asvITS.2012 <- asvITS.2012[,colSums(asvITS.2012) > 0]
-summary(rowSums(asvITS.2012)) #1046
+summary(rowSums(asvITS.2012)) #507
 summary(colSums(asvITS.2012)) #2.0
 
-mdITS.2012 <- subset(mdITS_OCG, row.names(mdITS_OCG) %in% row.names(asvITS.2012)) #96 of 22
+mdITS.2012 <- subset(mdITS_OCG, row.names(mdITS_OCG) %in% row.names(asvITS.2012)) #105 of 22
 mdITS.2012 <- droplevels(mdITS.2012)
 
 #rarefy
-asvITS.2012.r <- rrarefy(asvITS.2012,1046) ## rarefy. warning message
+asvITS.2012.r <- rrarefy(asvITS.2012,507) ## rarefy. warning message
 
 #nmds
 set.seed(12)
-#asvITS.2012.nmds <- metaMDS(asvITS.2012.r, trymax=1000) ###solution reached! warning message
+#asvITS.2012.nmds <- metaMDS(asvITS.2012.r, trymax=500) ###solution reached! warning message
 #save(asvITS.2012.nmds, file = "nmds/asvITS.2012.nmds.rda")
 load("nmds/asvITS.2012.nmds.rda")
 
@@ -261,11 +287,11 @@ ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subspecies, show.groups = "W", c
 
 ###PERMANOVA and adonis for 2012 subspecies####
 asvITS.2012.ad <- adonis2(asvITS.2012.r ~ mdITS.2012$Subspecies) # Bray-Curtis is the default metric
-asvITS.2012.ad #subspecies significant 0.001
+asvITS.2012.ad #subspecies significant 0.007
 
 #pairwiseadonis
 asvITS.2012.subsp.pw <- pairwise.adonis(asvITS.2012.r, mdITS.2012$Subspecies)
-asvITS.2012.subsp.pw #T vs V= 0.009, T vs W= 0.006, and W vs V= 1.000.
+asvITS.2012.subsp.pw #T vs V= 0.027, T vs W= 0.027, and W vs V= 1.000.
 
 ## 2012 NMDS for fungal community by ploidy ####
 plot(asvITS.2012.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -304,27 +330,27 @@ ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "W_4
 
 ### PERMANOVA and adonis for subspecies ploidy ####
 asvITS.2012.subsp_ploi <- adonis2(asvITS.2012.r ~ mdITS.2012$Subsp_ploidy) 
-asvITS.2012.subsp_ploi #subspecies ploidy is significant 0.027
+asvITS.2012.subsp_ploi #subspecies ploidy is not sig
 
 #pairwiseadonis
 asvITS.2012.subsp.pw <- pairwise.adonis(asvITS.2012.r, mdITS.2012$Subsp_ploidy)
-asvITS.2012.subsp.pw #p-adjusted: T_4n vs T_2n= 1.0, T_4n vs V_2n = 1.0, T_4n vs V_4n = 1.0, T_4n vs W_4n = 0.73, T_2n vs V_2n = 0.08, T_2n vs V_4n = 0.30, T_2n vs W_4n = 0.04, V_2n vs V_4n = 1.00, V_2n vs W_4n = 1.00, V_4n vs W_4n = 1.00
-
+asvITS.2012.subsp.pw #none sig
 
 ## 2021 NMDS fungal community by subspecies####
-asvITS.2021 <- subset(asvITS.OCG, mdITS_OCG$Year=="2021") #43 of 716 
+asvITS.2021 <- subset(asvITS.OCG, mdITS_OCG$Year=="2021") #48 of 2135 
 asvITS.2021 <- asvITS.2021[,colSums(asvITS.2021) > 0]
 
-summary(rowSums(asvITS.2021)) #1021
+summary(rowSums(asvITS.2021)) #648
 summary(colSums(asvITS.2021)) #2
 
-mdITS.2021 <- subset(mdITS_OCG, row.names(mdITS_OCG) %in% row.names(asvITS.2021)) #43 obs of 22
+mdITS.2021 <- subset(mdITS_OCG, row.names(mdITS_OCG) %in% row.names(asvITS.2021)) #49 obs of 22
 mdITS.2021 <- droplevels(mdITS.2021)
 
 #rarefying
-asvITS.2021.r <- rrarefy(asvITS.2021,1021) ## rarefy. warning message
+asvITS.2021.r <- rrarefy(asvITS.2021,648) ## rarefy. warning message
 
 #nmds
+set.seed(78)
 #asvITS.2021.nmds <- metaMDS(asvITS.2021.r, trymax=500) ###solution reached!
 #save(asvITS.2021.nmds, file = "nmds/asvITS.2021.nmds.rda")
 load("nmds/asvITS.2021.nmds.rda")
@@ -349,8 +375,6 @@ ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subspecies, show.groups = "W", c
 asvITS.2021.ad <- adonis2(asvITS.2021.r ~ mdITS.2021$Subspecies) # Bray-Curtis is the default metric
 asvITS.2021.ad #subspecies not significant
 
-
-
 ## 2021 NMDS for fungal community by ploidy ####
 plot(asvITS.2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
      main="Sagebrush fungal community by ploidy", 
@@ -367,9 +391,7 @@ ordispider(asvITS.2021.nmds,groups = mdITS.2021$Ploidy, show.groups = "4n", col 
 
 ### PERMANOVA for 2021 ploidy####
 asvITS.2021.ploidy <- adonis2(asvITS.2021.r ~ mdITS.2021$Ploidy,by="margin") # Bray-Curtis is the default metric
-asvITS.2021.ploidy #ploidy is significant 0.016
-
-
+asvITS.2021.ploidy #ploidy is significant 0.018
 
 ## 2021 NMDS for fungal community by subsp ploidy ####
 plot(asvITS.2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -391,13 +413,11 @@ ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subsp_ploidy, show.groups = "W_4
 
 ### PERMANOVA and adonis for subspecies ploidy ####
 asvITS.2021.subsp_ploi <- adonis2(asvITS.2021.r ~ mdITS.2021$Subsp_ploidy) 
-asvITS.2021.subsp_ploi #subspecies ploidy is on the verge of being significant 0.052
+asvITS.2021.subsp_ploi #subspecies ploidy is not sig
 
 #pairwiseadonis
 asvITS.2021.subsp.pw <- pairwise.adonis(asvITS.2021.r, mdITS.2021$Subsp_ploidy)
 asvITS.2021.subsp.pw #
-
-
 
 
 # Mantel measuring correlation between the distance matrices ####

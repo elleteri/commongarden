@@ -20,34 +20,32 @@ if (!require("ggplot2")) {install.packages("ggplot2"); require("ggplot2")}
 # Read data in#### 
 ##Metadata read in#####
 mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) 
-#139 of 22 variables
+#154 of 15 variables
 
 #subset the md to only have observations from 2012 to avoid duplicates
 mdITS_OCG_2012 <- subset(mdITS_OCG, mdITS_OCG$Year=="2012") 
-#96 observations and 22 variables
+#105
+mdITS_OCG_2012$`Garden Plant ID` <- as.factor(mdITS_OCG_2012$`Garden Plant ID`) #as factor so I can combine them
 
 #subset the md to only have observations from 2021 to avoid duplicates
 mdITS_OCG_2021 <- subset(mdITS_OCG, mdITS_OCG$Year=="2021") 
-#43 observations and 22 variables
-
+#49
 
 ## 2012 GC raw data read in####
 #read in 2012 GC chemistry data
-OCG_AUC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #227 obs of 221 var
+OCG_AUC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #183 obs of 221 var
 
 ## 2012 GC Cleaning ####
 # Remove the second column since it is empty
 OCG_AUC_2012 <- OCG_AUC_2012[, -2]
 names(OCG_AUC_2012)[1] <- "Plant_ID"
 
-sum(duplicated(OCG_AUC_2012$Plant_ID)) #48 duplicates (100 and then cocktails and blanks)
-
-# Remove duplicates
-OCG_AUC_2012 <- distinct(OCG_AUC_2012) #180 of 220
+sum(duplicated(OCG_AUC_2012$Plant_ID)) #4 duplicates (control, cocktails, and blanks)
 
 # Remove rows where "empty", "Empty", "Ct, "CT", "M", "w"  occur
 OCG_AUC_2012 <- OCG_AUC_2012[!(apply(OCG_AUC_2012, 1, function(row) any(grepl("^empty|^Empty|^Ct|^CT |^M|w", row)))), ] #167 of 220 variables
 
+sum(duplicated(OCG_AUC_2012$Plant_ID)) # 0 duplicates
 #head(OCG_AUC_2021)
 
 #subset to only columns that contain "Peak Area" and "Plant ID". This removes "RT". 
@@ -67,20 +65,18 @@ colnames(OCG_AUC_2012)[peak_area_cols] <- new_col_names #167 of 74 variables
 
 names(OCG_AUC_2012)[names(OCG_AUC_2012) == 'Plant_ID'] <- 'Garden Plant ID' #renaming the ID column to be the same in both datasets: Garden Plant ID
 
-OCG_AUC_2012$`Garden Plant ID` <- as.integer(OCG_AUC_2012$`Garden Plant ID`) #as integer so I can combine them
+OCG_AUC_2012 <- merge(mdITS_OCG_2012, OCG_AUC_2012, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 105 obs of 88
 
-OCG_AUC_2012 <- merge(mdITS_OCG_2012, OCG_AUC_2012, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 31 obs of 95 variables
+OCG_AUC_2012 <- OCG_AUC_2012[,-c(1:14)] #removing everything except area under the curve for each compound and garden plant ID number
+#105 obs of 74 variables
 
-OCG_AUC_2012 <- OCG_AUC_2012[,-c(1:6,8:22)] #removing everything except area under the curve for each compound and garden plant ID number
-#31 obs of 74 variables
-
-##Save this csv so I can re-read in the data with row 1 being plant ID
+##Save this csv so I can re-read in the data with row 1 being plant ID description
 write.csv(OCG_AUC_2012, file = "data_csv/OCG_AUC_2012_cleaned.csv",row.names = FALSE)
 
 ## 2012 cleaned GC data read in####
 #read in cleaned 2012 GC data with row 1 being plant ID
 OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012_cleaned.csv", row.names = 1) 
-#31 obs of 73 variables
+#105 obs of 73 variables
 
 
 
@@ -118,12 +114,12 @@ names(OCG_AUC_2021)[names(OCG_AUC_2021) == 'Plant_ID'] <- 'Garden Plant ID' #ren
 
 mdITS_OCG_2021$`Garden Plant ID` <- as.character(mdITS_OCG_2021$`Garden Plant ID`) #as character so I can combine them
 
-OCG_AUC_2021 <- merge(mdITS_OCG_2021, OCG_AUC_2021, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 39 obs of 96 variables
+OCG_AUC_2021 <- merge(mdITS_OCG_2021, OCG_AUC_2021, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 43 obs of 89 variables
 
-#Going to remove everything except chem data and plant ID
-OCG_AUC_2021 <- OCG_AUC_2021[,-c(1:6, 8:22)] #39 obs of 75 variables
+#Going to remove everything except chem data and plant ID description
+OCG_AUC_2021 <- OCG_AUC_2021[,-c(2:14)] #43 obs of 75 variables
 
-##Save this csv so I can re-read in the data with row 1 being plant ID
+##Save this csv so I can re-read in the data with row 1 being plant ID description
 write.csv(OCG_AUC_2021, file = "data_csv/OCG_AUC_2021.csv",row.names = FALSE)
 
 ## 2021 cleaned GC data read in####
