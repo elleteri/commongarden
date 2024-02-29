@@ -135,20 +135,23 @@ OCG_AUC_2021 <- OCG_AUC_2021 [, grepl("Peak.Area|Plant_ID", colnames(OCG_AUC_202
 #subset to remove columns that contain Peak Area Percent and just keep Peak Area.
 OCG_AUC_2021 <- OCG_AUC_2021 [, !grepl("Peak.Area.Percent", colnames(OCG_AUC_2021))] #87 obs of 75 variables
 
-#subset to have just the columns that contain "Peak Area" 1:74
+#remove column with compound 1 to match to the 2012 GC data that starts at compound C002
+OCG_AUC_2021 <- OCG_AUC_2021[,-2]  # Remove the first row #87 of 74 variables
+
+#subset to have just the columns that contain "Peak Area" 1:73
 peak_area_cols <- grep("Peak.Area", colnames(OCG_AUC_2021)) 
 
-#the new column names I want to generate will replace the repeating "Peak.Area" names to be "C001" through "C0074" increasing sequentially. 
+#the new column names I want to generate will replace the repeating "Peak.Area" names to be "C001" through "C0073" increasing sequentially. 
 new_col_names <- paste0("C", sprintf("%03d", seq_along(peak_area_cols)))
 
 #Rename the columns containing "Peak Area" to compound number
-colnames(OCG_AUC_2021)[peak_area_cols] <- new_col_names #87 obs and 75 variables
+colnames(OCG_AUC_2021)[peak_area_cols] <- new_col_names #87 obs and 74 variables
 
 names(OCG_AUC_2021)[names(OCG_AUC_2021) == 'Plant_ID'] <- 'Garden Plant ID' #renaming the ID column to be the same in both datasets: Garden Plant ID
 
 mdITS_OCG_2021$`Garden Plant ID` <- as.character(mdITS_OCG_2021$`Garden Plant ID`) #as character so I can combine them
 
-OCG_AUC_2021 <- merge(mdITS_OCG_2021, OCG_AUC_2021, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 70 obs of 90 variables
+OCG_AUC_2021 <- merge(mdITS_OCG_2021, OCG_AUC_2021, by="Garden Plant ID") # Joining the dataframes so I can match/subset metadta of OCG to the samples we have. 70 obs of 89 variables
 
 #Going to remove everything except chem data and plant ID description
 OCG_AUC_2021 <- OCG_AUC_2021[,-c(1:15)] #70 obs of 75 variables
@@ -159,12 +162,17 @@ write.csv(OCG_AUC_2021, file = "data_csv/OCG_AUC_2021.csv",row.names = FALSE)
 ## 2021 cleaned GC data read in####
 #read in 2021 chemistry data
 OCG_AUC_2021 <- read.csv("data_csv/OCG_AUC_2021.csv", row.names = 1) 
-#70 obs of 75 variables
+#70 obs of 73 variables
 OCG_AUC_2021 <- OCG_AUC_2021[order(row.names(OCG_AUC_2021)),] # order samples alphabetically
 
-OCG_AUC_2021 <- subset(OCG_AUC_2021, row.names(OCG_AUC_2021) %in% row.names(mdITS)) #70 of 74 variables
+OCG_AUC_2021 <- subset(OCG_AUC_2021, row.names(OCG_AUC_2021) %in% row.names(mdITS)) #70 of 73 variables
 
-## 2012/2021 LCMS raw data read in ####
+##Cleaned Full GC data read in ####
+OCG_GC <- rbind(OCG_AUC_2012, OCG_AUC_2021) #218 obs of 73 variables
+OCG_GC <- OCG_GC[order(row.names(OCG_GC)),] # order samples alphabetically
+OCG_GC <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(mdITS)) #218 of 73 variables
+
+## 1uL & 3uL LCMS raw data read in ####
 OCG_LCMS_1uL <- read.csv("data_csv/1uL_Injection_Results_LCMS.csv", head=T, check.names = F,stringsAsFactors = T, skip = 1) #120 of 930 variables
 
 sum(duplicated(OCG_LCMS_1uL$Plant_ID)) #one duplicate: plant #273
@@ -345,6 +353,29 @@ OCG_AUC_2021_subset[is.na(OCG_AUC_2021_subset)] <- 0
 
 colSums(is.na(OCG_AUC_2021_subset)) #all zeroes for each column which indicates there are no NA values
 
+## Full GC data cleaning ####
+colSums(is.na(OCG_GC)) #checking for null values since pca wont run with NAs. All zeroes for each column which indicates there are no NA values
+
+#So now the data needs to be cleaned to only contain compounds that occur in more than 20% of the samples (plants). AKA columns need to be removed that don't have at least 20% of the rows containing a number=NA
+
+#Calculate proportion of NA values that are in each column
+na_proportion <- colMeans(is.na(OCG_GC))
+print(na_proportion)
+
+#Now define the threshold of 20% - there are  compounds that remain after this
+threshold <- 0.80
+
+#identify which columns I need to keep
+columns_to_keep <- na_proportion <= threshold
+
+# Subset dataframe to keep only columns with NA proportion <= threshold
+OCG_GC_subset <- OCG_GC[, columns_to_keep] #148 obs of 47 variables
+
+# Replace NA values with zeroes
+OCG_GC_subset[is.na(OCG_GC_subset)] <- 0
+
+colSums(is.na(OCG_GC_subset)) #all zeroes for each column which indicates there are no NA values
+
 ## 1uL LCMS data cleaning ####
 colSums(is.na(OCG_LCMS_1uL)) #checking for null values
 
@@ -418,6 +449,21 @@ colSums(is.na(OCG_AUC_2021_subset.t)) #checking for null values
 data_normalized_2021.ID <- scale(OCG_AUC_2021_subset.t) 
 #1:36, 1:70
 
+## Full GC scaling ####
+#Compound correlation plot
+data_normalized_GC <- scale(OCG_GC_subset) #this will center the data
+#1:218, 1:47
+
+#Plant correlation plot
+#transpose the data first to put plant ID as columns and compound as row 
+OCG_GC_subset.t <- t(OCG_GC_subset) # transpose rows and columns
+
+#only works with numeric data
+colSums(is.na(OCG_GC_subset.t)) #checking for null values
+
+data_normalized_GC.ID <- scale(OCG_GC_subset.t) 
+#1:47, 1:218
+
 ##1uL LCMS scaling####
 data_LCMS1_normalized <- scale(OCG_LCMS_1uL_subset) #this will center the data
 #1:109, 1:278
@@ -463,6 +509,13 @@ corr_matrix_2021 <- cor(data_normalized_2021) #36 compounds
 
 #corr plot for plant ID
 corr_matrix_2021.ID <- cor(data_normalized_2021.ID) # 70 plants
+
+#### GC correlation ####
+#corr plot for compound
+corr_matrix_GC <- cor(data_normalized_GC) #47 compounds
+
+#corr plot for plant ID
+corr_matrix_GC.ID <- cor(data_normalized_GC.ID) # 218 plants
 
 ### 1uL LCMS correlation ####
 #corr plot for compound
@@ -533,7 +586,7 @@ autoplot(data.pca_2012_ID, label = TRUE)
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="GC of 2012 plant by ploidy", 
+     main="GC comp of 2012 plant by ploidy", 
      col= c("red","blue")[mdITS_OCG_2012$Ploidy],
      pch=c(19),
      xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
@@ -624,10 +677,72 @@ legend("topright",
        cex=0.8,
        bty = "n")
 
+## Full GC PCA ####
+data.pca_GC_ID <- prcomp(data_normalized_GC)
+summary(data.pca_GC_ID)
+fviz_eig(data.pca_GC_ID, addlabels = TRUE) #scree plot
+fviz_cos2(data.pca_GC_ID, choice = "ind", axes = 1:2) #Contribution of each plant
+autoplot(data.pca_GC_ID)
+autoplot(data.pca_GC_ID, label = TRUE)
+
+plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="Full GC comp plant by ploidy", 
+     col= c("red","blue")[mdITS.OCG$Ploidy],
+     pch=c(19),
+     xlim = range(data.pca_GC_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_ID$x[, 2], na.rm = TRUE))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="Full GC comp plant by subspecies", 
+     col= c("pink","brown",'darkgreen')[mdITS.OCG$Subspecies],
+     pch=c(19),
+     xlim = range(data.pca_GC_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_ID$x[, 2], na.rm = TRUE))
+legend("topleft", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("pink","brown","darkgreen"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="Full GC comp of plants by subspecies ploidy", 
+     col= c("pink","brown",'darkgreen','tan','lightblue')[mdITS.OCG$Subsp_ploidy],
+     pch=c(19),
+     xlim = range(data.pca_GC_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_ID$x[, 2], na.rm = TRUE))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="Full GC comp by year", 
+     col= rainbow(2)[mdITS.OCG$Year],
+     pch=19)
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("red","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
 ##1uL LCMS PCA by plant ID ####
 data.pca_LCMS1.ID <- prcomp(data_LCMS1_normalized)
 summary(data.pca_LCMS1.ID)
-fviz_eig(data.pca_LCMS1.ID, addlabels = TRUE) #scree plot
+fviz_eig(data.pca_LCMS1.ID, addlabels = TRUE) #13.4%, 8.9%
 fviz_cos2(data.pca_LCMS1.ID, choice = "var", axes = 1:2) #Contribution of each compound
 fviz_cos2(data.pca_LCMS1.ID, choice = "ind", axes = 1:2) #Contribution of each plant
 autoplot(data.pca_LCMS1.ID)
@@ -692,8 +807,8 @@ legend("topleft",
 ## 3uL LCMS PCA by Plant ID####
 data.pca_LCMS3_ID <- prcomp(data_LCMS3_normalized)
 summary(data.pca_LCMS3_ID)
-fviz_eig(data.pca_LCMS3_ID, addlabels = TRUE) #scree plot
-fviz_cos2(data.pca_LCMS3.ID, choice = "var", axes = 1:2) #Contribution of each compound
+fviz_eig(data.pca_LCMS3_ID, addlabels = TRUE) #14.1% and 8.9%
+fviz_cos2(data.pca_LCMS3_ID, choice = "var", axes = 1:2) #Contribution of each compound
 fviz_cos2(data.pca_LCMS3_ID, choice = "ind", axes = 1:2) #Contribution of each plant
 autoplot(data.pca_LCMS3_ID)
 autoplot(data.pca_LCMS3_ID, label = TRUE)
@@ -742,7 +857,7 @@ legend("topleft",
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="LCMS 1uL plant by year", 
+     main="LCMS 3uL plant by year", 
      col= c("maroon","cyan")[mdITS.OCG$Year],
      pch=c(19),
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
@@ -877,7 +992,7 @@ OCG_AUC_2021_ploidy #ploidy is significant 0.002
 
 #subspecies nmds
 plot(OCG_AUC_2021_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
-     main="2012 GC chemistry by subspecies",
+     main="2021 GC chemistry by subspecies",
      col= c("olivedrab","cadetblue","goldenrod")[mdITS.OCG.GC.2021$Subspecies],
      pch=c(19))
 legend("topleft", 
@@ -896,11 +1011,11 @@ OCG_AUC_2021_subsp #subspecies is signficant= 0.001
 
 #pairwiseadonis
 OCG_AUC_2021_subsp.pw <- pairwise.adonis(OCG_AUC_2021, mdITS.OCG.GC.2021$Subspecies)
-OCG_AUC_2021_subsp.pw # sig between all subspecies
+OCG_AUC_2021_subsp.pw # sig between T vs V, T vs W
 
 # Subspecies ploidy NMDS #
 plot(OCG_AUC_2021_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="2012 GC chemistry by subspecies and ploidy", 
+     main="2021 GC chemistry by subspecies and ploidy", 
      col= c("red","orange","green","cyan","purple")[mdITS.OCG.GC.2021$Subsp_ploidy],
      pch=c(19))
 legend("topleft", 
@@ -923,6 +1038,104 @@ OCG_AUC_2021_subspploidy #subspecies ploidy is significant
 OCG_AUC_2021_subsp_ploidy.pw <- pairwise.adonis(OCG_AUC_2021, mdITS.OCG.GC.2021$Subsp_ploidy)
 OCG_AUC_2021_subsp_ploidy.pw 
 
+## Full GC NMDS plots and stats by plant ID ####
+# Replace NA with 0
+OCG_GC[is.na(OCG_GC)] <- 0
+#OCG_GC <- OCG_GC[-which(rownames(OCG_GC) == "CAT.1.1_2021"), ] #remove this outlier?
+
+#turn abundance data frame into a matrix
+OCG_GC.t <- t(OCG_GC) #transpose for Plant ID
+m_OCG_GC.t = as.matrix(OCG_GC.t)
+
+set.seed(4)
+OCG_GC_ID.nmds <- metaMDS(t(m_OCG_GC.t), trymax=500) #solution reached
+save(OCG_GC_ID.nmds, file = "nmds/OCG_GC_ID.nmds.rda")
+load("nmds/OCG_GC_ID.nmds.rda")
+
+ordiplot(OCG_GC_ID.nmds, type = "t",display = "sites",cex = .7)
+
+mdITS.OCG.GC <- subset(mdITS.OCG, row.names(mdITS.OCG) %in% row.names(OCG_GC)) #subset md to match AUC samples #217
+OCG_GC <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(mdITS.OCG))
+
+plot(OCG_GC_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of plant by ploidy", 
+     col= c("red","blue")[mdITS.OCG.GC$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Ploidy, show.groups = "2n", col = "red")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Ploidy, show.groups = "4n", col = "blue")
+
+#### PERMANOVA for 2021 ploidy ##
+OCG_GC_ploidy <- adonis2(OCG_GC ~ mdITS.OCG.GC$Ploidy,by="margin") # Bray-Curtis is the default metric
+OCG_GC_ploidy #ploidy is significant 0.003
+
+#subspecies nmds
+plot(OCG_GC_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="GC chemistry by subspecies",
+     col= c("olivedrab","cadetblue","goldenrod")[mdITS.OCG.GC$Subspecies],
+     pch=c(19))
+legend("topleft", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subspecies, show.groups = "T", col = "olivedrab")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subspecies, show.groups = "V", col = "cadetblue")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subspecies, show.groups = "W", col = "goldenrod")
+
+#### PERMANOVA & pairwaise adonis for subspecies ###
+OCG_GC_subsp <- adonis2(OCG_GC ~ mdITS.OCG.GC$Subspecies,by="margin") # Bray-Curtis is the default metric
+OCG_GC_subsp #subspecies is signficant= 0.001
+
+#pairwiseadonis
+OCG_GC_subsp.pw <- pairwise.adonis(OCG_GC, mdITS.OCG.GC$Subspecies)
+OCG_GC_subsp.pw # sig between T vs V, V vs W
+
+# Subspecies ploidy NMDS #
+plot(OCG_GC_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC chemistry by subspecies and ploidy", 
+     col= c("red","orange","green","cyan","purple")[mdITS.OCG.GC$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("red","orange","green","cyan","purple"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subsp_ploidy, show.groups = "T_2n", col = "red")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subsp_ploidy, show.groups = "T_4n", col = "orange")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subsp_ploidy, show.groups = "V_2n", col = "green")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
+ordispider(OCG_GC_ID.nmds,groups = mdITS.OCG.GC$Subsp_ploidy, show.groups = "W_4n", col = "purple")
+
+# PERMANOVAS and pairwise adonis for subspecies ploidy ##
+OCG_GC_subspploidy <- adonis2(OCG_GC ~ mdITS.OCG.GC$Subsp_ploidy,by="margin") # Bray-Curtis is the default metric
+OCG_GC_subspploidy #subspecies ploidy is significant
+
+#pairwiseadonis
+OCG_GC_subsp_ploidy.pw <- pairwise.adonis(OCG_GC, mdITS.OCG.GC$Subsp_ploidy)
+OCG_GC_subsp_ploidy.pw 
+
+#by year
+plot(OCG_GC_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of plant by year", 
+     col= c("maroon","cyan")[mdITS.OCG.GC$Year],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+OCG_GC_yr <- adonis2(OCG_GC ~ mdITS.OCG.GC$Year,by="margin") # Bray-Curtis is the default metric
+OCG_GC_yr #yearis signficant= 0.001
 
 ##1uL LCMS NMDS by plant ID ####
 # Replace NA with 0
@@ -1115,3 +1328,4 @@ ordispider(OCG_LCMS_3uL_ID.nmds,groups = mdITS.OCG.LCMS.3$Year, show.groups = "2
 # PERMANOVAS for year ##
 OCG_LCMS3_year <- adonis2(OCG_LCMS_3uL ~ mdITS.OCG.LCMS.3$Year,by="margin") # Bray-Curtis is the default metric
 OCG_LCMS3_year #year is significant
+
