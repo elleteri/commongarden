@@ -229,8 +229,19 @@ LCMS3.asv.mant <- mantel(OCG_LCMS_3uL.dist,asvITS.OCG.LC3.dist, permutations = 9
 LCMS3.asv.mant ## r = -0.1345, P =0.9879
 
 
+#LCMS against 1ul and 3ul procrustes to check #### 
+OCG_LCMS_3uL. <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(OCG_LCMS_1uL)) #58
+OCG_LCMS_1uL. <- subset(OCG_LCMS_1uL, row.names(OCG_LCMS_1uL) %in% row.names(OCG_LCMS_3uL)) #58
+
+set.seed(72)
+OCG_LCMS3_prot.nmds <- metaMDS(OCG_LCMS_3uL., trymax=500) ###solution reached!
 
 
+set.seed(92)
+OCG_LCMS1_prot.nmds <- metaMDS(OCG_LCMS_1uL., trymax=500) ###solution reached!
 
-
+LCMS_3_1.pro <- protest(OCG_LCMS1_prot.nmds ,OCG_LCMS3_prot.nmds, symmetric=T) 
+LCMS_3_1.pro ## Correlation in a symmetric Procrustes rotation: 0.7926, Significance: 0.001
+summary(LCMS_3_1.pro) 
+plot(LCMS_3_1.pro)
 

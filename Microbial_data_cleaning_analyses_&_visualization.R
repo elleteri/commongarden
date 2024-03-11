@@ -117,8 +117,31 @@ row.names(asvITS.OCG) == row.names(mdITS.OCG) # sanity check:TRUE
 
 tax.ITS <- read.csv("~/Documents/Orchard_Common _Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in
 
+#Alpha diversity OCG####
 ##Rarefying####
 asvITS.OCG.r <- rrarefy(asvITS.OCG,507) ## rarefy: Warning message
+asvITS.OCG.shannon <- diversity(asvITS.OCG.r)
+asvITS.OCG.ef <- exp(asvITS.OCG.shannon)
+asvITS.OCG.efr <- round(asvITS.OCG.ef)
+mdITS.OCG <- cbind(mdITS.OCG, effective_species = asvITS.OCG.efr)
+
+glm.OCG <- glm(effective_species ~ Subspecies + Year, family = poisson, data=mdITS.OCG)
+summary(glm.OCG)
+
+plot(allEffects(glm.OCG))
+
+plot(mdITS.OCG$Year,asvITS.OCG.ef)
+plot(mdITS.OCG$Subspecies,asvITS.OCG.ef)
+
+ggplot(mdITS.OCG, aes(Year, effective_species))+
+  geom_boxplot(aes(group = Year, fill = Year))+
+  theme_classic()
+
+ggplot(data = mdITS.OCG, mapping = aes(x = Subspecies, y = effective_species, fill = Subspecies)) +
+  geom_boxplot() +
+  theme_classic()
+
+#Beta diversity#### 
 set.seed(41)
 #asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=500) ### Solution reached! gives me a warning
 # save(asvITS.OCG.nmds, file = "nmds/asvITS_OCG_nmds.rda") #save the nmds so you won't need to run it again
