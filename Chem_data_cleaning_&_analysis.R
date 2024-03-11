@@ -9,6 +9,7 @@ if (!require("ggcorrplot")) {install.packages("ggcorrplot"); require("ggcorrplot
 if (!require("ggfortify")) {install.packages("ggfortify"); require("ggfortify")}
 if (!require("ggplot2")) {install.packages("ggplot2"); require("ggplot2")}
 if (!require("ggpubr")) {install.packages("ggpubr"); require("ggpubr")}
+if (!require("gridExtra")) {install.packages("gridExtra"); require("gridExtra")}
 if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"); require("pairwiseAdonis")}
 if (!require("readr")) {install.packages("readr"); require("readr")}
 if (!require("tidyr")) {install.packages("tidyr"); require("tidyr")}
@@ -1700,19 +1701,32 @@ legend("topright",
        cex=0.6,
        bty = "n")
 
-#Stable isotope data analysis#### 
-#2012 data read in
-stable_iso_data_2012<-read.csv("data_csv/Stable_isotope_2012.csv")
-str(stable_iso_data_2012)
+rm(list = ls())
 
+#Stable isotope data analysis#### 
+#2012 
+stable_iso_data_2012<-read.csv("data_csv/Stable_isotope_2012.csv")
+str(stable_iso_data_2012) #96
 # Extracting numbers from Plant_ID column
 stable_iso_data_2012$Sample.ID <- as.numeric(gsub("[^0-9]", "", stable_iso_data_2012$ID))
 stable_iso_data_2012$Sample.ID <- as.character(stable_iso_data_2012$Sample.ID)
+stable_iso_data_2012$Subspecies <- recode(stable_iso_data_2012$Subspecies, 
+                               "Tridentata" = "T",
+                               "Vaseyana" = "V",
+                               "Wyomingensis" = "W")
+levels(stable_iso_data_2012$Subspecies)
+stable_iso_data_2012$Subspecies <- as.factor(stable_iso_data_2012$Subspecies)
 str(stable_iso_data_2012)
 
-#2021 data read in
-stable_iso_data_2021<-read.csv("data_csv/Stable_isotope_2021.csv")
+#2021
+stable_iso_data_2021<-read.csv("data_csv/Stable_isotope_2021.csv") #74
 str(stable_iso_data_2021)
+## Remove V-134677 (not sure what subspecies since it says "T/W"). look into later
+stable_iso_data_2021 <- stable_iso_data_2021[!(row.names(stable_iso_data_2021) == "31"),] #73
+# need to check what subspecies 134677 is 
+levels(stable_iso_data_2021$Subspecies)<- list(Tridentata="T", Vaseyana="V", Wyomingensis="W")
+levels(stable_iso_data_2021$Subspecies)
+stable_iso_data_2021$Subspecies <- as.factor(stable_iso_data_2021$Subspecies)
 
 #renaming the columns to combine the data together
 names(stable_iso_data_2021)[names(stable_iso_data_2021) == "Ampl..28"] <- "Ampl28"
@@ -1720,138 +1734,32 @@ names(stable_iso_data_2021)[names(stable_iso_data_2021) == "Ampl..44"] <- "Ampl4
 names(stable_iso_data_2021)[names(stable_iso_data_2021) == "d15N"] <- "Delta15N"
 names(stable_iso_data_2021)[names(stable_iso_data_2021) == "d13C"] <- "Delta13C"
 
-#add these two dataframes together
-stable_iso_df <- full_join(stable_iso_data_2012,stable_iso_data_2021)
+#FULL STABLE ISOTOPE DATA
+stable_iso_df <- full_join(stable_iso_data_2012,stable_iso_data_2021) #169 of 15 var
+stable_iso_df$Subspecies <- droplevels(stable_iso_df$Subspecies)
+str(stable_iso_df)
 
-#structure the data to subspecies being T W and V... wont need to do this. I need tocheck what subspecies 134677 is 
-stable_iso_data_2021$Subspecies<-recode_factor(stable_iso_data_2021$Subspecies, Tridentata="T", Vaseyana="V", Wyomingensis="W")
-levels(stable_iso_data_2021$Subspecies)
-levels(stable_iso_data_2021$Subspecies)<- list(Tridentata="T", Vaseyana="V", Wyomingensis="W")
-levels(stable_iso_data_2021$Subspecies)
+# 2012 BETADISPERSION
+# Delta 15 N
+D15Ndist <- vegdist(stable_iso_data_2012$Delta15N, method = "bray")
+D15Nbetadisper <- betadisper(D15Ndist, group = stable_iso_data_2012$Subspecies)
+permutest(D15Nbetadisper) #0.343
 
+D15N21fit<-lm(Delta15N~Subspecies,data = stable_iso_data_2012)
+summary(D15N21fit) #sig between subspecies
 
-## Remove V-134677 (not sure what subspecies since it says "T/W"). look into later
-stable_iso_data_2021 <- stable_iso_data_2021[!(row.names(stable_iso_data_2021) == "31"),]
-print(stable_iso_data_2021)
-
-dis<-vegdist(stable_iso_data_2012$Delta15N) #Bray-curtis distance between samples: quantifies differences in the overall taxonomic composition between two samples
-
-groups<-factor(stable_iso_data_2012$Subspecies, labels = c("T","V","W")) #using the md for year 
-
-## Calculate multivariate dispersions
-mod<-betadisper(dis,groups)
-mod
-
-#Perform test
-anova(mod)
-
-#Permutation test for F
-permutest(mod, permutations = 99,pairwise = TRUE) 
-
-dis<-vegdist(stable_iso_data_2012$Delta13C) #Bray-curtis distance between samples: quantifies differences in the overall taxonomic composition between two samples
-
-groups<-factor(stable_iso_data_2012$Subspecies, labels = c("T","V","W")) #using the md for year 
-
-## Calculate multivariate dispersions
-mod<-betadisper(dis,groups)
-mod
-
-#Perform test
-anova(mod)
-
-TukeyHSD(p1)
-
-pw.comparison.15N<-aov(Delta15N~Subspecies,data=stable_iso_data_2012)
-TukeyHSD(pw.comparison.15N)
-
-pw.comparison.13C<-aov(Delta13C~Subspecies,data=stable_iso_data_2012)
-TukeyHSD(pw.comparison.13C)
-
-#Permutation test for F
-permutest(mod, permutations = 99,pairwise = TRUE) 
-
-fit<-lm(Delta15N~Subspecies,data = stable_iso_data_2012)
-summary(fit) #T vs V= 0.006, T vs W= 0.024, and W vs V= 0.164.
-
+#Delta 13 C
+D13Cdist <- vegdist(stable_iso_data_2012$Delta13C, method = "euclidean")
+D13Cbetadisper <- betadisper(D13Cdist, group = stable_iso_data_2012$Subspecies)
+permutest(D13Cbetadisper) #0.036
 #pairwiseadonis
-stable_iso.subsp.pw <- pairwise.adonis(stable_iso_data_2012$Delta15N, stable_iso_data_2012$Subspecies)
-# stable_iso.subsp.pw #T vs V= < 2e-16, T vs W= 5.25e-05, and W vs V= 0.0391.
+D13Csubsp.pw.12 <- pairwise.adonis(D13Cdist,as.factor(stable_iso_data_2012$Subspecies))
+D13Csubsp.pw.12 #T vs V sig
 
-library(pairwiseAdonis)
+D13C12fit<-lm(Delta13C~Subspecies,data = stable_iso_data_2012)
+summary(D13C12fit)
 
-pairwise.adonis<-pairwise.adonis2(stable_iso_data_2012$Delta15N ~ stable_iso_data_2012$Subspecies)
-pairwise.adonis
-
-fit1<-lm(Delta13C~Subspecies,data = stable_iso_data_2012)
-summary(fit1)#0.039
-
-fit2<-lm(d15N~Subspecies,data = stable_iso_data_2021)
-
-summary(fit2) #vaseyana significnatly different
-fit3<-lm(d13C~Subspecies,data = stable_iso_data_2021)
-summary(fit3) #p-value=0.037
-
-#differences between year
-stable_isotope_full_data<-read.csv("stable_isotope_full_data")
-
-#model
-fit4<-lm(Delta15N~Year,data=)
-summary(fit4)
-
-library(ggplot2)
-p1<-ggplot(stable_iso_data_2012,aes(Subspecies,Delta15N))+
-  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
-  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+ggtitle("2012")+ theme(legend.position = "none")
-
-p2<-ggplot(stable_iso_data_2021,aes(Subspecies,d15N))+
-  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
-  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+
-  ylab("Delta15N")+ggtitle("2021")+theme(legend.position = "none")
-
-library(gridExtra)
-grid.arrange(p1, p2, nrow = 1)
-
-ggplot(stable_iso_data_2012,aes(Delta13C,Delta15N))+
-  geom_point(aes(color=Subspecies))+theme_classic()+
-  scale_color_manual(values=c("olivedrab","cadetblue","goldenrod"))+
-  ggtitle("2012")+theme(legend.position = "none")+geom_text(aes(label=ID))
-
-ggplot(stable_iso_data_2021,aes(d13C,d15N))+
-  geom_point(aes(color=Subspecies))+theme_classic()+
-  scale_color_manual(values=c("olivedrab","cadetblue","goldenrod"))+ ggtitle("2021")+theme(legend.position = "none")+
-  geom_text(aes(label=Lab))
-
-stable_iso_data_2021$Subspecies
-
-fit<-anova_test(stable_iso_data_2012$Delta13C~stable_iso_data_2012Subspecies,
-                detailed = TRUE)
-fit<-anova(stable_iso_data_2012$Delta13C,stable_iso_data_2012$Subspecies)
-
-library(ggpubr)
-ggscatterhist(
-  stable_iso_data_2012, x = "Delta13C", y = "Delta15N", group="Subspecies",
-  color = "Subspecies", fill= "Subspecies", size = 3, alpha = 0.6,
-  palette = c("olivedrab", "cadetblue", "goldenrod"),
-  margin.plot = "boxplot",
-  margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
-  ggtheme = theme_bw()
-)+
-  geom_text(aes(label=))
-
-ggscatterhist(
-  stable_iso_data_2021, x = "d13C", y = "d15N", group="Subspecies",
-  color = "Subspecies", fill= "Subspecies", size = 3, alpha = 0.6,
-  palette = c("olivedrab", "cadetblue", "goldenrod"),
-  margin.plot = "boxplot",
-  margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
-  ggtheme = theme_bw()
-)+
-  geom_text(aes(label=Sample.ID))
-
-#geom_text(aes(label= Sample.ID))
-
-#mean point, x and y with sd. geom_errorbarh
-
+#2012 VISUALIZATION
 # Grouped Scatter plot with marginal density plots
 ggscatterhist(
   stable_iso_data_2012, x = "Delta13C", y = "Delta15N", group = "Subspecies",
@@ -1859,3 +1767,55 @@ ggscatterhist(
   palette = c("olivedrab", "cadetblue", "goldenrod"),
   margin.params = list(fill = "Subspecies", color = "black", size = 0.2)
 )
+
+ggscatterhist(
+  stable_iso_data_2012, x = "Delta13C", y = "Delta15N", group="Subspecies",
+  color = "Subspecies", fill= "Subspecies", size = 3, alpha = 0.6,
+  palette = c("olivedrab", "cadetblue", "goldenrod"),
+  margin.plot = "boxplot",
+  margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
+  ggtheme = theme_bw()
+)
+
+#2021 BETADISPERSION
+D15N21fit<-lm(Delta15N~Subspecies,data = stable_iso_data_2021)
+summary(D15N21fit) #p -value= 0.1812
+D13C21fit<-lm(Delta13C~Subspecies,data = stable_iso_data_2021)
+summary(D13C21fit) #p-value = 0.037
+
+#2021 VISUALIZATION
+ggscatterhist(
+  stable_iso_data_2021, "Delta13C", y = "Delta15N", group="Subspecies",
+  color = "Subspecies", fill= "Subspecies", size = 3, alpha = 0.6,
+  palette = c("olivedrab", "cadetblue", "goldenrod"),
+  margin.plot = "boxplot",
+  margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
+  ggtheme = theme_bw()
+)
+
+#FULL VISUALIZATION
+ggscatterhist(
+  stable_iso_df, "Delta13C", y = "Delta15N", group="Subspecies",
+  color = "Subspecies", fill= "Subspecies", size = 3, alpha = 0.6,
+  palette = c("olivedrab", "cadetblue", "goldenrod"),
+  margin.plot = "boxplot",
+  margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
+  ggtheme = theme_bw()
+)
+
+p1<-ggplot(stable_iso_data_2012,aes(Subspecies,Delta15N))+
+  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
+  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+ ggtitle("2012")+ theme(legend.position = "none") + ylab("Delta15N")
+p2<-ggplot(stable_iso_data_2021,aes(Subspecies,Delta15N))+
+  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
+  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+ ggtitle("2021")+theme(legend.position = "none")
+p3<-ggplot(stable_iso_data_2012,aes(Subspecies,Delta13C))+
+  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
+  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+ggtitle("2012")+ theme(legend.position = "none")
+p4<-ggplot(stable_iso_data_2021,aes(Subspecies,Delta13C))+
+  geom_boxplot(aes(fill=Subspecies))+theme_classic()+
+  scale_fill_manual(values=c("olivedrab","cadetblue","goldenrod"))+ggtitle("2021")+theme(legend.position = "none")
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+
+
+
