@@ -1487,14 +1487,14 @@ colSums(is.na(OCG_GC_2012)) #checking for null values since they are used for fi
 na_proportion <- colMeans(is.na(OCG_GC_2012))
 print(na_proportion)
 
-#Now define the threshold of 20% - there are 40 compounds that remain after this
+#Now define the threshold of 20% - there are 73 compounds that remain after this
 threshold <- 0.90
 
 #identify which columns I need to keep
 columns_to_keep <- na_proportion <= threshold
 
 # Subset dataframe to keep only columns with NA proportion <= threshold
-OCG_GC_2012_subset <- OCG_GC_2012[, columns_to_keep] #147 obs of 40 variables
+OCG_GC_2012_subset <- OCG_GC_2012[, columns_to_keep] #147 obs of 73 variables
 
 # Replace NA values with zeroes
 OCG_GC_2012_subset[is.na(OCG_GC_2012_subset)] <- 0
@@ -1511,7 +1511,7 @@ threshold <- 0.90
 
 columns_to_keep <- na_proportion <= threshold
 
-OCG_GC_2021_subset <- OCG_GC_2021[, columns_to_keep] #70 obs of 36 var variables
+OCG_GC_2021_subset <- OCG_GC_2021[, columns_to_keep] #70 obs of 42 var variables
 
 OCG_GC_2021_subset[is.na(OCG_GC_2021_subset)] <- 0
 colSums(is.na(OCG_GC_2021_subset)) 
@@ -1527,7 +1527,7 @@ threshold <- 0.90
 
 columns_to_keep <- na_proportion <= threshold
 
-OCG_GC_subset <- OCG_GC[, columns_to_keep] #217 obs of 47 variables
+OCG_GC_subset <- OCG_GC[, columns_to_keep] #217 obs of 54 variables
 
 OCG_GC_subset[is.na(OCG_GC_subset)] <- 0
 
@@ -1544,7 +1544,7 @@ threshold <- 0.90
 
 columns_to_keep <- na_proportion <= threshold
 
-OCG_LCMS_3uL_subset <- OCG_LCMS_3uL[, columns_to_keep] #111 of 283 variables
+OCG_LCMS_3uL_subset <- OCG_LCMS_3uL[, columns_to_keep] #111 of 302 variables
 
 OCG_LCMS_3uL_subset[is.na(OCG_LCMS_3uL_subset)] <- 0
 
@@ -1553,65 +1553,65 @@ colSums(is.na(OCG_LCMS_3uL_subset))
 # Scaling####
 ## 2012 GC scaling ####
 #Compound
-data_normalized_2012 <- scale(OCG_GC_2012_subset) #this will center the data 1:147, 1:40
+data_normalized_2012 <- scale(OCG_GC_2012_subset) #this will center the data 1:147, 1:47
 
 #2012 plant ID
 OCG_GC_2012_subset.t <- t(OCG_GC_2012_subset) #transpose the data first to put plant ID as columns and compound as row
 colSums(is.na(OCG_GC_2012_subset.t)) #checking for null values
-data_normalized_2012.ID <- scale(OCG_GC_2012_subset.t) #1:40, 1:147
+data_normalized_2012.ID <- scale(OCG_GC_2012_subset.t) #1:47, 1:147
 
 ## 2021 GC scaling ####
 #Compound 
-data_normalized_2021 <- scale(OCG_GC_2021_subset) #1:70, 1:36
+data_normalized_2021 <- scale(OCG_GC_2021_subset) #1:70, 1:42
 
 #2021 plant ID
 OCG_GC_2021_subset.t <- t(OCG_GC_2021_subset) 
 colSums(is.na(OCG_GC_2021_subset.t))
-data_normalized_2021.ID <- scale(OCG_GC_2021_subset.t) #1:36, 1:70
+data_normalized_2021.ID <- scale(OCG_GC_2021_subset.t) #1:42, 1:70
 
 ## Full GC scaling ####
 #Compound
-data_normalized_GC <- scale(OCG_GC_subset) #1:217, 1:47
+data_normalized_GC <- scale(OCG_GC_subset) #1:217, 1:54
 
 #Plant ID
 OCG_GC_subset.t <- t(OCG_GC_subset)
 colSums(is.na(OCG_GC_subset.t))
-data_normalized_GC.ID <- scale(OCG_GC_subset.t) #1:47, 1:217
+data_normalized_GC.ID <- scale(OCG_GC_subset.t) #1:54, 1:217
 
 ## LCMS scaling ####
 #Compound
-data_LCMS3_normalized <- scale(OCG_LCMS_3uL_subset) #1:111, 1:283
+data_LCMS3_normalized <- scale(OCG_LCMS_3uL_subset) #1:111, 1:302
 
 #Plant ID
 OCG_LCMS_3uL.t <- t(OCG_LCMS_3uL_subset)
 colSums(is.na(OCG_LCMS_3uL.t)) 
-data_LCMS3_normalized.ID <- scale(OCG_LCMS_3uL.t) #1:283, 1:111 
+data_LCMS3_normalized.ID <- scale(OCG_LCMS_3uL.t) #1:302, 1:111 
 
 ## Correlation ####
 ### 2012 GC CORRELATION
 #Compound
-corr_matrix_2012 <- cor(data_normalized_2012) #40 compounds
+corr_matrix_2012 <- cor(data_normalized_2012) #47 compounds
 ggcorrplot(corr_matrix_2012)
 #Plant ID
 corr_matrix_2012.ID <- cor(data_normalized_2012.ID) #147 plants
 
 ### 2021 GC CORRELATION 
 #Compound
-corr_matrix_2021 <- cor(data_normalized_2021) #36 compounds
+corr_matrix_2021 <- cor(data_normalized_2021) #42 compounds
 ggcorrplot(corr_matrix_2021)
 #Plant ID
 corr_matrix_2021.ID <- cor(data_normalized_2021.ID) # 70 plants
 
 ### GC CORRELATION
 #Compound
-corr_matrix_GC <- cor(data_normalized_GC) #47 compounds
+corr_matrix_GC <- cor(data_normalized_GC) #54 compounds
 ggcorrplot(corr_matrix_GC)
 #Plant ID
 corr_matrix_GC.ID <- cor(data_normalized_GC.ID) # 217 plants
 
 ### LCMS CORRELATION 
 #Compound
-corr_matrix_LCMS3 <- cor(data_LCMS3_normalized)#large matrix 80089 elements
+corr_matrix_LCMS3 <- cor(data_LCMS3_normalized)#large matrix 91204 elements
 ggcorrplot(corr_matrix_LCMS3)
 #Plant ID
 corr_matrix_LCMS3.ID <- cor(data_LCMS3_normalized.ID) #111 plants
@@ -1622,7 +1622,7 @@ data.pca_2012 <- princomp(corr_matrix_2012)
 summary(data.pca_2012)
 data.pca_2012$loadings[, 1:2]
 
-fviz_eig(data.pca_2012, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain.
+fviz_eig(data.pca_2012, addlabels = TRUE) #scree plot is used to visualize the importance of each principal component and can be used to determine the number of principal components to retain. (52%, 17%)
 
 #With the biplot, it is possible to visualize the similarities and dissimilarities between the samples, and further shows the impact of each attribute on each of the principal components.
 
@@ -1694,7 +1694,7 @@ data.pca_2021 <- princomp(corr_matrix_2021)
 summary(data.pca_2021)
 data.pca_2021$loadings[, 1:2]
 
-fviz_eig(data.pca_2021, addlabels = TRUE)
+fviz_eig(data.pca_2021, addlabels = TRUE) #(49%, 16%)
 
 fviz_pca_var(data.pca_2021, col.var = "black")
 
@@ -1707,7 +1707,7 @@ fviz_pca_var(data.pca_2021, col.var = "cos2",
 ## 2021 GC PCA BY PLANT ID
 data.pca_2021_ID <- prcomp(data_normalized_2021)
 summary(data.pca_2021_ID)
-fviz_eig(data.pca_2021_ID, addlabels = TRUE)
+fviz_eig(data.pca_2021_ID, addlabels = TRUE) #20%, 13%
 fviz_cos2(data.pca_2021_ID, choice = "ind", axes = 1:2)
 autoplot(data.pca_2021_ID)
 autoplot(data.pca_2021_ID, label = TRUE)
@@ -1760,7 +1760,7 @@ legend("topright",
 ## Full GC PCA ####
 data.pca_GC_ID <- prcomp(data_normalized_GC)
 summary(data.pca_GC_ID)
-fviz_eig(data.pca_GC_ID, addlabels = TRUE)
+fviz_eig(data.pca_GC_ID, addlabels = TRUE) #17.6, 10.7%
 fviz_cos2(data.pca_GC_ID, choice = "ind", axes = 1:2) 
 autoplot(data.pca_GC_ID)
 autoplot(data.pca_GC_ID, label = TRUE)
@@ -1822,12 +1822,12 @@ legend("topleft",
 #BY YEAR
 plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="Full GC comp by year", 
-     col= rainbow(2)[md.OCG.GC$Year],
+     main="PCA of GC data by year", 
+     col= c("maroon","cyan")[md.OCG.GC$Year],
      pch=19)
 legend("topleft", 
        legend=c("2012","2021"),
-       col= c("red","cyan"),
+       col= c("maroon","cyan"),
        pch=19,
        cex=0.8,
        bty = "n")
@@ -1915,7 +1915,7 @@ plotcolor <- c("olivedrab","cadetblue","magenta","blue","orange","green","darkgr
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="LCMS 3uL plant by Location", 
+     main="PCA of LCMS data by location", 
      col= plotcolor[md.OCG.LCMS.3$Location],
      pch=c(16),
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
@@ -2177,7 +2177,7 @@ rownames(OCG_GC_ID.nmds$points) == rownames(md.OCG.GC)
 
 #YEAR
 plot(OCG_GC_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="GC of plant by year", 
+     main="NMDS of GC data by year", 
      col= c("maroon","cyan")[md.OCG.GC$Year],
      pch=c(19))
 legend("topleft", 
@@ -2454,8 +2454,10 @@ OCG_LCMS_2021_loc #location is significant
 # Binary jaccard plots ####
 ## LCMS binary jaccard ####
 set.seed(8)
-OCG_LCMS_3uL_ID.jdis <- vegdist(OCG_LCMS_3uL.r, method = "jaccard", binary = TRUE)
-OCG_LCMS_3uL_ID.jnmds <- metaMDS(OCG_LCMS_3uL_ID.jdis, trymax=500) #solution reached
+#OCG_LCMS_3uL_ID.jdis <- vegdist(OCG_LCMS_3uL.r, method = "jaccard", binary = TRUE)
+#OCG_LCMS_3uL_ID.jnmds <- metaMDS(OCG_LCMS_3uL_ID.jdis, trymax=500) #solution reached
+#save(OCG_LCMS_3uL_ID.jnmds, file = "jnmds/OCG_LCMS_3uL_ID.jnmds.rda")
+load("jnmds/OCG_LCMS_3uL_ID.jnmds.rda")
 
 ordiplot(OCG_LCMS_3uL_ID.jnmds, type = "t",display = "sites",cex = .7)
 
@@ -2463,7 +2465,7 @@ plotcolor <- c("olivedrab","cadetblue","magenta","blue","orange","green","darkgr
 
 #BY SUBSPECIES AND LOCATION
 plot(OCG_LCMS_3uL_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
-     main="LCMS 3uL chemistry by subspecies and location",
+     main="Binary jaccard of LCMS by subspecies and location",
      col = plotcolor [md.OCG.LCMS.3$Location],
      pch=c(17,19,15)[md.OCG.LCMS.3$Subspecies])
 legend("topleft", 
@@ -2535,10 +2537,10 @@ legend("bottomright",
 
 ## GC binary jaccard ####
 set.seed(6)
-# OCG_GC <- OCG_GC[-which(colnames(OCG_GC) == "CAT.1.1_2021"), ] #remove this outlier
-OCG_GC_ID.jdis <- vegdist(t(m_OCG_GC.t), method = "jaccard", binary = TRUE)
+OCG_GC <- OCG_GC[-which(colnames(OCG_GC) == "CAT.1.1_2021"), ] #remove this outlier
+OCG_GC_ID.jdis <- vegdist(OCG_GC.r, method = "jaccard", binary = TRUE)
 OCG_GC_ID.jnmds <- metaMDS(OCG_GC_ID.jdis, trymax=500) #solution reached
-save(OCG_GC_ID.jnmds, file = "jnmds/OCG_GC_ID.jnmds.rda")
+#save(OCG_GC_ID.jnmds, file = "jnmds/OCG_GC_ID.jnmds.rda")
 load("jnmds/OCG_GC_ID.jnmds.rda")
 
 ordiplot(OCG_GC_ID.jnmds, type = "t",display = "sites",cex = .7)
@@ -2585,12 +2587,12 @@ legend("bottomright",
 
 #BY SUBSPECIES PLOIDY
 plot(OCG_GC_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="GC chemistry by subspecies ploidy & year", 
-     col= c("red","orange","green","cyan","purple")[md.OCG.GC$Subsp_ploidy],
+     main="Binary jaccard of GC data by subspecies, ploidy, & year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC$Subsp_ploidy],
      pch=c(17,19)[md.OCG.GC$Year])
 legend("topleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("red","orange","green","cyan","purple"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
        cex=0.8,
        bty = "n")
@@ -2603,7 +2605,7 @@ legend("bottomright",
 
 #BY YEAR
 plot(OCG_GC_ID.jnmds$point [,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="GC of plant by year", 
+     main="Binary jaccard of GC data by year", 
      col= c("maroon","cyan")[md.OCG.GC$Year],
      pch=c(19))
 legend("topleft", 
@@ -2615,7 +2617,7 @@ legend("topleft",
 
 # PCoA ####
 ## GC PCoA ####
-GC_dist_matrix <- vegdist(OCG_GC, method = "bray")
+GC_dist_matrix <- vegdist(OCG_GC.r, method = "bray")
 GC_pcoa <- cmdscale(GC_dist_matrix) #classic multidimensional scaling (cmdscale)
 
 #BY PLOIDY
@@ -2644,21 +2646,40 @@ legend("topleft",
        cex=0.8,
        bty = "n")
 
+#BY SUBSPECIES PLOIDY
+plot(GC_pcoa[,1], GC_pcoa[,2], 
+     main="PCoA of GC data by subspecies, ploidy, and year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("bottomright", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.6,
+       bty = "n")
+legend("topright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
+
+
 #BY YEAR
 plot(GC_pcoa[,1], GC_pcoa[,2], 
      xlab = "PC1", ylab = "PC2", 
-     main = "GC PCoA Visualization by year", 
-     col= c("red","cyan")[md.OCG.GC$Year],
+     main = "PCoA of GC by year", 
+     col= c("maroon","cyan")[md.OCG.GC$Year],
      pch = 16)
 legend("topleft", 
        legend=c("2012","2021"),
-       col= c("red","cyan"),
+       col= c("maroon","cyan"),
        pch=16,
        cex=0.8,
        bty = "n")
 
 ## LCMS PCoA ####
-LCMS_dist_matrix <- vegdist(OCG_LCMS_3uL, method = "bray")
+LCMS_dist_matrix <- vegdist(OCG_LCMS_3uL.r, method = "bray")
 LCMS_pcoa <- cmdscale(LCMS_dist_matrix)
 
 plot(LCMS_pcoa)
@@ -2706,27 +2727,33 @@ legend("topleft",
 #BY SUBSPECIES PLOIDY
 plot(LCMS_pcoa[,1], LCMS_pcoa[,2],
      xlab="PC 1", ylab="PC 2", 
-     main="LCMS PCoA Visualization by subspecies ploidy", 
+     main="PCoA of LCMS data by subspecies, ploidy, & year", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
-     pch=c(16))
+     pch=c(17,19)[md.OCG.LCMS.3$Year])
 legend("topleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=16,
        cex=0.8,
        bty = "n")
+legend("bottomleft", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
 
 #BY LOCATION
 plot(LCMS_pcoa[,1], LCMS_pcoa[,2],
      xlab="PC 1", ylab="PC 2", 
-     main="LCMS PCoA Visualization by Location", 
+     main="PCoA of LCMS data by location", 
      col= plotcolor[md.OCG.LCMS.3$Location],
      pch=c(16))
-legend("topright", 
+legend("topleft", 
        legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
        col= plotcolor,
        pch=16,
-       cex=0.6,
+       cex=0.8,
        bty = "n")
 
 # Clear Global Environment ####
