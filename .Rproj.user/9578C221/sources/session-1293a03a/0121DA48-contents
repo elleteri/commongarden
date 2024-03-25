@@ -173,11 +173,11 @@ str(mdITS.OCG)
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
      main="Sagebrush fungal community by subspecies",
      col= c("olivedrab","cadetblue","goldenrod")[mdITS.OCG$Subspecies],
-     pch=c(19,17,19)[mdITS.OCG$Year])
+     pch=c(16,17)[mdITS.OCG$Year])
 legend("bottomleft", 
        legend=c("Tridentata","Vaseyana","Wyomingensis"),
        col= c("olivedrab","cadetblue","goldenrod"),
-       pch=19,
+       pch=16,
        cex=0.8,
        bty = "n")
 ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subspecies, show.groups = "T", col = "olivedrab")
@@ -212,13 +212,13 @@ asvITS.OCG.ploidy #ploidy is not significant
 
 #SUBSPECIES PLOIDY
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="Sagebrush fungal community by subspecies, ploidy, & year", 
+     main="Fungal community by subspecies, ploidy, & year", 
      col= c("pink","brown","darkgreen",'tan','lightblue')[mdITS.OCG$Subsp_ploidy],
-     pch=c(17,19)[mdITS.OCG$Year])
+     pch=c(17,16)[mdITS.OCG$Year])
 legend("bottomleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
-       pch=19,
+       pch=16,
        cex=0.6,
        bty = "n")
 legend("topleft", 
@@ -227,11 +227,11 @@ legend("topleft",
        pch=c(17,19),
        cex=0.6,
        bty = "n")
-# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_2n", col = "red")
-# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_4n", col = "orange")
-# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_2n", col = "green")
-# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
-# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "W_4n", col = "purple")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
 ### PERMANOVA and adonis for subspecies ploidy ##
 asvITS.OCG.subsp_ploi <- adonis2(asvITS.OCG.r ~ mdITS.OCG$Subsp_ploidy) 
@@ -244,12 +244,12 @@ asvITS.OCG.subsp.pw #p-adjusted:T_4n vs V_2n = 0.04, T_4n vs V_4n = 0.03, T_4n v
 #YEAR
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
      main="Sagebrush fungal community by year", 
-     col= rainbow(2)[mdITS.OCG$Year],
-     pch=19)
+     col= c("maroon","cyan")[mdITS.OCG$Year],
+     pch=16)
 legend("bottomleft", 
        legend=c("2012","2021"),
-       col= c("red","cyan"),
-       pch=19,
+       col= c("maroon","cyan"),
+       pch=16,
        cex=0.8,
        bty = "n")
 ordiarrows(asvITS.OCG.nmds, mdITS.OCG$Plant)
@@ -1823,6 +1823,10 @@ legend("topleft",
        cex=0.6,
        bty = "n")
 
+#permanova by subspecies ploidy
+PCA_gc_subsploi <- adonis2(OCG_GC_subset ~ md.OCG.GC$Subsp_ploidy, by = "margin")
+PCA_gc_subsploi #subspecies ploidy is significant 0.001
+
 #BY YEAR
 plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
@@ -1835,6 +1839,9 @@ legend("topleft",
        pch=19,
        cex=0.8,
        bty = "n")
+
+PCA_gc_yr <- adonis2(OCG_GC_subset ~ md.OCG.GC$Year, by = "margin")
+PCA_gc_yr #year is significant 0.001
 
 ## Full LCMS PCA ####
 data.pca_LCMS3_ID <- prcomp(data_LCMS3_normalized)
@@ -1899,6 +1906,10 @@ legend("topleft",
        cex=0.6,
        bty = "n")
 
+#permanova for subspecies ploidy
+PCA_lcms_subsploi <- adonis2(OCG_LCMS_3uL_subset ~ md.OCG.LCMS.3$Subsp_ploidy, by = "margin")
+PCA_lcms_subsploi #subspecies ploidy is significant 0.001
+
 #BY YEAR
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
@@ -1930,6 +1941,9 @@ legend("topleft",
        pch=16,
        cex=0.5,
        bty = "n")
+
+PCA_lcms_loc <- adonis2(OCG_LCMS_3uL_subset ~ md.OCG.LCMS.3$Location, by = "margin")
+PCA_lcms_loc #subspecies ploidy is significant 0.001
 
 # NMDS plots####
 ## 2012 GC NMDS####
@@ -2280,7 +2294,7 @@ OCG_LCMS3_subspploidy <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Subsp_ploidy + m
 OCG_LCMS3_subspploidy #subspecies ploidy is significant
 
 #PAIRWISE ADONIS
-OCG_LCMS3_subsp_ploidy.pw <- pairwise.adonis(OCG_LCMS_3uL, md.OCG.LCMS.3$Subsp_ploidy)
+OCG_LCMS3_subsp_ploidy.pw <- pairwise.adonis(OCG_LCMS_3uL.r, md.OCG.LCMS.3$Subsp_ploidy)
 OCG_LCMS3_subsp_ploidy.pw 
 
 #YEAR
@@ -2298,6 +2312,26 @@ legend("topleft",
 # PERMANOVAS
 OCG_LCMS3_year <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Year ,by="margin") 
 OCG_LCMS3_year #year is significant
+
+plotcolor <- c("olivedrab","cadetblue","magenta","blue","orange","green","darkgreen","firebrick","lightgoldenrod","mediumaquamarine","cornflowerblue")
+
+# LOCATION 
+plot(OCG_LCMS_3uL_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location", 
+     col= plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,16)[md.OCG.LCMS.3$Year])
+legend("bottomleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.6,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
 
 ## 2012 LCMS NMDS ####
 str(md.OCG.2012)
