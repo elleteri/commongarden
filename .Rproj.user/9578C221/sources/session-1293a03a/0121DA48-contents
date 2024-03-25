@@ -163,6 +163,7 @@ set.seed(41)
 load("nmds/asvITS_OCG_nmds.rda") #load it to use in code anytime after the initial run
 
 ordiplot(asvITS.OCG.nmds, type = "t",display = "sites",cex = .6)
+rownames(asvITS.OCG.nmds$points) == rownames(mdITS.OCG)
 
 #make variables factor to plot
 mdITS.OCG[, c("Ploidy", "Subspecies", "Subsp_ploidy", "Year", "Plant")] <- lapply(mdITS.OCG[, c("Ploidy", "Subspecies", "Subsp_ploidy", "Year", "Plant")], as.factor)
@@ -211,20 +212,26 @@ asvITS.OCG.ploidy #ploidy is not significant
 
 #SUBSPECIES PLOIDY
 plot(asvITS.OCG.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="Sagebrush fungal community by subspecies and ploidy", 
-     col= c("red","orange","green","cyan","purple")[mdITS.OCG$Subsp_ploidy],
-     pch=c(19,17)[mdITS.OCG$Year])
+     main="Sagebrush fungal community by subspecies, ploidy, & year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[mdITS.OCG$Subsp_ploidy],
+     pch=c(17,19)[mdITS.OCG$Year])
 legend("bottomleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("red","orange","green","cyan","purple"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
-       cex=0.8,
+       cex=0.6,
        bty = "n")
-ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_2n", col = "red")
-ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_4n", col = "orange")
-ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_2n", col = "green")
-ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
-ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "W_4n", col = "purple")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
+# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_2n", col = "red")
+# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "T_4n", col = "orange")
+# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_2n", col = "green")
+# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
+# ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Subsp_ploidy, show.groups = "W_4n", col = "purple")
 
 ### PERMANOVA and adonis for subspecies ploidy ##
 asvITS.OCG.subsp_ploi <- adonis2(asvITS.OCG.r ~ mdITS.OCG$Subsp_ploidy) 
@@ -259,12 +266,12 @@ asvITS.OCG.yr #year is significant
 
 ## 2012 asv NMDS ####
 #NMDS
-asvITS.2012 <- subset(asvITS.OCG, mdITS.OCG$Year=="2012") #105 of 1440 variables
+asvITS.2012 <- subset(asvITS.OCG, mdITS.OCG$Year=="2012") #105 of 2135 variables
 asvITS.2012 <- asvITS.2012[,colSums(asvITS.2012) > 0]
 summary(rowSums(asvITS.2012)) #507
 summary(colSums(asvITS.2012)) #2.0
 
-mdITS.2012 <- subset(mdITS.OCG, row.names(mdITS.OCG) %in% row.names(asvITS.2012)) #105 of 16
+mdITS.2012 <- subset(mdITS.OCG, row.names(mdITS.OCG) %in% row.names(asvITS.2012)) #105 of 17
 str(mdITS.2012)
 
 #rarefy
@@ -276,7 +283,7 @@ set.seed(12)
 load("nmds/asvITS.2012.nmds.rda")
 
 ordiplot(asvITS.2012.nmds, type = "t",display = "sites",cex = .6)
-
+rownames(asvITS.2012.nmds$points) == rownames(mdITS.2012)
 #SUBSPECIES
 plot(asvITS.2012.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
      main="Sagebrush 2012 fungal community by subspecies", 
@@ -321,23 +328,23 @@ asvITS.2012.ploidy #ploidy is not significant
 #SUBSP PLOIDY
 plot(asvITS.2012.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
      main="Sagebrush 2012 fungal community by subspecies and ploidy", 
-     col= c("red","orange","green","cyan","purple")[mdITS.2012$Subsp_ploidy],
+     col= c("pink","brown","darkgreen",'tan','lightblue')[mdITS.2012$Subsp_ploidy],
      pch=c(19))
 legend("topright", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("red","orange","green","cyan","purple"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
        cex=0.8,
        bty = "n")
-ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "T_2n", col = "red")
-ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "T_4n", col = "orange")
-ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "V_2n", col = "green")
-ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
-ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "W_4n", col = "purple")
+# ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "T_2n", col = "red")
+# ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "T_4n", col = "orange")
+# ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "V_2n", col = "green")
+# ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
+# ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subsp_ploidy, show.groups = "W_4n", col = "purple")
 
 ### PERMANOVA and adonis for subspecies ploidy ##
 asvITS.2012.subsp_ploi <- adonis2(asvITS.2012.r ~ mdITS.2012$Subsp_ploidy) 
-asvITS.2012.subsp_ploi #subspecies ploidy is sig
+asvITS.2012.subsp_ploi #subspecies ploidy is not sig
 
 #pairwiseadonis
 asvITS.2012.subsp.pw <- pairwise.adonis(asvITS.2012.r, mdITS.2012$Subsp_ploidy)
@@ -361,6 +368,7 @@ set.seed(78)
 load("nmds/asvITS.2021.nmds.rda")
 
 ordiplot(asvITS.2021.nmds, type = "t",display = "sites",cex = .6)
+rownames(asvITS.2021.nmds$points) == rownames(mdITS.2021)
 
 #SUBSPECIES
 plot(asvITS.2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
@@ -402,24 +410,20 @@ asvITS.2021.ploidy #ploidy is significant 0.024
 #SUBSPECIES PLOIDY
 plot(asvITS.2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
      main="Sagebrush 2021 fungal community by subspecies and ploidy", 
-     col= c("red","orange","cyan","purple")[mdITS.2021$Subsp_ploidy],
+     col= c("pink","brown","darkgreen",'tan')[mdITS.2021$Subsp_ploidy],
      pch=19)
 legend("topleft", 
        legend=c("T_2n","T_4n","V_4n","W_4n"),
-       col= c("red","orange","cyan","purple"),
+       col= c("pink","brown","darkgreen",'tan'),
        pch=19,
        cex=0.8,
        bty = "n")
-ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subsp_ploidy, show.groups = "T_2n", col = "red")
-ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subsp_ploidy, show.groups = "T_4n", col = "orange")
-ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subsp_ploidy, show.groups = "V_4n", col = "cyan")
-ordispider(asvITS.2021.nmds,groups = mdITS.2021$Subsp_ploidy, show.groups = "W_4n", col = "purple")
 
 #there is no V_2n in 2021
 
 ### PERMANOVA and adonis for subspecies ploidy ##
 asvITS.2021.subsp_ploi <- adonis2(asvITS.2021.r ~ mdITS.2021$Subsp_ploidy) 
-asvITS.2021.subsp_ploi #subspecies ploidy is not sig
+asvITS.2021.subsp_ploi #subspecies ploidy is sig
 
 #Bar chart of ASV level ####
 asvITSt <- t(asvITS.OCG.r)
@@ -2775,12 +2779,12 @@ row.names(asvITS.OCG) == row.names(mdITS_OCG) # TRUE
 
 #LCMS 1UL
 #LCMS 1uL read in and subset with asv
-OCG_LCMS_1uL <- read.csv("data_csv/OCG_LCMS_1uL_cleaned.csv", row.names = 1) #110 obs of 309 var
-OCG_LCMS_1uL <- OCG_LCMS_1uL[order(row.names(OCG_LCMS_1uL)),] # order samples alphabetically
+# OCG_LCMS_1uL <- read.csv("data_csv/OCG_LCMS_1uL_cleaned.csv", row.names = 1) #110 obs of 309 var
+# OCG_LCMS_1uL <- OCG_LCMS_1uL[order(row.names(OCG_LCMS_1uL)),] # order samples alphabetically
+# 
+# OCG_LCMS_1uL <- subset(OCG_LCMS_1uL, row.names(OCG_LCMS_1uL) %in% row.names(asvITS.OCG)) #58 of 309 variables
 
-OCG_LCMS_1uL <- subset(OCG_LCMS_1uL, row.names(OCG_LCMS_1uL) %in% row.names(asvITS.OCG)) #58 of 309 variables
-
-asvITS.OCG.LC1 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_LCMS_1uL)) #58 of 2135 variables
+#asvITS.OCG.LC1 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_LCMS_1uL)) #58 of 2135 variables
 
 #LCMS 3UL
 #LCMS 3uL read in and subset with asv
@@ -2814,11 +2818,11 @@ asvITS.OCG.GC <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_GC)
 
 rownames(OCG_GCp) == rownames(asvITS.OCG.GC)
 
-summary(rowSums(OCG_GCpp)) #179
-summary(colSums(OCG_GCpp)) #0
-OCG_GCpp <- OCG_GCpp[,colSums(OCG_GCpp) > 0]
-summary(colSums(OCG_GCpp)) #151
-OCG_GCpp.r <- rrarefy(round(OCG_GCpp),179) ## rarefy. 
+summary(rowSums(OCG_GCp)) #179
+summary(colSums(OCG_GCp)) #0
+OCG_GCp <- OCG_GCp[,colSums(OCG_GCp) > 0]
+summary(colSums(OCG_GCp)) #151
+OCG_GCp.r <- rrarefy(round(OCG_GCp),179) ## rarefy. 
 
 ## Run NMDS (not needed if already done) ####
 set.seed(41)
@@ -2871,14 +2875,14 @@ ordiplot(OCG_LCMS3_pro.nmds)
 save(OCG_LCMS3_pro.nmds, file = "nmds/OCG_LCMS3_pro.nmds.rda")
 
 #ASV NMDS TO MATCH 2012 GC
-#set.seed(53)
-#asvITS.OCG.GC12.nmds <- metaMDS(asvITS.OCG.GC12.r, trymax=500) ###solution reached! warning message
-#save(asvITS.OCG.GC12.nmds, file = "nmds/asvITS.OCG.GC12.nmds.rda")
+set.seed(53)
+asvITS.OCG.GC12.nmds <- metaMDS(asvITS.OCG.GC12.r, trymax=500) ###solution reached! warning message
+save(asvITS.OCG.GC12.nmds, file = "nmds/asvITS.OCG.GC12.nmds.rda")
 
 #2012 GC TO MATCH ASV
-#set.seed(85)
-#OCG_GCpp12_pro.nmds <- metaMDS(OCG_AUC_2012, trymax=500) ###solution reached! 
-#save(OCG_GCpp12_pro.nmds, file = "nmds/OCG_GCpp12_pro.nmds.rda")
+# set.seed(85)
+# OCG_GCpp12_pro.nmds <- metaMDS(OCG_GC_2012, trymax=500) ###solution reached! 
+# save(OCG_GCpp12_pro.nmds, file = "nmds/OCG_GCpp12_pro.nmds.rda")
 
 #ASV NMDS TO MATCH ALL GC
 set.seed(98)
@@ -2888,7 +2892,7 @@ save(asvITS_OCG_GCpp.nmds, file = "nmds/asvITS_OCG_GCpp.nmds.rda")
 
 #ALL GC TO MATCH ASV
 set.seed(5)
-OCG_GCpp_pro.nmds <- metaMDS(OCG_GCpp, trymax=500) ###solution reached!
+OCG_GCp_pro.nmds <- metaMDS(OCG_GCp, trymax=500) ###solution reached!
 ordiplot(OCG_GCp_pro.nmds)
 save(OCG_GCp_pro.nmds, file = "nmds/OCG_GCp_pro.nmds.rda")
 
@@ -2897,7 +2901,7 @@ load("nmds/asvITS_OCG_LCMS1.nmds.rda") #asv file for LCMS 1uL data = asvITS.OCG
 load("nmds/asvITS_OCG_LCMS3.nmds.rda") #asv file for LCMS 3uL data = asvITS.OCG
 load("nmds/OCG_LCMS1_pro.nmds.rda") #LCMS 1uL file for asv data = OCG_LCMS_1uL
 load("nmds/OCG_LCMS3_pro.nmds.rda") #LCMS 3uL file for asv data = OCG_LCMS_3uLp
-load("nmds/asvITS_OCG_GCp.nmds.rda") #asv file for all GC data = asvITS.OCG
+load("nmds/asvITS_OCG_GCpp.nmds.rda") #asv file for all GC data = asvITS.OCG
 load("nmds/OCG_GCp_pro.nmds.rda") #all GC file for asv data = OCG_GCp
 
 # Procrustes plots ####
@@ -2940,7 +2944,7 @@ ggplot() +
   theme_classic() 
 
 # All GC procrustes ####
-asv_GC.pro <- protest(asvITS_OCG_GCp.nmds, OCG_GCp_pro.nmds, symmetric=T) 
+asv_GC.pro <- protest(asvITS_OCG_GCpp.nmds, OCG_GCp_pro.nmds, symmetric=T) 
 asv_GC.pro ## Correlation in a symmetric Procrustes rotation: 0.348, Significance: 0.001
 summary(asv_GC.pro) 
 plot(asv_GC.pro)
@@ -2955,7 +2959,7 @@ ggplot() +
   geom_segment(data=asv_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2, xend=Xend, yend=Yend), size=0.8, color="gray") + 
   geom_point(data=asv_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2), size=2, shape=19, color = "maroon") +
   geom_point(data=asv_GC.pro_prodat, mapping=aes(x=Xend, y=Yend), size=2, shape=17, color = "lightseagreen") +
-  labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "GC 2012 vs asv procrustes plot") +
+  labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "GC vs ASV Procrustes Plot") +
   theme_classic() 
 
 
