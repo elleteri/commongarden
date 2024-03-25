@@ -2766,8 +2766,8 @@ rm(list = ls())
 # Procrustes analysis here ####
 #Read in cleaned data ####
 #METADATA
-mdITS_OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in #154 of 16 variables
-head(mdITS_OCG)
+md.OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #metadata read in #154 of 16 variables
+head(md.OCG)
 
 #ASV
 asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #asv table read in 154 obs of 2135 variables
@@ -2775,155 +2775,110 @@ asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.na
 summary(rowSums(asvITS.OCG)) #507
 summary(colSums(asvITS.OCG)) #2
 
-row.names(asvITS.OCG) == row.names(mdITS_OCG) # TRUE
-
-#LCMS 1UL
-#LCMS 1uL read in and subset with asv
-# OCG_LCMS_1uL <- read.csv("data_csv/OCG_LCMS_1uL_cleaned.csv", row.names = 1) #110 obs of 309 var
-# OCG_LCMS_1uL <- OCG_LCMS_1uL[order(row.names(OCG_LCMS_1uL)),] # order samples alphabetically
-# 
-# OCG_LCMS_1uL <- subset(OCG_LCMS_1uL, row.names(OCG_LCMS_1uL) %in% row.names(asvITS.OCG)) #58 of 309 variables
-
-#asvITS.OCG.LC1 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_LCMS_1uL)) #58 of 2135 variables
+row.names(asvITS.OCG) == row.names(md.OCG) # TRUE
 
 #LCMS 3UL
 #LCMS 3uL read in and subset with asv
 OCG_LCMS_3uL <- read.csv("data_csv/OCG_LCMS_3uL_cleaned.csv", row.names = 1) #110 obs of 309 var
 OCG_LCMS_3uL <- OCG_LCMS_3uL[order(row.names(OCG_LCMS_3uL)),] # order samples alphabetically
 
-OCG_LCMS_3uLp <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(mdITS_OCG)) #59 of 309 variables
+OCG_LCMS_3uLp <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.OCG)) #59 of 309 variables
 
 asvITS.OCG.LC3 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_LCMS_3uLp)) #59 of 2135 variables
 
-#2012 GC data read in and subset with asv
-# OCG_AUC_2012 <- read.csv("data_csv/OCG_AUC_2012_cleaned.csv", row.names = 1) 
-# #157 obs of 73 variables
-# OCG_AUC_2012 <- OCG_AUC_2012[order(row.names(OCG_AUC_2012)),] # order samples alphabetically
-# 
-# OCG_AUC_2012 <- subset(OCG_AUC_2012, row.names(OCG_AUC_2012) %in% row.names(asvITS.OCG)) #97 of 73 var
-# asvITS.OCG.GC12 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_AUC_2012)) #97 of 2135 var
-# 
-# #2021 GC data read in and subset with asv
-# OCG_AUC_2021 <- read.csv("data_csv/OCG_AUC_2021.csv", row.names = 1) 
-# #70 obs of 75 variables
-# OCG_AUC_2021 <- OCG_AUC_2021[order(row.names(OCG_AUC_2021)),] # order samples alphabetically
-# 
-# OCG_AUC_2021 <- subset(OCG_AUC_2021, row.names(OCG_AUC_2021) %in% row.names(asvITS.OCG)) #43 of 74 var
-# asvITS.OCG.GC21 <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_AUC_2021)) #43 of 2135 var
-
 #GC
-OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv", row.names = 1)
-OCG_GCp <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(mdITS_OCG)) #140
+OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv", row.names = 1) #217
+OCG_GCp <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(md.OCG)) #140
 asvITS.OCG.GC <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(OCG_GC)) #140 of 2135 var
+rownames(OCG_GCp) == rownames(asvITS.OCG.GC) #TRUE
 
-rownames(OCG_GCp) == rownames(asvITS.OCG.GC)
-
-summary(rowSums(OCG_GCp)) #179
-summary(colSums(OCG_GCp)) #0
-OCG_GCp <- OCG_GCp[,colSums(OCG_GCp) > 0]
-summary(colSums(OCG_GCp)) #151
-OCG_GCp.r <- rrarefy(round(OCG_GCp),179) ## rarefy. 
+#LCMS to GC subset
+OCG_GCp2 <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(OCG_LCMS_3uL)) #107
+OCG_LCMS_3uLp2 <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(OCG_GC)) #107 var
+rownames(OCG_GCp2) == rownames(OCG_LCMS_3uLp2) #TRUE
 
 ## Run NMDS (not needed if already done) ####
-set.seed(41)
-#rarefy
-#LCMS 1
-#summary(rowSums(asvITS.OCG.LC1)) #507
-#summary(colSums(asvITS.OCG.LC1)) #0.00
-#asvITS.LCMS_1.r <- rrarefy(asvITS.OCG.LC1,507) ## rarefy. warning message
+# Replace NA with 0
+OCG_LCMS_3uLp[is.na(OCG_LCMS_3uLp)] <- 0
+OCG_LCMS_3uLp2[is.na(OCG_LCMS_3uLp2)] <- 0
+OCG_GCp[is.na(OCG_GCp)] <- 0
+OCG_GCp2[is.na(OCG_GCp2)] <- 0
 
-#LCMS 3
+#rarefy
+
+#ASV FOR LCMS 3
 summary(rowSums(asvITS.OCG.LC3)) #507
 summary(colSums(asvITS.OCG.LC3)) #0.00 Need to get rid of ASVs that are 0!
 asvITS.OCG.LC3 <- asvITS.OCG.LC3[,colSums(asvITS.OCG.LC3) > 0]
 summary(colSums(asvITS.OCG.LC3)) #2
-asvITS.LCMS_3.r <- rrarefy(asvITS.OCG.LC3,507) ## rarefy. 
+asvITS.LCMS_3.r <- rrarefy(asvITS.OCG.LC3,507) ## rarefy.
 
-#ALL GC
+#LCMS 3UL
+summary(rowSums(OCG_LCMS_3uLp)) #47200283
+summary(colSums(OCG_LCMS_3uLp)) #12471
+OCG_LCMS_3uLp.r <- rrarefy(round(OCG_LCMS_3uLp),47200283) ## rarefy.
+
+#LCMS FOR ALL GC
+summary(rowSums(OCG_LCMS_3uLp2)) #31016795
+summary(colSums(OCG_LCMS_3uLp2)) #254831
+OCG_LCMS_3uLp2.r <- rrarefy(round(OCG_LCMS_3uLp2),31016795) ## rarefy. 
+
+#ASV FOR ALL GC
 summary(rowSums(asvITS.OCG.GC)) #507
 summary(colSums(asvITS.OCG.GC)) #0.00
 asvITS.OCG.GC <- asvITS.OCG.GC[,colSums(asvITS.OCG.GC) > 0]
 summary(colSums(asvITS.OCG.GC)) #2
-
 asvITS.OCG.GC.r <- rrarefy(asvITS.OCG.GC,507) ## rarefy
 
-# Replace NA with 0
-# OCG_LCMS_1uL[is.na(OCG_LCMS_1uL)] <- 0
-OCG_LCMS_3uLp[is.na(OCG_LCMS_3uLp)] <- 0
-# # OCG_AUC_2012[is.na(OCG_AUC_2012)] <- 0
-# OCG_GCpp[is.na(OCG_GCpp)] <- 0
+#ALL GC
+summary(rowSums(OCG_GCp)) #179
+summary(colSums(OCG_GCp)) #151
+OCG_GCp.r <- rrarefy(round(OCG_GCp),179) ## rarefy. 
 
-#ASV NMDS TO MATCH LCMS 1
-#set.seed(7)
-#asvITS_OCG_LCMS1.nmds <- metaMDS(asvITS.LCMS_1.r, trymax=500) ###solution reached! warning message
-#save(asvITS_OCG_LCMS1.nmds, file = "nmds/asvITS_OCG_LCMS1.nmds.rda")
-
-#LCMS 1 TO MATCH ASV
-#set.seed(9)
-#OCG_LCMS1_pro.nmds <- metaMDS(OCG_LCMS_1uL, trymax=500) ###solution reached! 
-#save(OCG_LCMS1_pro.nmds, file = "nmds/OCG_LCMS1_pro.nmds.rda")
+#ALL GC FOR LCMS
+summary(rowSums(OCG_GCp2)) #179
+summary(colSums(OCG_GCp2)) #0
+OCG_GCp2.r <- rrarefy(round(OCG_GCp2),179) ## rarefy. 
 
 #ASV NMDS TO MATCH LCMS 3
-#set.seed(87)
-#asvITS_OCG_LCMS3.nmds <- metaMDS(asvITS.LCMS_3.r, trymax=500) ###solution reached! warning message
-#save(asvITS_OCG_LCMS3.nmds, file = "nmds/asvITS_OCG_LCMS3.nmds.rda")
+set.seed(87)
+asvITS_OCG_LCMS3.nmds <- metaMDS(asvITS.LCMS_3.r, trymax=500) ###solution reached! warning message
+save(asvITS_OCG_LCMS3.nmds, file = "nmds/asvITS_OCG_LCMS3.nmds.rda")
 
 #LCMS 3 TO MATCH ASV NMDS
 set.seed(56)
-OCG_LCMS3_pro.nmds <- metaMDS(OCG_LCMS_3uLp, trymax=500) ###solution reached!
-ordiplot(OCG_LCMS3_pro.nmds)
+OCG_LCMS3_pro.nmds <- metaMDS(OCG_LCMS_3uLp.r, trymax=500) ###solution reached!
 save(OCG_LCMS3_pro.nmds, file = "nmds/OCG_LCMS3_pro.nmds.rda")
 
-#ASV NMDS TO MATCH 2012 GC
-set.seed(53)
-asvITS.OCG.GC12.nmds <- metaMDS(asvITS.OCG.GC12.r, trymax=500) ###solution reached! warning message
-save(asvITS.OCG.GC12.nmds, file = "nmds/asvITS.OCG.GC12.nmds.rda")
-
-#2012 GC TO MATCH ASV
-# set.seed(85)
-# OCG_GCpp12_pro.nmds <- metaMDS(OCG_GC_2012, trymax=500) ###solution reached! 
-# save(OCG_GCpp12_pro.nmds, file = "nmds/OCG_GCpp12_pro.nmds.rda")
+#LCMS 3 TO MATCH ALL GC NMDS
+set.seed(55)
+OCG_LCMS3_prop2.nmds <- metaMDS(OCG_LCMS_3uLp2.r, trymax=500) ###solution reached!
+save(OCG_LCMS3_prop2.nmds, file = "nmds/OCG_LCMS3_prop2.nmds.rda")
 
 #ASV NMDS TO MATCH ALL GC
 set.seed(98)
 asvITS_OCG_GCpp.nmds <- metaMDS(asvITS.OCG.GC.r, trymax=500) ###solution reached! warning message
-ordiplot(asvITS_OCG_GCpp.nmds)
 save(asvITS_OCG_GCpp.nmds, file = "nmds/asvITS_OCG_GCpp.nmds.rda")
 
 #ALL GC TO MATCH ASV
 set.seed(5)
-OCG_GCp_pro.nmds <- metaMDS(OCG_GCp, trymax=500) ###solution reached!
-ordiplot(OCG_GCp_pro.nmds)
+OCG_GCp_pro.nmds <- metaMDS(OCG_GCp.r, trymax=500) ###solution reached!
 save(OCG_GCp_pro.nmds, file = "nmds/OCG_GCp_pro.nmds.rda")
 
+#ALL GC TO MATCH ASV
+set.seed(5)
+OCG_GCp2_pro.nmds <- metaMDS(OCG_GCp2.r, trymax=500) ###solution reached!
+save(OCG_GCp2_pro.nmds, file = "nmds/OCG_GCp2_pro.nmds.rda")
+
 # Load all nmds files ####
-load("nmds/asvITS_OCG_LCMS1.nmds.rda") #asv file for LCMS 1uL data = asvITS.OCG
 load("nmds/asvITS_OCG_LCMS3.nmds.rda") #asv file for LCMS 3uL data = asvITS.OCG
-load("nmds/OCG_LCMS1_pro.nmds.rda") #LCMS 1uL file for asv data = OCG_LCMS_1uL
+load("nmds/OCG_LCMS3_prop2.nmds.rda") #LCMS 3uL file for GC data = OCG_LCMS_3uLp2
 load("nmds/OCG_LCMS3_pro.nmds.rda") #LCMS 3uL file for asv data = OCG_LCMS_3uLp
 load("nmds/asvITS_OCG_GCpp.nmds.rda") #asv file for all GC data = asvITS.OCG
 load("nmds/OCG_GCp_pro.nmds.rda") #all GC file for asv data = OCG_GCp
+load("nmds/OCG_GCp2_pro.nmds.rda") #all GC file for LCMS 3uL data = OCG_GCp2
 
 # Procrustes plots ####
-# LCMS 1uL procrustes ####
-# asv_LCMS_1.pro <- protest(asvITS_OCG_LCMS1.nmds, OCG_LCMS1_pro.nmds, symmetric=T) 
-# asv_LCMS_1.pro ## Correlation in a symmetric Procrustes rotation: 0.1718, Significance: 0.323
-# summary(asv_LCMS_1.pro) 
-# plot(asv_LCMS_1.pro)
-# ## Re-plotting the procrustes 
-# asv_LCMS_1_prodat <- as.data.frame(asv_LCMS_1.pro$X)
-# asv_LCMS_1_prodat <- cbind(asv_LCMS_1_prodat,asv_LCMS_1.pro$Yrot)
-# colnames(asv_LCMS_1_prodat)[colnames(asv_LCMS_1_prodat)=="1"] <- "Xend"
-# colnames(asv_LCMS_1_prodat)[colnames(asv_LCMS_1_prodat)=="2"] <- "Yend"
-
-# ggplot() +
-#   geom_segment(data=asv_LCMS_1_prodat, mapping=aes(x=NMDS1, y=NMDS2, xend=Xend, yend=Yend), size=0.8, color="gray") + 
-#   geom_point(data=asv_LCMS_1_prodat, mapping=aes(x=NMDS1, y=NMDS2), size=2, shape=19, color = "maroon") +
-#   geom_point(data=asv_LCMS_1_prodat, mapping=aes(x=Xend, y=Yend), size=2, shape=17, color = "lightseagreen") +
-#   labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "LCMS1 vs asv procrustes plot") +
-#   theme_classic() 
-
-
 # LCMS 3uL procrustes ####
 asv_LCMS_3.pro <- protest(asvITS_OCG_LCMS3.nmds, OCG_LCMS3_pro.nmds, symmetric=T) 
 asv_LCMS_3.pro ## Correlation in a symmetric Procrustes rotation: 0.1575, Significance: 0.434
@@ -2962,27 +2917,24 @@ ggplot() +
   labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "GC vs ASV Procrustes Plot") +
   theme_classic() 
 
+# GC vs LCMS procrustes ####
+LCMS_GC.pro <- protest(OCG_LCMS3_prop2.nmds, OCG_GCp2_pro.nmds, symmetric=T) 
+LCMS_GC.pro ## Correlation in a symmetric Procrustes rotation: 0.3824, Significance: 0.001
+summary(LCMS_GC.pro) 
+plot(LCMS_GC.pro)
 
-#Mantel tests measuring correlation between the distance matrices##
-#GC 
-OCG_GCp.dist <- vegdist(OCG_GCp)
-asvITS.OCG.GC.dist <- vegdist(asvITS.OCG.GC)
-GC.asv.mant <- mantel(OCG_GCp.dist,asvITS.OCG.GC.dist, permutations = 9999) 
-GC.asv.mant ## r = 0.008694, P = 0.4007
+## Re-plotting the procrustes 
+LCMS_GC.pro_prodat <- as.data.frame(LCMS_GC.pro$X)
+LCMS_GC.pro_prodat <- cbind(LCMS_GC.pro_prodat,LCMS_GC.pro$Yrot)
+colnames(LCMS_GC.pro_prodat)[colnames(LCMS_GC.pro_prodat)=="1"] <- "Xend"
+colnames(LCMS_GC.pro_prodat)[colnames(LCMS_GC.pro_prodat)=="2"] <- "Yend"
 
-
-# #LCMS1
-# OCG_LCMS_1uL.dist <- vegdist(OCG_LCMS_1uL)
-# asvITS.OCG.LC1.dist <- vegdist(asvITS.OCG.LC1)
-# LCMS1.asv.mant <- mantel(OCG_LCMS_1uL.dist,asvITS.OCG.LC1.dist, permutations = 9999) 
-# LCMS1.asv.mant ## r = -0.1146, P =0.9645
-
-#LCMS3
-OCG_LCMS_3uLp.dist <- vegdist(OCG_LCMS_3uLp)
-asvITS.OCG.LC3.dist <- vegdist(asvITS.OCG.LC3)
-LCMS3.asv.mant <- mantel(OCG_LCMS_3uLp.dist,asvITS.OCG.LC3.dist, permutations = 9999) 
-LCMS3.asv.mant ## r = -0.1345, P =0.9879
-
+ggplot() + 
+  geom_segment(data=LCMS_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2, xend=Xend, yend=Yend), size=0.8, color="gray") + 
+  geom_point(data=LCMS_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2), size=2, shape=19, color = "maroon") +
+  geom_point(data=LCMS_GC.pro_prodat, mapping=aes(x=Xend, y=Yend), size=2, shape=17, color = "lightseagreen") +
+  labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "GC vs LCMS Procrustes Plot") +
+  theme_classic() 
 
 # #LCMS against 1ul and 3ul procrustes to check #### 
 # OCG_LCMS_3uLp. <- subset(OCG_LCMS_3uLp, row.names(OCG_LCMS_3uLp) %in% row.names(OCG_LCMS_1uL)) #58
@@ -2999,6 +2951,19 @@ LCMS3.asv.mant ## r = -0.1345, P =0.9879
 # LCMS_3_1.pro ## Correlation in a symmetric Procrustes rotation: 0.7926, Significance: 0.001
 # summary(LCMS_3_1.pro) 
 # plot(LCMS_3_1.pro)
+
+#Mantel tests measuring correlation between the distance matrices####
+#GC 
+OCG_GCp.dist <- vegdist(OCG_GCp)
+asvITS.OCG.GC.dist <- vegdist(asvITS.OCG.GC)
+GC.asv.mant <- mantel(OCG_GCp.dist,asvITS.OCG.GC.dist, permutations = 9999) 
+GC.asv.mant ## r = 0.008694, P = 0.4007
+
+#LCMS3
+OCG_LCMS_3uLp.dist <- vegdist(OCG_LCMS_3uLp)
+asvITS.OCG.LC3.dist <- vegdist(asvITS.OCG.LC3)
+LCMS3.asv.mant <- mantel(OCG_LCMS_3uLp.dist,asvITS.OCG.LC3.dist, permutations = 9999) 
+LCMS3.asv.mant ## r = -0.1345, P =0.9879
 
 # Clear Global Environment ####
 rm(list = ls())
