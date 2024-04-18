@@ -118,19 +118,17 @@ rm(list = ls())
 #Read in cleaned data : START HERE ####
 #METADATA
 mdITS.OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #154 of 16 variables
-head(mdITS.OCG)
 str(mdITS.OCG)
 
 #ASV
 asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #154 obs of 2135 variables
-head(asvITS.OCG)
 summary(rowSums(asvITS.OCG)) #507
 summary(colSums(asvITS.OCG)) #2
 
 row.names(asvITS.OCG) == row.names(mdITS.OCG) # sanity check:TRUE
 
 #TAXONOMY
-tax.ITS <- read.csv("~/Documents/Orchard_Common_Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in
+tax.ITS <- read.csv("~/Documents/Orchard_Common_Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in 5983 obs of 2 variables
 
 #Alpha diversity asv level####
 ##Rarefying
@@ -141,7 +139,7 @@ asvITS.OCG.efr <- round(asvITS.OCG.ef)
 mdITS.OCG <- cbind(mdITS.OCG, effective_species = asvITS.OCG.efr)
 
 glm.OCG <- glm(effective_species ~ Subspecies + Year, family = poisson, data=mdITS.OCG)
-summary(glm.OCG)
+summary(glm.OCG) # year p-value = 0.000460
 
 plot(allEffects(glm.OCG))
 
@@ -252,7 +250,8 @@ legend("bottomleft",
        pch=16,
        cex=0.8,
        bty = "n")
-ordiarrows(asvITS.OCG.nmds, mdITS.OCG$Plant)
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Year, show.groups = "2012", col = "maroon")
+ordispider(asvITS.OCG.nmds,groups = mdITS.OCG$Year, show.groups = "2021", col = "cyan")
 
 ### PERMANOVAs for year ##
 asvITS.OCG.subsp_loc_yr <- adonis2(asvITS.OCG.r ~ mdITS.OCG$Subspecies + mdITS.OCG$Year + mdITS.OCG$Location, by = "margin") 
@@ -489,11 +488,11 @@ rm(list = ls())
 #ANCOM####
 #Read in project data 
 #ASV
-asvITS <- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) 
+asvITS <- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) #5983 obs of 463 var
 asvITS <- asvITS[,order(colnames(asvITS))] # order samples alphabetically
 
 #METADATA
-mdITS <- read.csv("data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) 
+mdITS <- read.csv("data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) # 505 obs of 16 var
 mdITS <- mdITS[order(row.names(mdITS)),] 
 mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) 
 colnames(asvITS) == row.names(mdITS) # sanity check:TRUE
@@ -512,9 +511,9 @@ summary(colSums(asvITS)) #0
 
 asvITS <- asvITS[,colSums(asvITS) > 999] # each sample needs at least 1000 seqs
 
-mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) # remove trimmed samples from metadata
+mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) # remove trimmed samples from metadata #361 obs o f 16 var
 
-mdITS.OCG <- subset(mdITS, mdITS$Project == "OCG")   
+mdITS.OCG <- subset(mdITS, mdITS$Project == "OCG") #146 obs of 16 var   
 mdITS.OCG <- subset(mdITS.OCG, mdITS.OCG$Location != "NEG")  
 asvITS.t <- t(asvITS) 
 asvITS.OCG_t <- subset(asvITS.t, row.names(asvITS.t) %in% row.names(mdITS.OCG)) 
@@ -826,11 +825,11 @@ sbsdfplot_sublong$subspecies <-  factor(sbsdfplot_sublong$subspecies, levels = c
 ### Figure - OCG top ANCOM ASVs by Subspecies with default sorting 
 ggplot(sbsdfplot_sublong, aes(y = value, x = subspecies, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable, shape = variable), alpha =.4) +
+  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
   ylab("Log  rel. abundance") + xlab("Subspecies") + theme_classic()
 
 print(taxITS.OCG_sigsbst_subspecies_default)
-print(taxITS.OCG_sisubspeciesgsbst_subspecies_default)
+print(taxITS.OCG_sigsbst_subspecies_default)
 
 #PLOIDY - no sig differences found
 #Run ANCOM, specify variable
@@ -922,10 +921,10 @@ sbsplplot_sublong$subsp_ploidy <-  factor(sbsplplot_sublong$subsp_ploidy, levels
 ### FIGURE FOR SUBSPECIES PLOIDY
 ggplot(sbsplplot_sublong, aes(y = value, x = subsp_ploidy, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable, shape = variable), alpha =.4) +
+  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
   ylab("Log  rel. abundance") + xlab("Subsp_ploidy") + theme_classic()
 
-print(taxA_sigsbst_subsp_ploidy)
+print(taxITS.OCG_sigsbst_subsp_ploidy)
 
 ##SIGNIFICANCE BY YEAR
 #Run ANCOM, specify variable
@@ -969,16 +968,14 @@ yrplot_sublong$year <-  factor(yrplot_sublong$year, levels = c("2012", "2021"))
 ### FIGURE FOR YEAR
 ggplot(yrplot_sublong, aes(y = value, x = year, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable, shape = variable), alpha =.4) +
+  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
   ylab("Log  rel. abundance") + xlab("Year") + theme_classic()
 
 print(taxITS.OCG_sigsbst_year)
 
-#CLEAR GLOBAL ENVIRONMENT
-rm(list = ls())
-
 # Clear Global Environment ####
 rm(list = ls())
+
 #METACODER ####
 #Read in project data 
 #ASV
@@ -1239,11 +1236,11 @@ str(md.OCG.2021)
 
 ## 2012 GC RAW DATA READ IN
 #read in 2012 GC chemistry data
-OCG_GC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #183 obs of 221 var
+OCG_GC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #183 obs of 223 var
 
 ## 2012 GC CLEANING 
 # Remove the second column since it is empty
-OCG_GC_2012 <- OCG_GC_2012[, -2]
+#OCG_GC_2012 <- OCG_GC_2012[, -3] #this has been fixed
 names(OCG_GC_2012)[1] <- "Plant_ID"
 
 sum(duplicated(OCG_GC_2012$Plant_ID)) #4 duplicates (control, cocktails, and blanks)
@@ -1254,13 +1251,20 @@ OCG_GC_2012 <- OCG_GC_2012[!(apply(OCG_GC_2012, 1, function(row) any(grepl("^emp
 sum(duplicated(OCG_GC_2012$Plant_ID)) # 0 duplicates
 #head(OCG_GC_2021)
 
+# Rename duplicate columns
+names(OCG_GC_2012) <- make.unique(names(OCG_GC_2012))
+
+# Add 0.537 to non-NA values in RT columns
+OCG_GC_2012 <- OCG_GC_2012 %>%
+  mutate(across(starts_with("RT"), ~ ifelse(!is.na(.x), .x + 0.537, .x)))
+
 #subset to only columns that contain "Peak Area" and "Plant ID". This removes "RT". 
-OCG_GC_2012 <- OCG_GC_2012 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2012))] #167 obs of 147 variables
+OCG_GC_2012 <- OCG_GC_2012 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2012))] #167 obs of 149 variables
 
 #subset to remove columns that contain Peak Area Percent and just keep Peak Area.
-OCG_GC_2012 <- OCG_GC_2012 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2012))] #167 obs of 74 variables
+OCG_GC_2012 <- OCG_GC_2012 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2012))] #167 obs of 75 variables
 
-#subset to have just the columns that contain "Peak Area" 1:73 #shifted by one compared to 2021 since there was no compound 1 
+#subset to have just the columns that contain "Peak Area" 1:74 #shifted by one compared to 2021 since there was no compound 1 
 peak_area_cols <- grep("Peak.Area", colnames(OCG_GC_2012)) 
 
 #the new column names will replace the repeating "Peak.Area" names to be "C001" through "C0073" increasing sequentially. 
@@ -1269,9 +1273,9 @@ colnames(OCG_GC_2012)[peak_area_cols] <- new_col_names
 
 names(OCG_GC_2012)[names(OCG_GC_2012) == 'Plant_ID'] <- 'Garden Plant ID' 
 
-OCG_GC_2012 <- merge(md.OCG.2012, OCG_GC_2012, by="Garden Plant ID") #157 obs of 89
+OCG_GC_2012 <- merge(md.OCG.2012, OCG_GC_2012, by="Garden Plant ID") #156 obs of 90
 
-OCG_GC_2012 <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve 157 obs of 74 variables
+OCG_GC_2012 <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve 156 obs of 75 variables
 
 ##Save csv
 write.csv(OCG_GC_2012, file = "data_csv/OCG_GC_2012_cleaned.csv",row.names = FALSE)
@@ -1294,8 +1298,8 @@ OCG_GC_2021 <- OCG_GC_2021 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2021))
 #subset to keep Peak Area.
 OCG_GC_2021 <- OCG_GC_2021 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2021))] #87 obs of 75 variables
 
-#remove column with compound 1 to match to the 2012 GC data that starts at compound C002
-OCG_GC_2021 <- OCG_GC_2021[,-2] #87 of 74 variables
+#remove column with compound 1 to match to the 2012 GC data that starts at compound C002. fixed
+#OCG_GC_2021 <- OCG_GC_2021[,-2] #87 of 74 variables
 
 #subset to "Peak Area" 1:73
 peak_area_cols <- grep("Peak.Area", colnames(OCG_GC_2021)) 
@@ -1313,13 +1317,13 @@ md.OCG.2021$`Garden Plant ID` <- as.character(md.OCG.2021$`Garden Plant ID`)
 OCG_GC_2021 <- merge(md.OCG.2021, OCG_GC_2021, by="Garden Plant ID") #70 obs of 89 variables
 
 #Going to remove everything except AUC and plant ID description
-OCG_GC_2021 <- OCG_GC_2021[,-c(1:15)] #70 obs of 74 variables
+OCG_GC_2021 <- OCG_GC_2021[,-c(1:15)] #70 obs of 75 variables
 
 #Save csv
 write.csv(OCG_GC_2021, file = "data_csv/OCG_GC_2021.csv",row.names = FALSE)
 
 #FULL GC COMBINED
-OCG_GC <- rbind(OCG_GC_2012, OCG_GC_2021) #217 obs of 73 variables
+OCG_GC <- rbind(OCG_GC_2012, OCG_GC_2021) #226 obs of 75 variables
 
 ##Save csv
 write.csv(OCG_GC, file = "data_csv/OCG_GC_full_clean.csv",row.names = FALSE)
@@ -1408,21 +1412,21 @@ md.OCG.2021 <- subset(md.OCG, md.OCG$Year=="2021") #76
 str(md.OCG.2021)
 
 ## 2012 CLEAN GC
-OCG_GC_2012 <- read.csv("data_csv/OCG_GC_2012_cleaned.csv", row.names = 1) #157 obs of 73 variables
+OCG_GC_2012 <- read.csv("data_csv/OCG_GC_2012_cleaned.csv", row.names = 1) #157 obs of 74 variables
 OCG_GC_2012 <- OCG_GC_2012[order(row.names(OCG_GC_2012)),]
-OCG_GC_2012 <- subset(OCG_GC_2012, row.names(OCG_GC_2012) %in% row.names(md.OCG)) #147 of 73 variables
+OCG_GC_2012 <- subset(OCG_GC_2012, row.names(OCG_GC_2012) %in% row.names(md.OCG)) #147 of 74 variables
 OCG_GC_2012[is.na(OCG_GC_2012)] <- 0
 
 ## 2021 CLEAN GC
-OCG_GC_2021 <- read.csv("data_csv/OCG_GC_2021.csv", row.names = 1)#70 obs of 73 variables
+OCG_GC_2021 <- read.csv("data_csv/OCG_GC_2021.csv", row.names = 1)#70 obs of 74 variables
 OCG_GC_2021 <- OCG_GC_2021[order(row.names(OCG_GC_2021)),] 
-OCG_GC_2021 <- subset(OCG_GC_2021, row.names(OCG_GC_2021) %in% row.names(md.OCG)) #70 of 73 variables
+OCG_GC_2021 <- subset(OCG_GC_2021, row.names(OCG_GC_2021) %in% row.names(md.OCG)) #70 of 74 variables
 OCG_GC_2021[is.na(OCG_GC_2021)] <- 0
 
 ##FULL CLEAN GC
-OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv", row.names = 1)#217 obs of 73 variables
+OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv", row.names = 1)#226 obs of 74 variables
 OCG_GC <- OCG_GC[order(row.names(OCG_GC)),]
-OCG_GC <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(md.OCG)) #217 of 73 variables
+OCG_GC <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(md.OCG)) #217 of 74 variables
 md.OCG.GC <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC)) #217 of 16 variables
 OCG_GC[is.na(OCG_GC)] <- 0
 
@@ -1491,14 +1495,14 @@ colSums(is.na(OCG_GC_2012)) #checking for null values since they are used for fi
 na_proportion <- colMeans(is.na(OCG_GC_2012))
 print(na_proportion)
 
-#Now define the threshold of 20% - there are 73 compounds that remain after this
+#Now define the threshold of 10% - there are 73 compounds that remain after this
 threshold <- 0.90
 
 #identify which columns I need to keep
 columns_to_keep <- na_proportion <= threshold
 
 # Subset dataframe to keep only columns with NA proportion <= threshold
-OCG_GC_2012_subset <- OCG_GC_2012[, columns_to_keep] #147 obs of 73 variables
+OCG_GC_2012_subset <- OCG_GC_2012[, columns_to_keep] #147 obs of 74 variables
 
 # Replace NA values with zeroes
 OCG_GC_2012_subset[is.na(OCG_GC_2012_subset)] <- 0
@@ -1515,7 +1519,7 @@ threshold <- 0.90
 
 columns_to_keep <- na_proportion <= threshold
 
-OCG_GC_2021_subset <- OCG_GC_2021[, columns_to_keep] #70 obs of 42 var variables
+OCG_GC_2021_subset <- OCG_GC_2021[, columns_to_keep] #70 obs of 43 var variables
 
 OCG_GC_2021_subset[is.na(OCG_GC_2021_subset)] <- 0
 colSums(is.na(OCG_GC_2021_subset)) 
@@ -1595,28 +1599,28 @@ data_LCMS3_normalized.ID <- scale(OCG_LCMS_3uL.t) #1:302, 1:111
 ### 2012 GC CORRELATION
 #Compound
 corr_matrix_2012 <- cor(data_normalized_2012) #47 compounds
-ggcorrplot(corr_matrix_2012)
+#ggcorrplot(corr_matrix_2012)
 #Plant ID
 corr_matrix_2012.ID <- cor(data_normalized_2012.ID) #147 plants
 
 ### 2021 GC CORRELATION 
 #Compound
 corr_matrix_2021 <- cor(data_normalized_2021) #42 compounds
-ggcorrplot(corr_matrix_2021)
+#ggcorrplot(corr_matrix_2021)
 #Plant ID
 corr_matrix_2021.ID <- cor(data_normalized_2021.ID) # 70 plants
 
 ### GC CORRELATION
 #Compound
 corr_matrix_GC <- cor(data_normalized_GC) #54 compounds
-ggcorrplot(corr_matrix_GC)
+#ggcorrplot(corr_matrix_GC)
 #Plant ID
 corr_matrix_GC.ID <- cor(data_normalized_GC.ID) # 217 plants
 
 ### LCMS CORRELATION 
 #Compound
 corr_matrix_LCMS3 <- cor(data_LCMS3_normalized)#large matrix 91204 elements
-ggcorrplot(corr_matrix_LCMS3)
+#ggcorrplot(corr_matrix_LCMS3)
 #Plant ID
 corr_matrix_LCMS3.ID <- cor(data_LCMS3_normalized.ID) #111 plants
 
@@ -1634,12 +1638,15 @@ fviz_eig(data.pca_2012, addlabels = TRUE) #scree plot is used to visualize the i
 fviz_pca_var(data.pca_2012, col.var = "black")
 
 #Contribution of each compound
-fviz_cos2(data.pca_2012, choice = "var", axes = 1:2)
+fviz_cos2(data.pca_2012, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20)
 
 #Biplot combined with cos2
 fviz_pca_var(data.pca_2012, col.var = "cos2",
              gradient.cols = c("black", "orange", "green"),
              repel = TRUE)
+
+data.pca.GC_2012 <- princomp(data_normalized_2012)
+biplot(data.pca.GC_2012, cex = 0.4, pc.biplot = TRUE)
 
 ## 2012 GC PCA BY PLANT ID
 #prcomp() has improved numerical accuracy, so is preferable to use this function.
@@ -1681,7 +1688,7 @@ legend("topleft",
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="GC of 2012 plant by subspecies ploidy", 
+     main="PCA of 2012 GC by subspecies ploidy", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.2012$Subsp_ploidy],
      pch=c(19),
      xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
@@ -1702,11 +1709,14 @@ fviz_eig(data.pca_2021, addlabels = TRUE) #(49%, 16%)
 
 fviz_pca_var(data.pca_2021, col.var = "black")
 
-fviz_cos2(data.pca_2021, choice = "var", axes = 1:2)
+fviz_cos2(data.pca_2021, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20)
 
 fviz_pca_var(data.pca_2021, col.var = "cos2",
              gradient.cols = c("black", "orange", "green"),
              repel = TRUE)
+
+data.pca.GC_2021 <- princomp(data_normalized_2021)
+biplot(data.pca.GC_2021, cex = 0.4, pc.biplot = TRUE)
 
 ## 2021 GC PCA BY PLANT ID
 data.pca_2021_ID <- prcomp(data_normalized_2021)
@@ -1749,7 +1759,7 @@ legend("topright",
 #BY SUBSPECIES PLOIDY
 plot(data.pca_2021_ID$x[, 1], data.pca_2021_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="GC of 2021 plant by subspecies ploidy", 
+     main="PCA of 2021 GC by subspecies ploidy", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.2021$Subsp_ploidy],
      pch=c(19),
      xlim = range(data.pca_2021_ID$x[, 1], na.rm = TRUE),
@@ -1765,9 +1775,12 @@ legend("topright",
 data.pca_GC_ID <- prcomp(data_normalized_GC)
 summary(data.pca_GC_ID)
 fviz_eig(data.pca_GC_ID, addlabels = TRUE) #17.6, 10.7%
-fviz_cos2(data.pca_GC_ID, choice = "ind", axes = 1:2) 
+fviz_cos2(data.pca_GC_ID, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20) 
 autoplot(data.pca_GC_ID)
 autoplot(data.pca_GC_ID, label = TRUE)
+
+data.pca_GC <- princomp(data_normalized_GC)
+biplot(data.pca_GC, cex = 0.4, pc.biplot = TRUE)
 
 rownames(data_normalized_GC) == rownames(md.OCG.GC)
 
@@ -1823,8 +1836,16 @@ legend("topleft",
        cex=0.6,
        bty = "n")
 
+OCG_GC_subset[is.na(OCG_GC_subset)] <- 0
+summary(rowSums(OCG_GC_subset)) #179 seqs in smallest sample
+summary(colSums(OCG_GC_subset)) #2500
+OCG_GC_subset <- OCG_GC_subset[,colSums(OCG_GC_subset) > 0]
+summary(colSums(OCG_GC_subset)) #2500
+
+OCG_GC_subset.r <- rrarefy(round(OCG_GC_subset),sample = 179)
+
 #permanova by subspecies ploidy
-PCA_gc_subsploi <- adonis2(OCG_GC_subset ~ md.OCG.GC$Subsp_ploidy, by = "margin")
+PCA_gc_subsploi <- adonis2(OCG_GC_subset.r ~ md.OCG.GC$Subsp_ploidy, by = "margin")
 PCA_gc_subsploi #subspecies ploidy is significant 0.001
 
 #BY YEAR
@@ -1840,17 +1861,38 @@ legend("topleft",
        cex=0.8,
        bty = "n")
 
-PCA_gc_yr <- adonis2(OCG_GC_subset ~ md.OCG.GC$Year, by = "margin")
+PCA_gc_yr <- adonis2(OCG_GC_subset.r ~ md.OCG.GC$Year, by = "margin")
 PCA_gc_yr #year is significant 0.001
+
+## GC PCA for existing in both years ####
+OCG_GC_yr12<- subset(OCG_GC_2012_subset, row.names(OCG_GC_2012_subset) %in% row.names(md.OCG.2012)) #147 of 47
+
+OCG_GC_yr21 <- subset(OCG_GC_2021_subset, row.names(OCG_GC_2021_subset) %in% row.names(md.OCG.2021)) #70 of 42 variables
+
+OCG_GC_yr12 <- merge(OCG_GC_yr12, md.OCG.2012, by = "row.names", all.x = TRUE) #147 of 64
+OCG_GC_yr21 <- merge(OCG_GC_yr21, md.OCG.2021, by = "row.names", all.x = TRUE) #147 of 59
+
+OCG_GC_btyr <- merge(OCG_GC_yr12, OCG_GC_yr21, by = "Plant")
 
 ## Full LCMS PCA ####
 data.pca_LCMS3_ID <- prcomp(data_LCMS3_normalized)
 summary(data.pca_LCMS3_ID)
 fviz_eig(data.pca_LCMS3_ID, addlabels = TRUE) #14.1% and 8.9%
-fviz_cos2(data.pca_LCMS3_ID, choice = "var", axes = 1:2) #Contribution of each compound
-fviz_cos2(data.pca_LCMS3_ID, choice = "ind", axes = 1:2) #Contribution of each plant
+fviz_cos2(data.pca_LCMS3_ID, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each compound
+fviz_cos2(data.pca_LCMS3_ID, choice = "ind", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each plant
 autoplot(data.pca_LCMS3_ID)
 autoplot(data.pca_LCMS3_ID, label = TRUE)
+
+biplot(data.pca_LCMS3_ID, cex = 0.3, pc.biplot = TRUE)
+
+#data.pca_LCMS3 <- princomp(data_LCMS3_normalized)
+#autoplot(data.pca_LCMS3, label = TRUE)
+
+# merged_data <- merge(data.frame(Row.names = rownames(data.pca_LCMS3_ID$x), data.pca_LCMS3_ID$x), OCG_LCMS_3uL_subset)
+# 
+# ggplot(merged_data)+
+#   geom_point(aes(PC1, PC2, color = "Row.names"))+
+#   geom_point(aes(C001,C002))
 
 rownames(data_LCMS3_normalized) == rownames(md.OCG.LCMS.3)
 
@@ -1868,6 +1910,9 @@ legend("topleft",
        pch=19,
        cex=0.8,
        bty = "n")
+
+
+
 
 #BY SUBSPECIES
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
@@ -1926,7 +1971,9 @@ legend("topleft",
        bty = "n")
 
 #BY LOCATION
-plotcolor <- c("olivedrab","cadetblue","magenta","blue","orange","green","darkgreen","firebrick","lightgoldenrod","mediumaquamarine","cornflowerblue")
+plotcolor <- c("firebrick","cadetblue","darkgoldenrod","skyblue","rosybrown","tomato","olivedrab","turquoise","burlywood","mediumaquamarine","darkseagreen")
+
+plotcolorlcms <- c("cadetblue","skyblue","turquoise","mediumaquamarine","darkseagreen","tomato","firebrick","olivedrab","rosybrown","burlywood","darkgoldenrod")
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
@@ -1935,11 +1982,11 @@ plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      pch=c(16),
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
      ylim = range(data.pca_LCMS3_ID$x[, 2], na.rm = TRUE))
-legend("topleft", 
-       legend=c("AZ", "CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+legend("topright", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
        col= plotcolor,
-       pch=16,
-       cex=0.5,
+       pch=19,
+       cex=0.8,
        bty = "n")
 
 PCA_lcms_loc <- adonis2(OCG_LCMS_3uL_subset ~ md.OCG.LCMS.3$Location, by = "margin")
@@ -2004,18 +2051,23 @@ OCG_GC_2012_subsp.pw # sig between all subspecies
 
 # SUBSPECIES PLOIDY
 plot(OCG_AUC_2012_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="2012 GC chemistry by subspecies and ploidy", 
+     main="NMDS of 2012 GC by subspecies and ploidy", 
      col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC.2012$Subsp_ploidy],
      pch=c(19))
 legend("topleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
-       cex=0.6,
+       cex=0.8,
        bty = "n")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
 # PERMANOVAS FOR SUBSPECIES PLOIDY
-OCG_GC_2012_subspploidy <- adonis2(OCG_GC_2012 ~ md.OCG.GC.2012$Subsp_ploidy,by="margin") 
+OCG_GC_2012_subspploidy <- adonis2(OCG_GC_2012.r ~ md.OCG.GC.2012$Subsp_ploidy,by="margin") 
 OCG_GC_2012_subspploidy #subspecies ploidy is significant
 
 #PAIRWISE ADONIS
@@ -2079,15 +2131,20 @@ OCG_GC_2021_subsp.pw # sig between T vs V, T vs W
 
 # SUBSPECIES PLOIDY NMDS
 plot(OCG_GC_2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
-     main="2021 GC chemistry by subspecies and ploidy", 
+     main="NMDS of 2021 GC by subspecies and ploidy", 
      col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC.2021$Subsp_ploidy],
      pch=c(19))
-legend("bottomright", 
+legend("topleft", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
-       cex=0.6,
+       cex=0.8,
        bty = "n")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
 # PERMANOVAS FOR SUBSPECIES PLOIDY
 OCG_GC_2021_subspploidy <- adonis2(OCG_GC_2021.r ~ md.OCG.GC.2021$Subsp_ploidy,by="margin") 
@@ -2107,7 +2164,7 @@ summary(colSums(OCG_GC)) #77.1
 
 OCG_GC.r <- rrarefy(round(OCG_GC),sample = 2842)
 
-md.OCG.GC <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC)) #217
+md.OCG.GC <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC)) #216
 
 rownames(md.OCG.GC) == rownames(OCG_GC)
 
@@ -2218,7 +2275,7 @@ OCG_LCMS_3uL[is.na(OCG_LCMS_3uL)] <- 0
 summary(rowSums(OCG_LCMS_3uL)) #31016795 LCMS area in smallest sample
 summary(colSums(OCG_LCMS_3uL)) #265605
 
-OCG_LCMS_3uL.r <- rrarefy(round(OCG_LCMS_3uL),sample = 31016795)
+#OCG_LCMS_3uL.r <- rrarefy(round(OCG_LCMS_3uL),sample = 31016795)
 
 set.seed(38)
 #OCG_LCMS_3uL_ID.nmds <- metaMDS(OCG_LCMS_3uL.r, trymax=500) #solution reached
@@ -2324,14 +2381,96 @@ legend("bottomleft",
        legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
        col= plotcolor,
        pch=19,
-       cex=0.6,
+       cex=0.8,
        bty = "n")
 legend("topleft", 
        legend=c("2012","2021"),
        col="black",
        pch=c(17,19),
-       cex=0.6,
+       cex=0.7,
        bty = "n")
+
+## Subset LCMS to tridentata only ####
+md.tridentata <- md.OCG.LCMS.3[md.OCG.LCMS.3$Subspecies == "T", ] #80 plants
+
+LCMS.tridentata <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.tridentata)) #80
+
+summary(rowSums(LCMS.tridentata)) #49580982 
+summary(colSums(LCMS.tridentata)) #10697
+
+LCMS.tridentata.r <- rrarefy(round(LCMS.tridentata),sample = 49580982)
+
+set.seed(8)
+LCMS.tridentata.nmds <- metaMDS(LCMS.tridentata.r, trymax=500) #solution reached
+save(LCMS.tridentata.nmds, file = "nmds/LCMS.tridentata.nmds.rda")
+load("nmds/LCMS.tridentata.nmds.rda")
+
+ordiplot(LCMS.tridentata.nmds, type = "t",display = "sites",cex = .5)
+
+# LOCATION 
+plot(LCMS.tridentata.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location for tridentata", 
+     col= plotcolor [md.tridentata$Location],
+     pch=c(17,16)[md.tridentata$Year])
+legend("bottomleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+tri_LCMS3_loc <- adonis2(LCMS.tridentata.r ~ md.tridentata$Location ,by="margin") 
+tri_LCMS3_loc #year is significant
+
+lm_lcms_t <- lm(LCMS.tridentata.r ~ md.tridentata$Location)
+summary(lm_lcms_t)
+
+##Subset LCMS to wyomingensis only ####
+md.wyomingensis <- md.OCG.LCMS.3[md.OCG.LCMS.3$Subspecies == "W", ] #26 plants
+
+LCMS.wyomingensis <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.wyomingensis)) #26
+
+summary(rowSums(LCMS.wyomingensis)) #31016795 
+summary(colSums(LCMS.wyomingensis)) #0
+
+LCMS.wyomingensis.r <- rrarefy(round(LCMS.wyomingensis),sample = 31016795)
+
+set.seed(98)
+LCMS.wyomingensis.nmds <- metaMDS(LCMS.wyomingensis.r, trymax=500) #solution reached
+save(LCMS.wyomingensis.nmds, file = "nmds/LCMS.wyomingensis.nmds.rda")
+load("nmds/LCMS.wyomingensis.nmds.rda")
+
+ordiplot(LCMS.wyomingensis.nmds, type = "t",display = "sites",cex = .5)
+
+# LOCATION 
+plot(LCMS.wyomingensis.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location for wyomingensis", 
+     col= plotcolor [md.wyomingensis$Location],
+     pch=c(17,19)[md.wyomingensis$Year])
+legend("topright", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+# legend("topleft",
+#        legend=c("2012","2021"),
+#        col="black",
+#        pch=c(17,19),
+#        cex=0.6,
+#        bty = "n")
+
+wy_LCMS3_loc <- adonis2(LCMS.wyomingensis.r ~ md.wyomingensis$Location ,by="margin") 
+wy_LCMS3_loc #year is significant
+
+lm_lcms_w <- lm(LCMS.wyomingensis.r ~ md.wyomingensis$Location)
+summary(lm_lcms_w)
 
 ## 2012 LCMS NMDS ####
 str(md.OCG.2012)
@@ -3076,10 +3215,32 @@ ggscatterhist(
 )
 
 #2021 BETADISPERSION
+#DELTA 15 N
 D15N21fit<-lm(Delta15N~Subspecies,data = stable_iso_data_2021)
 summary(D15N21fit) #p -value= 0.1812
+D15N_model <- adonis2(stable_iso_data_2021$Delta15N ~ stable_iso_data_2021$Subspecies)
+
+D15Ndist <- vegdist(stable_iso_data_2021$Delta15N, method = "euclidean")
+D15Nbetadisper <- betadisper(D15Ndist, group = stable_iso_data_2021$Subspecies)
+permutest(D15Nbetadisper) #0.79
+#pairwiseadonis
+D15Nsubsp.pw.21 <- pairwise.adonis(D15Ndist,as.factor(stable_iso_data_2021$Subspecies))
+D15Nsubsp.pw.21 #T vs V sig
+
+#DELTA 13 C
+D13Cdist <- vegdist(stable_iso_data_2021$Delta13C, method = "euclidean")
+D13Cbetadisper <- betadisper(D13Cdist, group = stable_iso_data_2021$Subspecies)
+permutest(D13Cbetadisper) #0.491
+#pairwiseadonis
+D13Csubsp.pw.21 <- pairwise.adonis(D13Cdist,as.factor(stable_iso_data_2021$Subspecies))
+D13Csubsp.pw.21 #T vs V sig
+
+D15N_model <- adonis2(stable_iso_data_2021$Delta15N ~ stable_iso_data_2021$Subspecies)
+
 D13C21fit<-lm(Delta13C~Subspecies,data = stable_iso_data_2021)
 summary(D13C21fit) #p-value = 0.037
+
+D15Nsubsp.pw.21 <- pairwise.adonis(stable_iso_data_2021$Delta13C, stable_iso_data_2021$Subspecies)
 
 #2021 VISUALIZATION
 ggscatterhist(
@@ -3100,6 +3261,10 @@ ggscatterhist(
   margin.params = list(fill = "Subspecies", color = c("olivedrab", "cadetblue", "goldenrod"), size = 0.2),
   ggtheme = theme_bw()
 )
+
+D15N_model <- adonis2(stable_iso_df$Delta15N ~ stable_iso_df$Subspecies)
+
+D13C_model <- adonis2(stable_iso_df$Delta13C ~ stable_iso_df$Subspecies, method = "bray")
 
 p1<-ggplot(stable_iso_data_2012,aes(Subspecies,Delta15N))+
   geom_boxplot(aes(fill=Subspecies))+theme_classic()+
