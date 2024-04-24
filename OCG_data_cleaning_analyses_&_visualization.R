@@ -29,8 +29,9 @@ if (!require("tidyr")) {install.packages("tidyr"); require("tidyr")}
 if (!require("tidyverse")) {install.packages("tidyverse"); require("tidyverse")}
 if (!require("vegan")) {install.packages("vegan"); require("vegan")}
 
-#ASV analysis ####
-#Read in data : DONT START HERE ####
+#ASV analysis: includes alpha diversity analysis with glm; beta diversity analysis with NMDS plots, PERMANOVA tests, and pairwise adonis; barchart plots at asv level for just the common garden; betadispersion####
+
+#Read in uncleaned data ####
 ## ASV DATA
 #Data has not been filtered and is not yet clean to include just observations with at least 10 seqs and each sample needs at least 1000 seq. The data has not been transposed and is ordered alphabetically. 
 
@@ -485,7 +486,7 @@ plot(modsubplo.HSD)
 # Clear Global Environment ####
 rm(list = ls())
 
-#ANCOM####
+#ANCOM: analysis of composition of microbiomes... differential abundance analysis for common garden####
 #Read in project data 
 #ASV
 asvITS <- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) #5983 obs of 463 var
@@ -1205,7 +1206,7 @@ print(diff_heattree_color) ## Show taxonomic heat tree
 # Clear Global Environment ####
 rm(list = ls())
 
-# Chemistry analysis####
+# Chemistry analysis: GC and LCMS data from both 2012 and 2021. This analysis has PCAs, NMDS, PERMANOVAS, pairwise adonis, alpha diversity glms, binary jaccard plots, PCoA, and procrustes####
 
 # Read data in, DONT RUN#### 
 ##METADATA READ IN
@@ -1239,8 +1240,6 @@ str(md.OCG.2021)
 OCG_GC_2012 <- read.csv("data_csv/OCG_2012_GC.csv", head=T,check.names = F,stringsAsFactors = T, skip = 1) #183 obs of 223 var
 
 ## 2012 GC CLEANING 
-# Remove the second column since it is empty
-#OCG_GC_2012 <- OCG_GC_2012[, -3] #this has been fixed
 names(OCG_GC_2012)[1] <- "Plant_ID"
 
 sum(duplicated(OCG_GC_2012$Plant_ID)) #4 duplicates (control, cocktails, and blanks)
@@ -1258,24 +1257,35 @@ names(OCG_GC_2012) <- make.unique(names(OCG_GC_2012))
 OCG_GC_2012 <- OCG_GC_2012 %>%
   mutate(across(starts_with("RT"), ~ ifelse(!is.na(.x), .x + 0.537, .x)))
 
-#subset to only columns that contain "Peak Area" and "Plant ID". This removes "RT". 
-OCG_GC_2012 <- OCG_GC_2012 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2012))] #167 obs of 149 variables
+#subset to only columns that contain "Peak Area" and "Plant ID". This removes "RT". comment out if using RT
+OCG_GC_2012 <- OCG_GC_2012 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2012))] #167 obs of 149 variables. 
 
 #subset to remove columns that contain Peak Area Percent and just keep Peak Area.
 OCG_GC_2012 <- OCG_GC_2012 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2012))] #167 obs of 75 variables
 
-#subset to have just the columns that contain "Peak Area" 1:74 #shifted by one compared to 2021 since there was no compound 1 
+#subset to have just the columns that contain "Peak Area" 1:74   
 peak_area_cols <- grep("Peak.Area", colnames(OCG_GC_2012)) 
 
 #the new column names will replace the repeating "Peak.Area" names to be "C001" through "C0073" increasing sequentially. 
 new_col_names <- paste0("C", sprintf("%03d", seq_along(peak_area_cols)))
 colnames(OCG_GC_2012)[peak_area_cols] <- new_col_names 
 
+#subset to have just the columns that contain "RT" 1:74. if going to try graphing   
+# RT_cols <- grep("RT", colnames(OCG_GC_2012))
+# 
+# new_col_names_RT <- paste0("RT", sprintf("%03d", seq_along(RT_cols)))
+# colnames(OCG_GC_2012)[RT_cols] <- new_col_names_RT
+
 names(OCG_GC_2012)[names(OCG_GC_2012) == 'Plant_ID'] <- 'Garden Plant ID' 
 
 OCG_GC_2012 <- merge(md.OCG.2012, OCG_GC_2012, by="Garden Plant ID") #156 obs of 90
 
-OCG_GC_2012 <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve 156 obs of 75 variables
+OCG_GC_2012 <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve 156 obs of variables
+
+#OCG_GC_2012_w_RT <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve and RT. 156 obs of 149 variables
+
+##Save csv with RT
+# write.csv(OCG_GC_2012_w_RT, file = "data_csv/OCG_GC_2012_cleaned_w_RT.csv",row.names = FALSE)
 
 ##Save csv
 write.csv(OCG_GC_2012, file = "data_csv/OCG_GC_2012_cleaned.csv",row.names = FALSE)
@@ -1292,7 +1302,7 @@ OCG_GC_2021 <- OCG_GC_2021[-1, ] #99 of 225 variables
 # Remove rows where "Blank" or "Cocktail" or 429 or 333 appear in Plant ID column 
 OCG_GC_2021 <- OCG_GC_2021[!(apply(OCG_GC_2021, 1, function(row) any(grepl("^Blank_|^Cocktail_|^333|^429|^BLANK|Cocktail ", row)))), ] #87 obs of 225 variables
 
-#removes "RT". 
+#removes "RT". comment out if needed
 OCG_GC_2021 <- OCG_GC_2021 [, grepl("Peak.Area|Plant_ID", colnames(OCG_GC_2021))] #87 obs of 149 variables
 
 #subset to keep Peak Area.
@@ -1301,14 +1311,23 @@ OCG_GC_2021 <- OCG_GC_2021 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2021))
 #remove column with compound 1 to match to the 2012 GC data that starts at compound C002. fixed
 #OCG_GC_2021 <- OCG_GC_2021[,-2] #87 of 74 variables
 
-#subset to "Peak Area" 1:73
+#subset to "Peak Area" 1:74
 peak_area_cols <- grep("Peak.Area", colnames(OCG_GC_2021)) 
 
-#the new column "C001" through "C0073" increasing sequentially. 
+#the new column "C001" through "C0074" increasing sequentially. 
 new_col_names <- paste0("C", sprintf("%03d", seq_along(peak_area_cols)))
 
 #Rename
 colnames(OCG_GC_2021)[peak_area_cols] <- new_col_names #87 obs and 74 variables
+
+# #subset to "RT" 1:74 if keeping in RT
+# RT_cols <- grep("RT", colnames(OCG_GC_2021)) 
+# 
+# #the new column "C001" through "C0074" increasing sequentially. 
+# new_col_names_RT <- paste0("RT", sprintf("%03d", seq_along(RT_cols)))
+# 
+# #Rename
+# colnames(OCG_GC_2021)[RT_cols] <- new_col_names_RT #87 obs and 74 variables
 
 names(OCG_GC_2021)[names(OCG_GC_2021) == 'Plant_ID'] <- 'Garden Plant ID' 
 
@@ -1316,14 +1335,38 @@ md.OCG.2021$`Garden Plant ID` <- as.character(md.OCG.2021$`Garden Plant ID`)
 
 OCG_GC_2021 <- merge(md.OCG.2021, OCG_GC_2021, by="Garden Plant ID") #70 obs of 89 variables
 
+#Going to remove everything except AUC and plant ID description and RT
+#OCG_GC_2021_w_RT <- OCG_GC_2021[,-c(1:15,17:18)] #70 obs of 149 variables
+
 #Going to remove everything except AUC and plant ID description
 OCG_GC_2021 <- OCG_GC_2021[,-c(1:15)] #70 obs of 75 variables
+
+# #Save csv with RT
+# write.csv(OCG_GC_2021_w_RT, file = "data_csv/OCG_GC_2021_cleaned_w_RT.csv",row.names = FALSE)
 
 #Save csv
 write.csv(OCG_GC_2021, file = "data_csv/OCG_GC_2021.csv",row.names = FALSE)
 
 #FULL GC COMBINED
 OCG_GC <- rbind(OCG_GC_2012, OCG_GC_2021) #226 obs of 75 variables
+
+#FULL GC COMBINED W RT
+#OCG_GC_w_RT <- rbind(OCG_GC_2012_w_RT, OCG_GC_2021_w_RT) #226 obs of 149 variables
+
+#restructure the RT GC full data. 
+#remove plant ID?
+OCG_GC_w_RT <- OCG_GC_w_RT[,-c(1)]
+#pivot longer
+df_long <- OCG_GC_w_RT %>%
+  pivot_longer(cols = everything(), 
+               names_to = c(".value", "Compound"), 
+               names_pattern = "(C|RT)0*(\\d+)")
+
+# Rename columns for clarity
+names(df_long) <- c("Compound", "RT", "PeakArea")
+
+# ##Save csv
+# write.csv(OCG_GC_w_RT, file = "data_csv/OCG_GC_w_RT_full_clean.csv",row.names = FALSE)
 
 ##Save csv
 write.csv(OCG_GC, file = "data_csv/OCG_GC_full_clean.csv",row.names = FALSE)
@@ -1586,6 +1629,43 @@ OCG_GC_subset.t <- t(OCG_GC_subset)
 colSums(is.na(OCG_GC_subset.t))
 data_normalized_GC.ID <- scale(OCG_GC_subset.t) #1:54, 1:217
 
+## GC scaling for both years ####
+# OCG_GC_yr12<- subset(OCG_GC_2012_subset, row.names(OCG_GC_2012_subset) %in% row.names(md.OCG.2012)) #147 of 47
+# 
+# OCG_GC_yr21 <- subset(OCG_GC_2021_subset, row.names(OCG_GC_2021_subset) %in% row.names(md.OCG.2021)) #70 of 42 variables
+
+# OCG_GC_yr12 <- merge(OCG_GC_yr12, md.OCG.2012, by = "row.names", all.x = TRUE) #147 of 64
+# OCG_GC_yr21 <- merge(OCG_GC_yr21, md.OCG.2021, by = "row.names", all.x = TRUE) #147 of 59
+
+OCG_GC_btyr <- subset(OCG_GC_subset, row.names(OCG_GC_subset) %in% row.names(md.OCG.GC)) #217 of 54. 
+OCG_GC_btyr <- merge(OCG_GC_btyr, md.OCG.GC, by = "row.names", all.x = TRUE) #217 of 71
+
+# Identify plant IDs with duplicates in both years
+duplicated_plant_ids <- OCG_GC_btyr[duplicated(OCG_GC_btyr$Plant),] #65 of 71 var
+
+#subset to include only 'TRUE' for paired
+OCG_GC_btyr <- OCG_GC_btyr[OCG_GC_btyr$Paired == TRUE, ] #139 of 71 var
+
+# Plant names to remove since they didnt meet the threshold parameters
+plants_to_remove <- c("WAT.2.8", "WAT.2.4", "UTWV.2.10", "UTW.1.10", "UTV.3.5", "UTT.1.1", "MTT.1.6", "IDW.1.6", "CAT.2.9")
+
+# Filter to exclude specified plant names
+OCG_GC_btyr <- OCG_GC_btyr %>%
+  filter(!Plant %in% plants_to_remove) #130 of 71 variables
+
+#cleaning to remove everything except plant ID and compounds
+#5671
+OCG_GC_btyr <- OCG_GC_btyr[, -c(56:71)] #130 of 55
+
+#make the row names the plant id
+rownames(OCG_GC_btyr) <- OCG_GC_btyr[,1]
+
+# Remove the column with the rownames from the dataframe
+OCG_GC_btyr <- OCG_GC_btyr[,-1 ] #130 obs of 54 var
+
+#Compound
+data_normalized_GC_btyr <- scale(OCG_GC_btyr) #1:130, 1:54
+
 ## LCMS scaling ####
 #Compound
 data_LCMS3_normalized <- scale(OCG_LCMS_3uL_subset) #1:111, 1:302
@@ -1616,6 +1696,12 @@ corr_matrix_GC <- cor(data_normalized_GC) #54 compounds
 #ggcorrplot(corr_matrix_GC)
 #Plant ID
 corr_matrix_GC.ID <- cor(data_normalized_GC.ID) # 217 plants
+
+###GC CORRELATION BOTH YEAR
+corr_matrix_GC_btyr <- cor(data_normalized_GC_btyr) #54 compounds
+#ggcorrplot(corr_matrix_GC)
+#Plant ID
+corr_matrix_GC_btyr.ID <- cor(data_normalized_GC_btyr.ID) # 217 plants
 
 ### LCMS CORRELATION 
 #Compound
@@ -1659,7 +1745,7 @@ autoplot(data.pca_2012_ID, label = TRUE)
 
 #BY PLOIDY
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (52%)", ylab="PC 2 (17.8%)", 
      main="GC comp of 2012 plant by ploidy", 
      col= c("red","blue")[md.OCG.2012$Ploidy],
      pch=c(19),
@@ -1673,7 +1759,7 @@ legend("topleft",
        bty = "n")
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (52%)", ylab="PC 2 (17.8%)", 
      main="GC of 2012 plant by subspecies", 
      col= c("pink","brown",'darkgreen')[md.OCG.2012$Subspecies],
      pch=c(19),
@@ -1687,7 +1773,7 @@ legend("topleft",
        bty = "n")
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (52%)", ylab="PC 2 (17.8%)", 
      main="PCA of 2012 GC by subspecies ploidy", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.2012$Subsp_ploidy],
      pch=c(19),
@@ -1699,6 +1785,11 @@ legend("topleft",
        pch=19,
        cex=0.8,
        bty = "n")
+ordispider(data.pca_2012_ID,groups = md.OCG.2012$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
 ## 2021 GC PCA ####
 data.pca_2021 <- princomp(corr_matrix_2021)
@@ -1865,14 +1956,87 @@ PCA_gc_yr <- adonis2(OCG_GC_subset.r ~ md.OCG.GC$Year, by = "margin")
 PCA_gc_yr #year is significant 0.001
 
 ## GC PCA for existing in both years ####
-OCG_GC_yr12<- subset(OCG_GC_2012_subset, row.names(OCG_GC_2012_subset) %in% row.names(md.OCG.2012)) #147 of 47
+data.pca_GC_btyr_ID <- prcomp(data_normalized_GC_btyr)
+summary(data.pca_GC_btyr_ID)
+fviz_eig(data.pca_GC_btyr_ID, addlabels = TRUE) #22% and 9.7%
+fviz_cos2(data.pca_GC_btyr_ID, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each compound
+fviz_cos2(data.pca_GC_btyr_ID, choice = "ind", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each plant
+autoplot(data.pca_GC_btyr_ID)
+autoplot(data.pca_GC_btyr_ID, label = TRUE)
 
-OCG_GC_yr21 <- subset(OCG_GC_2021_subset, row.names(OCG_GC_2021_subset) %in% row.names(md.OCG.2021)) #70 of 42 variables
+md.OCG.GC.btyr <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC_btyr)) #130
 
-OCG_GC_yr12 <- merge(OCG_GC_yr12, md.OCG.2012, by = "row.names", all.x = TRUE) #147 of 64
-OCG_GC_yr21 <- merge(OCG_GC_yr21, md.OCG.2021, by = "row.names", all.x = TRUE) #147 of 59
+rownames(OCG_GC_btyr) == rownames(md.OCG.GC.btyr) 
 
-OCG_GC_btyr <- merge(OCG_GC_yr12, OCG_GC_yr21, by = "Plant")
+#BY PLOIDY
+plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="GC plants in both years by ploidy", 
+     col= c("red","blue")[md.OCG.GC.btyr$Ploidy],
+     pch=c(19),
+     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES
+plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="GC of plants from both years by subspecies", 
+     col= c("pink","brown",'darkgreen')[md.OCG.GC.btyr$Subspecies],
+     pch=c(19),
+     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
+legend("topleft",
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("pink","brown","darkgreen"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES PLOIDY
+plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="PCA of GC from plants in both years by subspecies, ploidy, and year", 
+     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.GC.btyr$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.GC.btyr$Year],
+     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
+legend("topright", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.6,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
+
+#permanova for subspecies ploidy
+PCA_GCbtyr_subsploi <- adonis2(OCG_GC_btyr ~ md.OCG.GC.btyr$Subsp_ploidy, by = "margin")
+PCA_GCbtyr_subsploi #subspecies ploidy is significant 0.001
+
+#BY YEAR
+plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="GC of plants in both years by year", 
+     col= c("maroon","cyan")[md.OCG.GC.btyr$Year],
+     pch=c(19),
+     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
 
 ## Full LCMS PCA ####
 data.pca_LCMS3_ID <- prcomp(data_LCMS3_normalized)
@@ -2345,6 +2509,11 @@ legend("topleft",
        pch=c(17,19),
        cex=0.6,
        bty = "n")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
 # PERMANOVAS FOR SUBSPECIES PLOIDY
 OCG_LCMS3_subspploidy <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Subsp_ploidy + md.OCG.LCMS.3$Location ,by="margin") 
