@@ -490,7 +490,7 @@ plot(modsubplo.HSD)
 ###### Clear Global Environment ####
 rm(list = ls())
 
-#ANCOM: analysis of composition of microbiomes... differential abundance analysis for common garden####
+#ANCOM: analysis of composition of microbiomes. Differential abundance analysis for common garden####
 #Read in project data 
 #ASV
 asvITS <- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) #5983 obs of 463 var
