@@ -1,38 +1,67 @@
 # Orchard Common Garden - Microbial & Chemistry data cleaning, analysis, and visualization
 # Set working directory and load necessary packages####
 setwd("/Users/ellehorwath/Documents/Orchard_Common_Garden/commongarden")
-if (!require("BiocManager")) {install.packages("BiocManager"); require("BiocManager")}
-if (!require("devtools")) {install.packages("devtools"); require("devtools")}
-if (!require("dplyr")) {install.packages("dplyr"); require("dplyr")}
-if (!require("dbscan")) {install.packages("dbscan"); require("dbscan")}
-if (!require("effects")) {install.packages("effects"); require("effects")}
-if (!require("exactRankTests")) {install.packages("exactRankTests"); require("exactRankTests")}
-if (!require("factoextra")) {install.packages("factoextra"); require("factoextra")}
-if (!require("ggcorrplot")) {install.packages("ggcorrplot"); require("ggcorrplot")}
-if (!require("ggfortify")) {install.packages("ggfortify"); require("ggfortify")}
-if (!require("ggplot2")) {install.packages("ggplot2"); require("ggplot2")}
-library("glmm")
-if (!require("gridExtra")) {install.packages("gridExtra"); require("gridExtra")}
-if (!require("iNEXT")) {install.packages("iNEXT"); require("iNEXT")}
-if (!require("lme4")) {install.packages("lme4"); require("lme4")}
-if (!require("MASS")) {install.packages("MASS"); require("MASS")}
-if (!require("metacoder")) {install.packages("metacoder"); require("metacoder")}
-if (!require("nlme")) {install.packages("nlme"); require("nlme")}
-if (!require("nVennR")) {install.packages("nVennR"); require("nVennR")}
-if (!require("pairwiseAdonis")) {devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"); require("pairwiseAdonis")}
-if (!require("phyloseq")) {BiocManager::install("phyloseq"); require("phyloseq")}
-if (!require("picante")) {install.packages("picante"); require("picante")}
-if (!require("qiime2R")) {BiocManager::install("qiime2R"); require("qiime2R")}
-if (!require("raster")) {install.packages("raster"); require("raster")}
-if (!require("readr")) {install.packages("readr"); require("readr")}
-if (!require("reshape2")) {install.packages("reshape2"); require("reshape2")}
-if (!require("tidyr")) {install.packages("tidyr"); require("tidyr")}
-if (!require("tidyverse")) {install.packages("tidyverse"); require("tidyverse")}
-if (!require("vegan")) {install.packages("vegan"); require("vegan")}
+# List of CRAN packages
+cran_packages <- c("dplyr", "effects", "exactRankTests", "factoextra", 
+                   "ggcorrplot", "ggfortify", "ggplot2", "glmm", "gridExtra", 
+                   "iNEXT", "lme4", "MASS", "metacoder", "nlme", 
+                   "picante", "raster", "readr", "reshape2", 
+                   "tidyr", "tidyverse", "vegan")
 
-#ASV analysis: includes alpha diversity analysis with glm; beta diversity analysis with NMDS plots, PERMANOVA tests, and pairwise adonis; barchart plots at asv level for just the common garden; betadispersion####
+# List of Bioconductor packages
+bioc_packages <- c("phyloseq", "qiime2R")
 
-#Read in uncleaned data ####
+# List of GitHub packages
+github_packages <- c("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+
+# Function to install and load CRAN packages
+install_and_load_cran <- function(pkg) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+    library(pkg, character.only = TRUE)
+  }
+}
+
+# Function to install and load Bioconductor packages
+install_and_load_bioc <- function(pkg) {
+  if (!require(pkg, character.only = TRUE)) {
+    BiocManager::install(pkg)
+    library(pkg, character.only = TRUE)
+  }
+}
+
+# Function to install and load GitHub packages
+install_and_load_github <- function(repo) {
+  pkg <- basename(repo)
+  if (!require(pkg, character.only = TRUE)) {
+    devtools::install_github(repo)
+    library(pkg, character.only = TRUE)
+  }
+}
+
+# Check for and install BiocManager if needed
+if (!require("BiocManager", character.only = TRUE)) {
+  install.packages("BiocManager")
+  library(BiocManager, character.only = TRUE)
+}
+
+# Check for and install devtools if needed
+if (!require("devtools", character.only = TRUE)) {
+  install.packages("devtools")
+  library(devtools, character.only = TRUE)
+}
+
+# Install and load all CRAN packages
+sapply(cran_packages, install_and_load_cran)
+
+# Install and load all Bioconductor packages
+sapply(bioc_packages, install_and_load_bioc)
+
+# Install and load all GitHub packages
+sapply(github_packages, install_and_load_github)
+
+# ASV analysis: includes alpha diversity analysis with glm; beta diversity analysis with NMDS plots, PERMANOVA tests, and pairwise adonis; barchart plots at asv level for just the common garden; betadispersion####
+# Read in uncleaned data ####
 ## ASV DATA
 #Data has not been filtered and is not yet clean to include just observations with at least 10 seqs and each sample needs at least 1000 seq. The data has not been transposed and is ordered alphabetically. 
 
@@ -117,7 +146,7 @@ write.csv(mdITS.OCG, file = "data_csv/metadata_OCG.csv")
 #Clear Global Environment 
 rm(list = ls())
 
-#Read in cleaned data : START HERE ####
+# Read in cleaned data : START HERE ####
 #METADATA
 mdITS.OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #154 of 16 variables
 str(mdITS.OCG)
@@ -132,8 +161,8 @@ row.names(asvITS.OCG) == row.names(mdITS.OCG) # sanity check:TRUE
 #TAXONOMY
 tax.ITS <- read.csv("~/Documents/Orchard_Common_Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in 5983 obs of 2 variables
 
-#Alpha diversity asv level####
-##Rarefying
+# Alpha diversity asv level####
+## Rarefying
 asvITS.OCG.r <- rrarefy(asvITS.OCG,507) ## rarefy: Warning message
 asvITS.OCG.shannon <- diversity(asvITS.OCG.r)
 asvITS.OCG.ef <- exp(asvITS.OCG.shannon)
@@ -1793,8 +1822,8 @@ legend("topleft",
        bty = "n")
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
-     xlab="PC 1 (19.8%)", ylab="PC 2 (12.5%)", 
-     main="PCA of 2012 GC data by subspecies ploidy", 
+     xlab="PC 1 (19.81%)", ylab="PC 2 (12.46%)", 
+     main="PCA of 2012 GC data by subspecies and ploidy", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.GC.2012$Subsp_ploidy],
      pch=c(19),
      xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
@@ -1811,10 +1840,28 @@ ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = 
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_4n", col = "tan")
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
-# k- means clustering attempt on 2012 GC####
-pca_scores_GC12 <- data.pca_2012$scores
-# Assuming you have already performed PCA and obtained PC scores in a variable called 'pca_scores'
-# Specify the number of clusters (k)
+### ANOVA for 2012 GC subspecies ploidy ####
+pca_scores_GC12 <- data.pca_2012_ID$x
+GC12_aov_df <- as.data.frame(pca_scores_GC12)
+pca_model_GC_12_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2012$Subsp_ploidy, data = GC12_aov_df)
+summary(pca_model_GC_12_subsppl) #PC 1 1.067e-15, PC2 0.0006886 of 2 dof. F(4) = 32.893, p < 0.001 for PC1. F(4) = 5.5143, p < 0.001
+
+#### k- means clustering on 2012 GC####
+set.seed(92)
+pca_scores_GC12 <- data.pca_2012_ID$x 
+
+#ELBOW METHOD
+# plot the within cluster sum of squares against the number of clusters
+wcss <- numeric(10)
+for (i in 1:10) {
+  kmeans_model <- kmeans(pca_scores_GC12, centers = i)
+  wcss[i] <- kmeans_model$tot.withinss
+}
+plot(1:10, wcss, type = "b", xlab = "Number of Clusters (k)", ylab = "WCSS")
+
+#Look for the "elbow" point where the rate of decrease in WCSS slows down significantly.
+#he elbow point is a good estimate for the optimal k.
+
 k <- 5  # Adjust this number based on your analysis
 
 # Perform k-means clustering on the PCA scores
@@ -1825,6 +1872,32 @@ cluster_assignments <- kmeans_result$cluster
 
 # Visualize the clusters (optional)
 plot(pca_scores_GC12, col = cluster_assignments, main = "PCA of 2012 GC data with k-means Clustering")
+
+## Adding k means clusters to md 
+md.OCG.GC.2012$cluster_assignments <- cluster_assignments
+
+plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="PCA of 2012 GC data with k-means cluster (5 clusters)", 
+     pch = 19,
+     col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise")[md.OCG.GC.2012$cluster_assignments],
+     xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_2012_ID$x[, 2], na.rm = TRUE))
+legend("topright", 
+       legend=c("1","2","3","4","5"),
+       col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#SPECTRAL CLUSTERING 2012 GC 
+set.seed(75)
+scgc12 <- specc(pca_scores_GC12, centers = 4)
+scgc12
+centers(scgc12)
+size(scgc12)
+withinss(scgc12)
+plot(pca_scores_GC12, col = scgc12, main = "PCA of 2012 GC data with spectral clustering")
 
 ## 2021 GC PCA ####
 data.pca_2021 <- princomp(data_normalized_2021)
@@ -1886,13 +1959,13 @@ legend("topright",
 
 #BY SUBSPECIES PLOIDY
 plot(data.pca_2021_ID$x[, 1], data.pca_2021_ID$x[, 2],
-     xlab="PC 1 (20%)", ylab="PC 2 (13.3%)", 
-     main="PCA of 2021 GC data by subspecies ploidy", 
+     xlab="PC 1 (20.54%)", ylab="PC 2 (13.33%)", 
+     main="PCA of 2021 GC data by subspecies and ploidy", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.GC.2021$Subsp_ploidy],
      pch=c(19),
      xlim = range(data.pca_2021_ID$x[, 1], na.rm = TRUE),
      ylim = range(data.pca_2021_ID$x[, 2], na.rm = TRUE))
-legend("topright", 
+legend("bottomright", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
@@ -1903,6 +1976,64 @@ ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = 
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_4n", col = "tan")
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
+
+### ANOVA for 2021 GC subspecies ploidy ####
+pca_scores_GC21 <- data.pca_2021_ID$x
+GC21_aov_df <- as.data.frame(pca_scores_GC21)
+pca_model_GC_21_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2021$Subsp_ploidy, data = GC21_aov_df)
+summary(pca_model_GC_21_subsppl) #F(4) = 4.5663 p < 0.005 (0.002598) for PC1. F(4) = 5.3852, p < 0.001 
+
+#### k- means clustering attempt on 2021 GC####
+pca_scores_GC21 <- data.pca_2021_ID$x
+
+#ELBOW METHOD
+# plot the within cluster sum of squares against the number of clusters
+wcss <- numeric(10)
+for (i in 1:10) {
+  kmeans_model <- kmeans(pca_scores_GC21, centers = i)
+  wcss[i] <- kmeans_model$tot.withinss
+}
+plot(1:10, wcss, type = "b", xlab = "Number of Clusters (k)", ylab = "WCSS")
+
+#Look for the "elbow" point where the rate of decrease in WCSS slows down significantly.
+#he elbow point is a good estimate for the optimal k.
+
+k <- 5  # Adjust this number based on your analysis
+
+# Perform k-means clustering on the PCA scores
+kmeans_result <- kmeans(pca_scores_GC21, centers = k)
+
+# Get cluster assignments for each sample
+cluster_assignments <- kmeans_result$cluster
+
+# Visualize the clusters (optional)
+plot(pca_scores_GC21, col = cluster_assignments, main = "PCA of 2021 GC data with k-means Clustering")
+
+## Adding k means clusters to md 
+md.OCG.GC.2021$cluster_assignments <- cluster_assignments
+
+plot(data.pca_2021_ID$x[, 1], data.pca_2021_ID$x[, 2],
+     xlab="PC 1", ylab="PC 2", 
+     main="PCA of 2021 GC data with k-means cluster (5 clusters)", 
+     pch = 19,
+     col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise")[md.OCG.GC.2021$cluster_assignments],
+     xlim = range(data.pca_2021_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_2021_ID$x[, 2], na.rm = TRUE))
+legend("topright", 
+       legend=c("1","2","3","4","5"),
+       col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#SPECTRAL CLUSTERING 2021 GC 
+set.seed(24)
+scgc21 <- specc(pca_scores_GC21, centers = 4)
+scgc21
+centers(scgc21)
+size(scgc21)
+withinss(scgc21)
+plot(pca_scores_GC21, col = scgc21, main = "PCA of 2021 GC data with spectral clustering")
 
 ## Full GC PCA ####
 data.pca_GC_ID <- prcomp(data_normalized_GC)
@@ -1996,21 +2127,6 @@ legend("topleft",
 
 PCA_gc_yr <- adonis2(OCG_GC_subset.r ~ md.OCG.GC$Year, by = "margin")
 PCA_gc_yr #year is significant 0.001
-
-# k- means clustering attempt for 2021 GC####
-pca_scores_GC21 <- data.pca_2021$scores
-# Assuming you have already performed PCA and obtained PC scores in a variable called 'pca_scores'
-# Specify the number of clusters (k)
-k <- 3  # Adjust this number based on your analysis
-
-# Perform k-means clustering on the PCA scores
-kmeans_result <- kmeans(pca_scores_GC21, centers = k)
-
-# Get cluster assignments for each sample
-cluster_assignments <- kmeans_result$cluster
-
-# Visualize the clusters (optional)
-plot(pca_scores_GC21, col = cluster_assignments, main = "PCA of 2021 GC data with k-means Clustering")
 
 ## GC PCA for existing in both years ####
 data.pca_GC_btyr_ID <- prcomp(data_normalized_GC_btyr)
@@ -2115,8 +2231,8 @@ autoplot(data.pca_LCMS3_ID, label = TRUE)
 
 biplot(data.pca_LCMS3_ID, cex = 0.3, pc.biplot = TRUE)
 
-#data.pca_LCMS3 <- princomp(data_LCMS3_normalized)
-#autoplot(data.pca_LCMS3, label = TRUE)
+# data.pca_LCMS3 <- princomp(data_LCMS3_normalized)
+# autoplot(data.pca_LCMS3, label = TRUE)
 
 # merged_data <- merge(data.frame(Row.names = rownames(data.pca_LCMS3_ID$x), data.pca_LCMS3_ID$x), OCG_LCMS_3uL_subset)
 # 
@@ -2159,7 +2275,7 @@ legend("topleft",
 #BY SUBSPECIES PLOIDY
 ## This is a good plot to share!
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (13.51%)", ylab="PC 2 (9.51%)", 
      main="PCA of LCMS data by subspecies, ploidy, and year", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
      pch=c(17,19)[md.OCG.LCMS.3$Year],
@@ -2188,11 +2304,17 @@ summary(colSums(OCG_LCMS_3uL_subset)) #384380
 OCG_LCMS_3uL_subset <- OCG_LCMS_3uL_subset[,colSums(OCG_LCMS_3uL_subset) > 0]
 summary(colSums(OCG_LCMS_3uL_subset)) #384380
 
-OCG_LCMS_3uL_subset.r <- rrarefy(round(OCG_LCMS_3uL_subset),sample = 31016795)
+#OCG_LCMS_3uL_subset.r <- rrarefy(round(OCG_LCMS_3uL_subset),sample = 31016795)
 
 #permanova for subspecies ploidy
 PCA_lcms_subsploi.r <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$Subsp_ploidy, by = "margin")
 PCA_lcms_subsploi.r #subspecies ploidy is significant 0.001
+
+### ANOVA for LCMS subspecies ploidy ####
+pca_scores_LCMS <- data.pca_LCMS3_ID$x
+LCMS_subspl_df <- as.data.frame(pca_scores_LCMS)
+pca_model_LCMS_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.LCMS.3$Subsp_ploidy, data = LCMS_subspl_df)
+summary(pca_model_LCMS_subsppl) #F(4) = 34.767 p < 0.001 for PC1. F(4) = 9.9945, p < 0.001 
 
 #BY YEAR
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
@@ -2210,10 +2332,10 @@ legend("topleft",
        bty = "n")
 
 #BY LOCATION
-plotcolor <- c("firebrick","cadetblue","darkgoldenrod","skyblue","rosybrown","tomato","olivedrab","turquoise","burlywood","mediumaquamarine","darkseagreen")
+plotcolor <- c("firebrick","cadetblue","sienna","skyblue","rosybrown","tomato","olivedrab","turquoise","burlywood","mediumaquamarine","darkseagreen")
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (13.51%)", ylab="PC 2 (9.51%)", 
      main="PCA of LCMS data by location and subspecies", 
      col= plotcolor[md.OCG.LCMS.3$Location],
      pch=c(17,19,15)[md.OCG.LCMS.3$Subspecies],
@@ -2235,20 +2357,9 @@ legend("topleft",
 PCA_lcms_loc.r <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$Location, by = "margin")
 PCA_lcms_loc.r #subspecies ploidy is significant 0.001
 
-# k- means clustering attempt for LCMS####
-pca_scores_LCMS <- OCG_LCMS_3uL_subset
-# Assuming you have already performed PCA and obtained PC scores in a variable called 'pca_scores'
-# Specify the number of clusters (k)
-k <- 5
-
-# Perform k-means clustering on the PCA scores
-kmeans_result <- kmeans(pca_scores_LCMS, centers = k)
-
-# Get cluster assignments for each sample
-cluster_assignments <- kmeans_result$cluster
-
-# Visualize the clusters (optional)
-plot(pca_scores_LCMS, col = cluster_assignments, main = "PCA of LCMS data with k-means Clustering")
+# k- means clustering for LCMS####
+set.seed(65)
+pca_scores_LCMS <- data.pca_LCMS3_ID$x
 
 #ELBOW METHOD
 # plot the within cluster sum of squares against the number of clusters
@@ -2261,62 +2372,41 @@ plot(1:10, wcss, type = "b", xlab = "Number of Clusters (k)", ylab = "WCSS")
 
 #Look for the "elbow" point where the rate of decrease in WCSS slows down significantly.
 #he elbow point is a good estimate for the optimal k.
+k <- 4
 
-#GAP stat
-#The optimal k corresponds to the smallest gap statistic value
-gap_stat <- clusGap(pca_scores_LCMS, FUNcluster = kmeans, K.max = 10, B = 50)  # Assuming a maximum of 10 clusters
-plot(gap_stat, main = "Gap Statistics for Clustering")
+# Perform k-means clustering on the PCA scores
+kmeans_result <- kmeans(pca_scores_LCMS, centers = k)
 
-#heirarchical cluster dendrogram
-hc <- hclust(dist(pca_scores_LCMS), method = "complete")
-# Plot the dendrogram
-plot(hc, main = "Hierarchical Clustering Dendrogram", xlab = "Samples", ylab = "Distance", cex = 0.4)
+# Get cluster assignments for each sample
+cluster_assignments <- kmeans_result$cluster
+
+# Visualize the clusters (optional)
+plot(pca_scores_LCMS, col = cluster_assignments, main = "PCA of LCMS data with k-means Clustering")
 
 ## Adding k means clusters to md 
 md.OCG.LCMS.3$cluster_assignments <- cluster_assignments
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1", ylab="PC 2", 
-     main="PCA of LCMS data with k-means cluster (5 clusters)", 
+     main="PCA of LCMS data with k-means cluster (4 clusters)", 
      pch = 19,
-     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$cluster_assignments],
+     col= c("lightcoral","rosybrown",'darkseagreen','peachpuff')[md.OCG.LCMS.3$cluster_assignments],
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
      ylim = range(data.pca_LCMS3_ID$x[, 2], na.rm = TRUE))
 legend("topright", 
-       legend=c("1","2","3","4","5"),
-       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       legend=c("1","2","3","4"),
+       col= c("lightcoral","rosybrown",'darkseagreen','peachpuff'),
        pch=19,
        cex=0.8,
        bty = "n")
-
-plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="PCA of LCMS data by subspecies, ploidy, and year", 
-     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
-     pch=c(17, 19)[md.OCG.LCMS.3$Year],
-     xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
-     ylim = range(data.pca_LCMS3_ID$x[, 2], na.rm = TRUE))
-legend("topright", 
-       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("pink","brown","darkgreen",'tan','lightblue'),
-       pch=19,
-       cex=0.8,
-       bty = "n")
-legend("topleft", 
-       legend=c("1","2", "3", "4", "5"),
-       col= "black",
-       pch=c(17, 19, 18, 15, 16),
-       cex=0.8,
-       bty = "n")
-
 
 ##DBSCAN ####
 # Perform DBSCAN clustering
-# dbscan::kNNdistplot(pca_scores_LCMS, k =  5)
-# abline(h = 14.5, lty = 2)
+dbscan::kNNdistplot(OCG_LCMS_3uL_subset, k =  5)
+abline(h = 6.0e+06, lty = 2)
 set.seed(123)
 # fpc package
-res.fpc <- fpc::dbscan(pca_scores_LCMS, eps = 14.5 , MinPts = 2)
+res.fpc <- fpc::dbscan(OCG_LCMS_3uL_subset, eps = 6.0e+06 , MinPts = 2)
 plot(res.fpc, pca_scores_LCMS)
 # dbscan package
 res.db <- dbscan::dbscan(pca_scores_LCMS, 14.5, 2)
@@ -2330,7 +2420,7 @@ dbscan_result$cluster
 fviz_cluster(dbscan_result, data = pca_scores_LCMS, geom = "point", 
              outlier.pointsize = 1, main = "DBSCAN Clustering on LCMS PCA-transformed Data", palette = "RdYlGn", shape = 19)+ theme_classic() 
 
-#HDBSCAN#HDBSCAN#HDBSCAN
+#HDBSCAN
 hdbscan_result <- hdbscan(pca_scores_LCMS, minPts = 5)
 plot(hdbscan_result, col = hdbscan_result$cluster+1, pch = 20)
 
@@ -2341,7 +2431,7 @@ sc
 centers(sc)
 size(sc)
 withinss(sc)
-plot(pca_scores_LCMS, col = sc)
+plot(pca_scores_LCMS, col = sc, main = "PCA of LCMS data with spectral clustering")
 
 ##LCMS PCA of just tridentata ####
 #subset LCMS to just tridentata
@@ -2383,7 +2473,7 @@ rownames(data_LCMS_tri_normalized) == rownames(md.OCG.LCMS.tri)
 
 #BY PLOIDY
 plot(data.pca_LCMS_tri_ID$x[, 1], data.pca_LCMS_tri_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (17.1%)", ylab="PC 2", 
      main="LCMS data of tridentata plants by ploidy", 
      col= c("red","blue")[md.OCG.LCMS.tri$Ploidy],
      pch=c(19),
@@ -2427,11 +2517,11 @@ summary(colSums(OCG_LCMS_tri_subset)) #110226
 OCG_LCMS_tri_subset <- OCG_LCMS_tri_subset[,colSums(OCG_LCMS_tri_subset) > 0]
 summary(colSums(OCG_LCMS_tri_subset)) #110226
 
-OCG_LCMS_tri_subset.r <- rrarefy(round(OCG_LCMS_tri_subset),sample = 49580982)
+#OCG_LCMS_tri_subset.r <- rrarefy(round(OCG_LCMS_tri_subset),sample = 49580982) #takes forever to run
 
 #permanova for subspecies ploidy
-PCA_lcms_tri_subsploi.r <- adonis2(OCG_LCMS_tri_subset.r ~ md.OCG.LCMS.tri$Subsp_ploidy, by = "margin")
-PCA_lcms_tri_subsploi.r #subspecies ploidy is significant 0.001
+#PCA_lcms_tri_subsploi.r <- adonis2(OCG_LCMS_tri_subset.r ~ md.OCG.LCMS.tri$Subsp_ploidy, by = "margin")
+#PCA_lcms_tri_subsploi.r #subspecies ploidy is significant 0.001
 
 #BY YEAR
 plot(data.pca_LCMS_tri_ID$x[, 1], data.pca_LCMS_tri_ID$x[, 2],
@@ -2460,7 +2550,7 @@ levels(md.OCG.LCMS.tri$Location)
 plotcolor.tri <- c("firebrick","cadetblue","skyblue","rosybrown","tomato","olivedrab","turquoise","burlywood","mediumaquamarine")
 
 plot(data.pca_LCMS_tri_ID$x[, 1], data.pca_LCMS_tri_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
+     xlab="PC 1 (17.08%)", ylab="PC 2 (9.3%)", 
      main="PCA of LCMS data by location for tridentata", 
      col= plotcolor.tri[md.OCG.LCMS.tri$Location],
      pch=19,
@@ -2472,15 +2562,85 @@ legend("topleft",
        pch=19,
        cex=0.8,
        bty = "n")
-legend("bottomleft", 
-       legend=c("T_2n","T_4n"),
-       col= "black",
-       pch=c(17,19),
+
+#PCA_lcms_tri.loc.r <- adonis2(OCG_LCMS_tri_subset ~ md.OCG.LCMS.tri$Location, by = "margin")
+#PCA_lcms_tri.loc.r #location and ploidy are significant 0.001
+
+### ANOVA for LCMS loc ####
+pca_scores_LCloc.tri <- data.pca_LCMS_tri_ID$x
+LCMS.tri_aov_df <- as.data.frame(pca_scores_LCloc.tri)
+pca_model_LCMS.tri <- aov(cbind(PC1, PC2) ~ md.OCG.LCMS.tri$Location, data = LCMS.tri_aov_df)
+summary(pca_model_LCMS.tri) #F(8) = 68.684 p < 0.001 for PC1. F(8) = 2.1365, p < 0.005 
+
+##LCMS PCA of just wyomingensis ####
+#subset LCMS to just wyomingensis
+OCG_LCMS_wy <- subset(OCG_LCMS_3uL, md.OCG.LCMS.3$Subspecies=="W") #80 of 308 variables
+md.OCG.LCMS.wy <- subset(md.OCG.LCMS.3, row.names(md.OCG.LCMS.3) %in% row.names(OCG_LCMS_wy)) #80
+
+#make 0 NA to redefine threshold
+OCG_LCMS_wy[OCG_LCMS_wy == 0] <- NA
+colSums(is.na(OCG_LCMS_wy))
+na_proportion <- colMeans(is.na(OCG_LCMS_wy))
+print(na_proportion)
+threshold <- 0.90
+columns_to_keep <- na_proportion <= threshold
+OCG_LCMS_wy_subset <- OCG_LCMS_wy[, columns_to_keep] #80 0f 297 var
+OCG_LCMS_wy_subset[is.na(OCG_LCMS_wy_subset)] <- 0
+colSums(is.na(OCG_LCMS_wy_subset)) 
+
+#SCALING
+#Compound
+data_LCMS_wy_normalized <- scale(OCG_LCMS_wy_subset) #1:26, 1:299
+
+#Plant ID
+OCG_LCMS_wy.t <- t(OCG_LCMS_wy_subset)
+colSums(is.na(OCG_LCMS_wy.t)) 
+data_LCMS_wy_normalized.ID <- scale(OCG_LCMS_wy.t) #1:299, 1:26
+
+#PCA
+data.pca_LCMS_wy_ID <- prcomp(data_LCMS_wy_normalized)
+summary(data.pca_LCMS_wy_ID)
+fviz_eig(data.pca_LCMS_wy_ID, addlabels = TRUE) #17.1% & 9.3%%
+fviz_cos2(data.pca_LCMS_wy_ID, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each compound
+fviz_cos2(data.pca_LCMS_wy_ID, choice = "ind", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each plant
+autoplot(data.pca_LCMS_wy_ID)
+autoplot(data.pca_LCMS_wy_ID, label = TRUE)
+
+biplot(data.pca_LCMS_wy_ID, cex = 0.3, pc.biplot = TRUE)
+
+rownames(data_LCMS_wy_normalized) == rownames(md.OCG.LCMS.wy)
+
+#BY LOCATION
+md.OCG.LCMS.wy$Location <- factor(md.OCG.LCMS.wy$Location)
+levels(md.OCG.LCMS.wy$Location)
+md.OCG.LCMS.tri$Location <- droplevels(md.OCG.LCMS.tri$Location)
+levels(md.OCG.LCMS.tri$Location)
+
+plotcolor.wy <- c("sienna","skyblue","rosybrown","turquoise","burlywood","mediumaquamarine")
+
+plot(data.pca_LCMS_wy_ID$x[, 1], data.pca_LCMS_wy_ID$x[, 2],
+     xlab="PC 1 (19.14%)", ylab="PC 2 (15.41%)", 
+     main="PCA of LCMS data by location for wyomingensis", 
+     col= plotcolor.wy[md.OCG.LCMS.wy$Location],
+     pch=19,
+     xlim = range(data.pca_LCMS_wy_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_LCMS_wy_ID$x[, 2], na.rm = TRUE))
+legend("bottomright", 
+       legend=c("CO", "ID", "MT", "OR", "UT", "WA"),
+       col= plotcolor.wy,
+       pch=19,
        cex=0.8,
        bty = "n")
 
-PCA_lcms_tri.loc.r <- adonis2(OCG_LCMS_tri_subset ~ md.OCG.LCMS.tri$Location, by = "margin")
-PCA_lcms_tri.loc.r #location and ploidy are significant 0.001
+PCA_lcms_wy.loc.r <- adonis2(OCG_LCMS_wy_subset ~ md.OCG.LCMS.wy$Location, by = "margin")
+PCA_lcms_wy.loc.r #location is significant 0.001
+
+### ANOVA for LCMS loc wyomingensis ####
+pca_scores_LCloc.w <- data.pca_LCMS_wy_ID$x
+LCMS_wy_aov_df <- as.data.frame(pca_scores_LCloc.w)
+pca_model_LCloc.w <- aov(cbind(PC1, PC2) ~ md.OCG.LCMS.wy$Location, data = LCMS_wy_aov_df)
+summary(pca_model_LCloc.w) #F(5) = 10.065 p < 0.001 for PC1. F(5) = 0.5863, p = 0.71
+
 
 # NMDS plots####
 ## 2012 GC NMDS####

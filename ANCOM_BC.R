@@ -633,6 +633,80 @@ spl2 <- ggplot(sbsp.plplotGC2021_sublong, aes(y = value, x = subsp_ploidy, color
   labs(color = "Compounds") +
   theme_classic()
 
+# Full GC ANCOM ####
+OCG_GC_subset[OCG_GC_subset < 10] <- 0
+OCG_GC_subset <- OCG_GC_subset[rowSums(OCG_GC_subset) > 0,] 
+
+summary(rowSums(OCG_GC_subset)) #179
+summary(colSums(OCG_GC_subset)) #2500
+
+OCG_GC_subset <- OCG_GC_subset[,colSums(OCG_GC_subset) > 10] 
+md.OCG.GC.a <- subset(md.OCG.GC, row.names(md.OCG.GC) %in% row.names(OCG_GC_subset)) 
+
+OCG_GC_subset.t <- t(OCG_GC_subset) 
+OCG_GC_subset_t <- OCG_GC_subset.t[, colnames(OCG_GC_subset.t) %in% row.names(md.OCG.GC.a), drop = FALSE]
+OCG_GC_subset <- t(OCG_GC_subset_t)
+OCG_GC_subset <- as.data.frame(OCG_GC_subset) 
+
+OCG_GC_subset[OCG_GC_subset < 10] <- 0  
+OCG_GC_subset <- OCG_GC_subset[rowSums(OCG_GC_subset) > 0,] 
+
+summary(rowSums(OCG_GC_subset)) #179
+summary(colSums(OCG_GC_subset)) #2500
+
+OCG_GC_subset <- OCG_GC_subset[,colSums(OCG_GC_subset) > 10]
+
+md.OCG.GC_sbst <- data.frame("Sample.ID" = row.names(md.OCG.GC.a), md.OCG.GC.a)
+OCG_GC_sbst <- data.frame("Sample.ID" = row.names(OCG_GC_subset), OCG_GC_subset, check.names = F)
+row.names(OCG_GC_sbst) == row.names(md.OCG.GC_sbst) #TRUE
+
+## YEAR Full GC ####
+#Run ANCOM, specify variable
+ANCOM_yr.GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
+
+sigGC_yr <- subset(ANCOM_yr.GC$W.taxa, ANCOM_yr.GC$W.taxa$W_stat > 0)[,1]
+sigGC_yr <- as.data.frame(sigGC_yr)
+row.names(sigGC_yr) <- sigGC_yr[54:1,1]
+sigGC_yr[,1] <- c(54:1)
+
+sigGC_yr_t <- t(sigGC_yr)
+sigGC_yr_t <- as.data.frame(sigGC_yr_t)
+colnames(sigGC_yr_t) <- as.character(colnames(sigGC_yr_t))
+print(colnames(sigGC_yr_t))
+sigGC_yr_t <- sigGC_yr_t[,order(colnames(sigGC_yr_t))]
+rownames(sigGC_yr_t) <- c("sig_rank")
+
+GC_sig_yr <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_yr)))
+
+GC_sig_yr <- GC_sig_yr[,order(colnames(GC_sig_yr))]
+colnames(sigGC_yr_t) == colnames(GC_sig_yr) #sanity check:TRUE
+
+GC_sig_yr <- rbind(GC_sig_yr, sigGC_yr_t)
+GC_sig_yr_t <- as.data.frame(t(GC_sig_yr))
+GC_sig_yr_t$sig_rank <- as.numeric(GC_sig_yr_t$sig_rank) 
+GC_sig_yr_t <- GC_sig_yr_t[order(GC_sig_yr_t$sig_rank),] 
+GC_sig_yr_t <- subset(GC_sig_yr_t, select=-c(sig_rank))
+GC_sig_yr_t <- as.data.frame(t(GC_sig_yr_t))
+
+#Build objects for plotting
+plotGC.yr <- data.frame(GC_sig_yr_t[,1:10], "year" = md.OCG.GC_sbst$Year, check.names = FALSE)
+plotGC.yr[,1:10] <- lapply(plotGC.yr[,1:10], function(x) as.numeric(as.character(x)))
+plotGC.yr[,1:10] <- log(plotGC.yr[,1:10]+1)
+plotGC.yr_sub <- data.frame(sample=rownames(plotGC.yr),plotGC.yr, check.names = F)
+plotGC.yr_sublong <- melt(plotGC.yr_sub)
+
+plotGC.yr$year <-  factor(plotGC.yr$year, levels = c("2012","2021"))
+
+### FIGURE FOR SUBSPECIES PLOIDY ####
+ggplot(plotGC.yr_sublong, aes(y = value, x = year, color=variable))+
+  geom_boxplot(outlier.shape = NA) + 
+  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+  scale_color_brewer(palette = "Spectral")+
+  ylab("Log  rel. abundance") + xlab("Subspecies") + 
+  ggtitle("GC ANCOM for year")+
+  labs(color = "Compounds") +
+  theme_classic()
+
 # LCMS ANCOM ####
 OCG_LCMS_3uL_subset[OCG_LCMS_3uL_subset < 10] <- 0
 OCG_LCMS_3uL_subset <- OCG_LCMS_3uL_subset[rowSums(OCG_LCMS_3uL_subset) > 0,] 
@@ -811,5 +885,57 @@ ggplot(plotLCMS.subspploidy_sublong, aes(y = value, x = subsp_ploidy, color=vari
   labs(color = "Compounds") +
   theme_classic()
 
-# ANCOM BC #### 
+## YEAR LCMS ####
+#Run ANCOM, specify variable
+ANCOM_yr.LCMS <- ANCOM.main(OCG_LCMS_sbst,md.OCG.LCMS.3_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
 
+sigLCMS_yr <- subset(ANCOM_yr.LCMS$W.taxa, ANCOM_yr.LCMS$W.taxa$W_stat > 0)[,1]
+sigLCMS_yr <- as.data.frame(sigLCMS_yr)
+row.names(sigLCMS_yr) <- sigLCMS_yr[302:1,1]
+sigLCMS_yr[,1] <- c(302:1)
+
+sigLCMS_yr_t <- t(sigLCMS_yr)
+sigLCMS_yr_t <- as.data.frame(sigLCMS_yr_t)
+colnames(sigLCMS_yr_t) <- as.character(colnames(sigLCMS_yr_t))
+print(colnames(sigLCMS_yr_t))
+sigLCMS_yr_t <- sigLCMS_yr_t[,order(colnames(sigLCMS_yr_t))]
+rownames(sigLCMS_yr_t) <- c("sig_rank")
+
+#write.csv(ANCOM_subsp_ploidy$W.taxa, file = "data_csv/ANCOM/ANCOM_subsp_ploidy.csv")
+
+LCMS_sig_yr <-  t(subset(t(OCG_LCMS_sbst), colnames(OCG_LCMS_sbst) %in% row.names(sigLCMS_yr)))
+
+LCMS_sig_yr <- LCMS_sig_yr[,order(colnames(LCMS_sig_yr))]
+colnames(sigLCMS_yr_t) == colnames(LCMS_sig_yr) #sanity check:TRUE
+
+LCMS_sig_yr <- rbind(LCMS_sig_yr, sigLCMS_yr_t)
+LCMS_sig_yr_t <- as.data.frame(t(LCMS_sig_yr))
+LCMS_sig_yr_t$sig_rank <- as.numeric(LCMS_sig_yr_t$sig_rank) 
+LCMS_sig_yr_t <- LCMS_sig_yr_t[order(LCMS_sig_yr_t$sig_rank),] 
+LCMS_sig_yr_t <- subset(LCMS_sig_yr_t, select=-c(sig_rank))
+LCMS_sig_yr_t <- as.data.frame(t(LCMS_sig_yr_t))
+
+#Build objects for plotting
+plotLCMS.yr <- data.frame(LCMS_sig_yr_t[,1:10], "year" = md.OCG.LCMS.3_sbst$Year, check.names = FALSE)
+plotLCMS.yr[,1:10] <- lapply(plotLCMS.yr[,1:10], function(x) as.numeric(as.character(x)))
+plotLCMS.yr[,1:10] <- log(plotLCMS.yr[,1:10]+1)
+plotLCMS.yr_sub <- data.frame(sample=rownames(plotLCMS.yr),plotLCMS.yr, check.names = F)
+plotLCMS.yr_sublong <- melt(plotLCMS.yr_sub)
+
+plotLCMS.yr$year <-  factor(plotLCMS.yr$year, levels = c("2012","2021"))
+
+### FIGURE FOR SUBSPECIES PLOIDY ####
+ggplot(plotLCMS.yr_sublong, aes(y = value, x = year, color=variable))+
+  geom_boxplot(outlier.shape = NA) + 
+  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+  scale_color_brewer(palette = "Spectral")+
+  ylab("Log  rel. abundance") + xlab("Subspecies") + 
+  ggtitle("LCMS ANCOM for year")+
+  labs(color = "Compounds") +
+  theme_classic()
+
+# ANCOM BC #### 
+## Make phyloseq objects ####
+row.names(OCG_GC_2012_subset) == row.names(md.OCG.GC.2012) #TRUE
+physeq <- phyloseq(OCG_GC_2012_subset, md.OCG.GC.2012)
+ancombc2(OCG_GC_2012_subset)
