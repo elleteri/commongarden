@@ -60,68 +60,18 @@ sapply(bioc_packages, install_and_load_bioc)
 # Install and load all GitHub packages
 sapply(github_packages, install_and_load_github)
 
-# ASV analysis: includes alpha diversity analysis with glm; beta diversity analysis with NMDS plots, PERMANOVA tests, and pairwise adonis; barchart plots at asv level for just the common garden; betadispersion####
-# Read in uncleaned data ####
-## ASV DATA
-#Data has not been filtered and is not yet clean to include just observations with at least 10 seqs and each sample needs at least 1000 seq. The data has not been transposed and is ordered alphabetically. 
-
-asvITS<- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names=1, check.names = F) #5983 obs of 463 variable
-asvITS<- asvITS[,order(colnames(asvITS))] # order samples alphabetically
-summary(rowSums(asvITS)) #1.0
-summary(colSums(asvITS)) #0
-
+# ASV analysis: includes alpha diversity analysis with glm; beta diversity analysis with NMDS plots, PERMANOVA tests, and pairwise adonis; barchart plots at asv level for just the common garden; betadispersion
+# Read in cleaned data : START HERE ####
 ##METADATA
-#Data includes metadata from numerous projects. I will be subsetting for just the orchard common garden plants. The data will include plant ID number, location of origin, year of sampling (2012 or 2021), subspecies, ploidy, and subspecies ploidy, status (dead or alive) in 2020.
+#Data includes just the orchard common garden plants. The data will include plant ID number, location of origin, year of sampling (2012 or 2021), subspecies, ploidy, and subspecies ploidy, status (dead or alive) in 2020.
+mdITS.OCG <- read.csv("data_csv/metadataITS_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #206 of 21 variables
+str(mdITS.OCG)
 
-mdITS <- read.csv("data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) #505 obs of 16 variables.
-mdITS <- mdITS[order(row.names(mdITS)),]
-mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) #463 of 16 variables
-colnames(asvITS) == row.names(mdITS) # sanity check true.
-
-mdITS$Description <- sub("_2020$", "_2021", mdITS$Description) # Replace "2020" with "2021" at the end of the strings
-
-##TAXONOMY
-#taxonomy table is used to match to amplicon sequence variant table to fungal ID.
-tax.ITS <- read.csv("~/Documents/Orchard_Common_Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #5983 obs of 2 variables
-row.names(asvITS) == row.names(tax.ITS) #TRUE
-
-
-#Cleaning data#
-##ASV 
-#asvITS[asvITS < 10] <- 0 # each observation needs at least 10 seqs.
-asvITS <- asvITS[rowSums(asvITS) > 0,] #the values that are greater than zero
-summary(rowSums(asvITS)) #1
-summary(colSums(asvITS)) #0
-
-asvITS <- asvITS[,colSums(asvITS) > 499] # each sample needs at least 500 seqs. #5983 of 385 var
-
-summary(colSums(asvITS)) #507
-summary(rowSums(asvITS)) #0
-
-asvITS.t <- t(asvITS) # transpose rows and columns
-asvITS.t <- asvITS.t[order(row.names(asvITS.t)),] # order samples alphabetically
-asvITS.t <- asvITS.t[,order(colnames(asvITS.t))] # order asvs alphabetically
-
-summary(rowSums(asvITS.t)) 
-summary(colSums(asvITS.t))
-
-mdITS <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t)) 
-
-asvITS.t2 <- asvITS.t[!(row.names(asvITS.t) %in% c("NEG_9-30-21","AH1919","AHM20207","AHM20125","UTW.1.4_2021")),] #outliers removed
-
-asvITS.t2 <- asvITS.t2[,colSums(asvITS.t2) > 0] #keeping samples greater than 0
-
-summary(rowSums(asvITS.t2)) #507
-summary(colSums(asvITS.t2)) #2.0
-
-mdITS2 <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t2)) #380 obs of 16 var
-
-### Subsetting to just the plant in the common garden (OCG)
-asvITS.OCG <- subset(asvITS.t2, mdITS2$Project=="OCG") 
-asvITS.OCG <- asvITS.OCG[,colSums(asvITS.OCG) > 0]
-
-summary(rowSums(asvITS.OCG)) #507
-summary(colSums(asvITS.OCG)) #2.0
+## ASV DATA
+#Data has not been filtered and is not yet clean to include just observations with a certain number of sequences and a certain number of sequences per sample. The data is ordered alphabetically.
+asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #206 obs of 2372 variables
+summary(rowSums(asvITS.OCG)) #0
+summary(colSums(asvITS.OCG)) #1
 
 ### Remove duplicates from ASV
 rows_to_remove <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1')
@@ -131,39 +81,29 @@ asvITS.OCG <- asvITS.OCG[!rownames(asvITS.OCG) %in% rows_to_remove, ]
 asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "NEG_8-28-21"),]
 
 ## Remove MTW.3.7.R_2012
-asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "MTW.3.7.R_2012"),] 
+asvITS.OCG <- asvITS.OCG[!(row.names(asvITS.OCG) == "MTW.3.7.R_2012"),] #197
 
-asvITS.OCG <- asvITS.OCG[,colSums(asvITS.OCG) > 0]
-summary(rowSums(asvITS.OCG)) #507
-summary(colSums(asvITS.OCG)) #2.0
+asvITS.OCG[asvITS.OCG < 4] <- 0 # each observation needs at least 4 seqs.
+asvITS.OCG <- asvITS.OCG[rowSums(asvITS.OCG) > 0,] #the values that are greater than zero
+summary(rowSums(asvITS.OCG)) #4
+summary(colSums(asvITS.OCG)) #0
 
-mdITS.OCG <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.OCG)) ##154 of 16 var
+asvITS.OCG <- asvITS.OCG[,colSums(asvITS.OCG) > 49] # each sample needs at least 100 seqs. #189 of 842
 
-#Write csv for cleaned metadata and asv table
-write.csv(asvITS.OCG, file = "data_csv/asvITS.OCG.csv") 
-write.csv(mdITS.OCG, file = "data_csv/metadata_OCG.csv") 
+summary(colSums(asvITS.OCG)) #50
+summary(rowSums(asvITS.OCG)) #0
 
-#Clear Global Environment 
-rm(list = ls())
-
-# Read in cleaned data : START HERE ####
-#METADATA
-mdITS.OCG <- read.csv("data_csv/metadata_OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #154 of 16 variables
-str(mdITS.OCG)
-
-#ASV
-asvITS.OCG <- read.csv("data_csv/asvITS.OCG.csv",head=T, row.names = 1, check.names = F,stringsAsFactors = T) #154 obs of 2135 variables
-summary(rowSums(asvITS.OCG)) #507
-summary(colSums(asvITS.OCG)) #2
+mdITS.OCG <- subset(mdITS.OCG, row.names(mdITS.OCG) %in% row.names(asvITS.OCG)) ##189 of 21 var
 
 row.names(asvITS.OCG) == row.names(mdITS.OCG) # sanity check:TRUE
 
-#TAXONOMY
+##TAXONOMY
+#taxonomy table is used to match to amplicon sequence variant table to fungal ID.
 tax.ITS <- read.csv("~/Documents/Orchard_Common_Garden/Shared_OCG_Code/data_csv/taxonomy.csv", head=T, row.names = 1, check.names = F) #taxonomy read in 5983 obs of 2 variables
 
 # Alpha diversity asv level####
 ## Rarefying
-asvITS.OCG.r <- rrarefy(asvITS.OCG,507) ## rarefy: Warning message
+asvITS.OCG.r <- rrarefy(asvITS.OCG,50) ## rarefy: Warning message
 asvITS.OCG.shannon <- diversity(asvITS.OCG.r)
 asvITS.OCG.ef <- exp(asvITS.OCG.shannon)
 asvITS.OCG.efr <- round(asvITS.OCG.ef)
@@ -526,7 +466,7 @@ asvITS <- read.csv("data_csv/asv-table-dada2-ITS-sagebrush.csv",head=T,row.names
 asvITS <- asvITS[,order(colnames(asvITS))] # order samples alphabetically
 
 #METADATA
-mdITS <- read.csv("data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) # 505 obs of 16 var
+mdITS <- read.csv("data_csv/Sagebrush2021_Mapping_both_4-12-22.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) # 505 obs of 21 var
 mdITS <- mdITS[order(row.names(mdITS)),] 
 mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) 
 colnames(asvITS) == row.names(mdITS) # sanity check:TRUE
@@ -542,8 +482,10 @@ asvITS <- asvITS[rowSums(asvITS) > 0,] # each observation needs at least 10 seqs
 
 summary(rowSums(asvITS)) #10
 summary(colSums(asvITS)) #0
+sort(colSums(asvITS)) 
 
-asvITS <- asvITS[,colSums(asvITS) > 999] # each sample needs at least 1000 seqs
+
+asvITS <- asvITS[,colSums(asvITS) > 499] # each sample needs at least 1000 seqs 
 
 mdITS <- subset(mdITS, row.names(mdITS) %in% colnames(asvITS)) # remove trimmed samples from metadata #361 obs o f 16 var
 
@@ -1006,6 +948,54 @@ ggplot(yrplot_sublong, aes(y = value, x = year, color=variable))+
   ylab("Log  rel. abundance") + xlab("Year") + theme_classic()
 
 print(taxITS.OCG_sigsbst_year)
+
+## ANCOM BC 2 ####
+# Create phyloseq object
+row.names(taxITS.OCG) == row.names(asvITS.OCG) #TRUE
+colnames(asvITS.OCG) == row.names(mdITS.OCG) #TRUE
+otu_asv_table <- otu_table(as.matrix(asvITS.OCG), taxa_are_rows = TRUE)
+tax_ITS_table <- tax_table(as.matrix(taxITS.OCG))
+md_ITS_phy <- sample_data(mdITS.OCG) #make metadata into sample data to create phyloseq
+physeqITS <- merge_phyloseq(phyloseq(otu_asv_table),md_ITS_phy,tax_ITS_table) #create phyloseq object for ANCOM BC
+physeqITS #1719 taxa and 146 samples
+
+#MAKE TSE
+tse.ITS = mia::makeTreeSummarizedExperimentFromPhyloseq(physeqITS)
+tse.ITS$Subspecies <- factor(tse.ITS$Subspecies, levels=c("T", "W", "V"))
+tse.ITS$Ploidy <- factor(tse.ITS$Ploidy, levels=c("2n", "4n"))
+tse.ITS$Subsp_ploidy <- factor(tse.ITS$Subsp_ploidy, levels=c("T_2n", "T_4n", "V_2n", "V_4n", "W_4n"))
+tse.ITS$Year <- factor(tse.ITS$Year, levels =c("2012", "2021"))
+
+#Model for Subspecies
+result_ITS_sub <- ancombc2( 
+  data = tse.ITS, assay_name = "counts", tax_level = NULL,
+  fix_formula = "Subspecies + Ploidy + Year",
+  p_adj_method = "fdr", pseudo_sens = TRUE,
+  group = "Subspecies", #change variable of interest
+  alpha = 0.05, verbose = TRUE,
+  global = TRUE, prv_cut = 0.02
+)
+
+summary(tse.ITS$Year)
+
+ancomITSres_df.sub <- result_ITS_sub$res
+
+#It will not run with subspecies ploidy in the model structure
+
+#Model for year
+result_ITS_yr <- ancombc2( 
+  data = tse.ITS, assay_name = "counts", tax_level = NULL,
+  fix_formula = "Subsp_ploidy + Year",
+  p_adj_method = "fdr", pseudo_sens = TRUE,
+  group = "Year", #change variable of interest
+  alpha = 0.05, verbose = TRUE,
+  global = TRUE, prv_cut = 0.1
+)
+
+ancomITSres_df.yr <- result_ITS_yr$res
+
+#iter_control = list(tol = 1e-5, max_iter = 200, 
+                    #verbose = FALSE)
 
 ###### Clear Global Environment ####
 rm(list = ls())
