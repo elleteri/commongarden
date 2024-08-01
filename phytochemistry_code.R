@@ -62,7 +62,7 @@ sapply(github_packages, install_and_load_github)
 
 # Cleaned data read in####
 #METADATA
-md.OCG <- read.csv("data_csv/metadata_OCG.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) #505 obs of 16 variables.
+md.OCG <- read.csv("data_csv/metadata_OCG.csv", head=T, row.names = 1, check.names = F,stringsAsFactors = T) #246 obs of 16 variables.
 md.OCG <- md.OCG[order(row.names(md.OCG)),]
 
 ### Remove duplicates, negatve controls, and MTW.3.7.R_2012
@@ -83,14 +83,14 @@ md.OCG.2021 <- subset(md.OCG, md.OCG$Year=="2021") #76
 str(md.OCG.2021)
 
 ##FULL CLEAN GC
-OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv")#226 obs of 74 variables
+OCG_GC <- read.csv("data_csv/OCG_GC_full_clean.csv", row.names = 1)#226 obs of 74 variables
 OCG_GC <- OCG_GC[order(row.names(OCG_GC)),]
 OCG_GC <- subset(OCG_GC, row.names(OCG_GC) %in% row.names(md.OCG)) #217 of 74 variables
 md.OCG.GC <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC)) #217 of 21 variables
 OCG_GC[is.na(OCG_GC)] <- 0
 
 ## 2012 CLEAN GC
-OCG_GC_2012 <- read.csv("data_csv/OCG_GC_2012_cleaned.csv", row.names = 1) #157 obs of 74 variables
+OCG_GC_2012 <- read.csv("data_csv/OCG_GC_2012_cleaned.csv", row.names = 1, check.names = FALSE) #157 obs of 74 variables
 OCG_GC_2012 <- OCG_GC_2012[order(row.names(OCG_GC_2012)),]
 OCG_GC_2012 <- subset(OCG_GC_2012, row.names(OCG_GC_2012) %in% row.names(md.OCG)) #147 of 74 variables
 md.OCG.GC.2012 <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC_2012)) #147
@@ -1249,6 +1249,974 @@ LCMS_wy_aov_df <- as.data.frame(pca_scores_LCloc.w)
 pca_model_LCloc.w <- aov(cbind(PC1, PC2) ~ md.OCG.LCMS.wy$Location, data = LCMS_wy_aov_df)
 summary(pca_model_LCloc.w) #F(5) = 10.065 p < 0.001 for PC1. F(5) = 0.5863, p = 0.71
 
+# NMDS plots####
+## 2012 GC NMDS####
+str(md.OCG.2012)
+OCG_GC_2012[is.na(OCG_GC_2012)] <- 0
+summary(rowSums(OCG_GC_2012)) #7962 seqs in smallest sample
+summary(colSums(OCG_GC_2012)) #0
+OCG_GC_2012 <- OCG_GC_2012[,colSums(OCG_GC_2012) > 0]
+summary(colSums(OCG_GC_2012)) #77.1
+
+OCG_GC_2012.r <- rrarefy(round(OCG_GC_2012),sample = 7962)
+
+set.seed(37)
+#OCG_AUC_2012_ID.nmds <- metaMDS(OCG_GC_2012.r, k=3, trymax=1000) #solution reached only with k=3
+#save(OCG_AUC_2012_ID.nmds, file = "nmds/OCG_AUC_2012_ID.nmds.rda")
+load("nmds/OCG_AUC_2012_ID.nmds.rda")
+
+ordiplot(OCG_AUC_2012_ID.nmds, type = "t",display = "sites",cex = .5)
+
+rownames(md.OCG.GC.2012) == rownames(OCG_AUC_2012_ID.nmds$points)
+
+#PLOIDY
+plot(OCG_AUC_2012_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of 2012 plant by ploidy", 
+     col= c("red","blue")[md.OCG.GC.2012$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR 2012 PLOIDY ##
+OCG_GC_2012_ploidy.r <- adonis2(OCG_GC_2012.r ~ md.OCG.GC.2012$Ploidy,by="margin",na.rm = T)
+OCG_GC_2012_ploidy.r #ploidy is significant 0.001
+
+OCG_GC_2012_ploidy_subsp.r <- adonis2(OCG_GC_2012.r ~ md.OCG.GC.2012$Ploidy + md.OCG.GC.2012$Subspecies,by="margin",na.rm = T)
+OCG_GC_2012_ploidy.r #ploidy and subspecies is significant 0.001
+
+#SUBSPECIES
+plot(OCG_AUC_2012_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="2012 GC chemistry by subspecies",
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.GC.2012$Subspecies],
+     pch=c(19))
+legend("topleft", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR SUBSPECIES
+OCG_GC_2012_subsp.r <- adonis2(OCG_GC_2012.r ~ md.OCG.GC.2012$Subspecies,by="margin", na.rm=T) 
+OCG_GC_2012_subsp.r #subspecies is signficant= 0.001
+
+#PAIRWISE ADONIS
+OCG_GC_2012_subsp.pw.r <- pairwise.adonis(OCG_GC_2012.r, md.OCG.GC.2012$Subspecies)
+OCG_GC_2012_subsp.pw.r # sig between all subspecies
+
+# SUBSPECIES PLOIDY
+plot(OCG_AUC_2012_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of 2012 GC data by subspecies and ploidy", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC.2012$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_AUC_2012_ID.nmds,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
+
+# PERMANOVAS FOR SUBSPECIES PLOIDY
+OCG_GC_2012_subspploidy <- adonis2(OCG_GC_2012.r ~ md.OCG.GC.2012$Subsp_ploidy,by="margin") 
+OCG_GC_2012_subspploidy #subspecies ploidy is significant
+
+#PAIRWISE ADONIS
+OCG_GC_2012_subsp_ploidy.pw.r <- pairwise.adonis(OCG_GC_2012.r, md.OCG.GC.2012$Subsp_ploidy)
+OCG_GC_2012_subsp_ploidy.pw.r 
+
+## 2021 GC NMDS #### 
+OCG_GC_2021[is.na(OCG_GC_2021)] <- 0
+OCG_GC_2021 <- OCG_GC_2021[-which(rownames(OCG_GC_2021) == "CAT.1.1_2021"), ] #remove this outlier
+summary(rowSums(OCG_GC_2021)) #2842 seqs in smallest sample
+summary(colSums(OCG_GC_2021)) #0
+OCG_GC_2021 <- OCG_GC_2021[,colSums(OCG_GC_2021) > 0]
+summary(colSums(OCG_GC_2021)) #100.3
+
+md.OCG.GC.2021 <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC_2021)) #70 of 16 variables
+
+OCG_GC_2021.r <- rrarefy(round(OCG_GC_2021),sample = 2842)
+
+set.seed(47)
+#OCG_GC_2021.nmds <- metaMDS(OCG_GC_2021.r, trymax=500) #solution reached
+#save(OCG_GC_2021.nmds, file = "nmds/OCG_GC_2021.nmds.rda")
+load("nmds/OCG_GC_2021.nmds.rda")
+
+ordiplot(OCG_GC_2021.nmds, type = "t",display = "sites",cex = .7)
+
+rownames(md.OCG.GC.2021) == rownames(OCG_GC_2021.nmds$points)
+
+#PLOIDY
+plot(OCG_GC_2021.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of 2021 plant by ploidy", 
+     col= c("red","blue")[md.OCG.GC.2021$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR 2021 PLOIDY##
+OCG_GC_2021_ploidy.r <- adonis2(OCG_GC_2021.r ~ md.OCG.GC.2021$Ploidy,by="margin")
+OCG_GC_2021_ploidy.r #ploidy is significant 0.002
+
+#SUBSPECIES
+plot(OCG_GC_2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="2021 GC chemistry by subspecies",
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.GC.2021$Subspecies],
+     pch=c(19))
+legend("topleft", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR SUBSPECIES
+OCG_GC_2021_subsp.r <- adonis2(OCG_GC_2021.r ~ md.OCG.GC.2021$Subspecies,by="margin") 
+OCG_GC_2021_subsp.r #subspecies is signficant= 0.001
+
+#PAIRWISE ADONIS SUBSPECIES
+OCG_GC_2021_subsp.pw.r <- pairwise.adonis(OCG_GC_2021.r, md.OCG.GC.2021$Subspecies)
+OCG_GC_2021_subsp.pw.r # sig between T vs V, T vs W
+
+# SUBSPECIES PLOIDY NMDS
+plot(OCG_GC_2021.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of 2021 GC data by subspecies and ploidy", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC.2021$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_GC_2021.nmds,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
+
+# PERMANOVAS FOR SUBSPECIES PLOIDY
+OCG_GC_2021_subspploidy.r <- adonis2(OCG_GC_2021.r ~ md.OCG.GC.2021$Subsp_ploidy,by="margin") 
+OCG_GC_2021_subspploidy.r #subspecies ploidy is significant
+
+#PAIRWISE ADONIS FOR SUBSPECIES PLOIDY
+OCG_GC_2021_subsp_ploidy.pw <- pairwise.adonis(OCG_GC_2021.r, md.OCG.GC.2021$Subsp_ploidy)
+OCG_GC_2021_subsp_ploidy.pw 
+
+## Full GC NMDS ####
+OCG_GC[is.na(OCG_GC)] <- 0
+OCG_GC <- OCG_GC[-which(rownames(OCG_GC) == "CAT.1.1_2021"), ] #remove this outlier
+summary(rowSums(OCG_GC)) #2842 seqs in smallest sample
+summary(colSums(OCG_GC)) #0
+OCG_GC <- OCG_GC[,colSums(OCG_GC) > 0]
+summary(colSums(OCG_GC)) #77.1
+
+OCG_GC.r <- rrarefy(round(OCG_GC),sample = 2842)
+
+md.OCG.GC <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC)) #216
+
+rownames(md.OCG.GC) == rownames(OCG_GC_ID.nmds$points)
+
+set.seed(64)
+#OCG_GC_ID.nmds <- metaMDS(OCG_GC.r, k=3, trymax=500) #solution not reached
+#save(OCG_GC_ID.nmds, file = "nmds/OCG_GC_ID.nmds.rda")
+load("nmds/OCG_GC_ID.nmds.rda")
+
+ordiplot(OCG_GC_ID.nmds, type = "t", display = "sites", cex = .4)
+
+#PLOIDY
+plot(OCG_GC_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of plant by ploidy", 
+     col= c("red","blue")[md.OCG.GC$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR PLOIDY ##
+OCG_GC_ploidy.r <- adonis2(OCG_GC.r ~ md.OCG.GC$Ploidy,by="margin")
+OCG_GC_ploidy.r #ploidy is significant 0.003
+
+#SUBSPECIES
+plot(OCG_GC_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="GC chemistry by subspecies",
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.GC$Subspecies],
+     pch=c(19))
+legend("topright", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.6,
+       bty = "n")
+
+#### PERMANOVA FOR SUBSPECIES###
+OCG_GC_subsp.r <- adonis2(OCG_GC.r ~ md.OCG.GC$Subspecies,by="margin") 
+OCG_GC_subsp.r #subspecies is signficant= 0.001
+
+OCG_GC_subsp_yr.r <- adonis2(OCG_GC.r ~ md.OCG.GC$Subspecies*md.OCG.GC$Year,by="margin") 
+OCG_GC_subsp_yr.r #sig 
+
+#PAIRWISE ADONIS FOR SUBSPECIES
+OCG_GC_subsp.pw.r <- pairwise.adonis(OCG_GC.r, md.OCG.GC$Subspecies)
+OCG_GC_subsp.pw.r # sig between T vs V, V vs W, & T VS W
+
+rownames(OCG_GC_ID.nmds$points) == rownames(md.OCG.GC)
+
+# SUBSPECIES PLOIDY YEAR NMDS 
+# This is a nice plot to share
+plot(OCG_GC_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of GC data by subspecies, ploidy, and year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("bottomright", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.6,
+       bty = "n")
+legend("topright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
+
+# PERMANOVAS FOR SUBSPECIES PLOIDY
+OCG_GC_subspploidy <- adonis2(OCG_GC.r ~ md.OCG.GC$Subsp_ploidy,by="margin") 
+OCG_GC_subspploidy #subspecies ploidy is significant
+
+OCG_GC_subspploidy_yr <- adonis2(OCG_GC.r ~ md.OCG.GC$Subsp_ploidy+md.OCG.GC$Year,by="margin")
+OCG_GC_subspploidy_yr #sig
+
+#PAIRWISEADONIS FOR SUBSPECIES PLOIDY
+OCG_GC_subsp_ploidy.pw <- pairwise.adonis(OCG_GC.r, md.OCG.GC$Subsp_ploidy)
+OCG_GC_subsp_ploidy.pw 
+
+## Trying to find name mismatch
+rownames(OCG_GC_ID.nmds$points) == rownames(md.OCG.GC)
+
+#YEAR
+plot(OCG_GC_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of GC data by year", 
+     col= c("maroon","cyan")[md.OCG.GC$Year],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+text(OCG_GC_ID.nmds$points[,1:2],
+     labels=md.OCG.GC$Description,
+     pos=1,
+     cex=0.4)
+
+OCG_GC_yr <- adonis2(OCG_GC.r ~ md.OCG.GC$Year,by="margin") 
+OCG_GC_yr #yearis signficant= 0.001
+
+## Full LCMS NMDS ####
+OCG_LCMS_3uL[is.na(OCG_LCMS_3uL)] <- 0
+
+summary(rowSums(OCG_LCMS_3uL)) #31016795 LCMS area in smallest sample
+summary(colSums(OCG_LCMS_3uL)) #265605
+
+OCG_LCMS_3uL.r <- rrarefy(round(OCG_LCMS_3uL),sample = 31016795)
+
+set.seed(38)
+#OCG_LCMS_3uL_ID.nmds <- metaMDS(OCG_LCMS_3uL.r, trymax=500) #solution reached
+#save(OCG_LCMS_3uL_ID.nmds, file = "nmds/OCG_LCMS_3uL_ID.nmds.rda")
+load("nmds/OCG_LCMS_3uL_ID.nmds.rda")
+
+ordiplot(OCG_LCMS_3uL_ID.nmds, type = "t",display = "sites",cex = .5)
+
+md.OCG.LCMS.3 <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_LCMS_3uL)) #subset md to match AUC samples #111
+
+row.names(md.OCG.LCMS.3) == row.names(OCG_LCMS_3uL_ID.nmds$points)
+
+#PLOIDY
+plot(OCG_LCMS_3uL_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 3uL plant by ploidy", 
+     col= c("red","blue")[md.OCG.LCMS.3$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA PLOIDY
+OCG_LCMS3_ploidy.r <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Ploidy ,by="margin") 
+OCG_LCMS3_ploidy.r #ploidy is significant 0.001
+
+#SUBSPECIES
+plot(OCG_LCMS_3uL_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 3uL chemistry by subspecies and ploidy",
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.LCMS.3$Subspecies],
+     pch=c(17,19)[md.OCG.LCMS.3$Ploidy])
+legend("topright", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomleft", 
+       legend=c("2n","4n"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+#### PERMANOVA FOR SUBSPECIES
+OCG_LCMS3_subsp <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Subspecies,by="margin") 
+OCG_LCMS3_subsp #subspecies is signficant= 0.001
+
+#PAIRWISEADONIS
+OCG_LCMS3_subsp.pw <- pairwise.adonis(OCG_LCMS_3uL.r, md.OCG.LCMS.3$Subspecies)
+OCG_LCMS3_subsp.pw # sig between all subspecies
+
+# SUBSPECIES PLOIDY 
+plot(OCG_LCMS_3uL_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by subspecies, ploidy, and year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.LCMS.3$Year])
+legend("bottomleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_4n", col = "brown")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_4n", col = "tan")
+ordispider(OCG_LCMS_3uL_ID.nmds,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
+
+# PERMANOVAS FOR SUBSPECIES PLOIDY
+OCG_LCMS3_subspploidy <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Subsp_ploidy, by="margin") 
+OCG_LCMS3_subspploidy #subspecies ploidy is significant
+
+#PAIRWISE ADONIS
+OCG_LCMS3_subsp_ploidy.pw <- pairwise.adonis(OCG_LCMS_3uL.r, md.OCG.LCMS.3$Subsp_ploidy)
+OCG_LCMS3_subsp_ploidy.pw 
+
+#YEAR
+plot(OCG_LCMS_3uL_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 3uL plant by year", 
+     col= c("maroon","cyan")[md.OCG.LCMS.3$Year],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# PERMANOVAS
+OCG_LCMS3_year <- adonis2(OCG_LCMS_3uL.r ~ md.OCG.LCMS.3$Year ,by="margin") 
+OCG_LCMS3_year #year is significant
+
+# LOCATION 
+plot(OCG_LCMS_3uL_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location", 
+     col= plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,16)[md.OCG.LCMS.3$Year])
+legend("bottomleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+## Subset LCMS to tridentata only ####
+md.tridentata <- md.OCG.LCMS.3[md.OCG.LCMS.3$Subspecies == "T", ] #80 plants
+LCMS.tridentata <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.tridentata)) #80
+md.tridentata$Location <- factor(md.tridentata$Location)
+levels(md.tridentata$Location)
+md.tridentata$Location <- droplevels(md.tridentata$Location)
+levels(md.tridentata$Location)
+
+summary(rowSums(LCMS.tridentata)) #49580982 
+summary(colSums(LCMS.tridentata)) #10697
+
+LCMS.tridentata.r <- rrarefy(round(LCMS.tridentata),sample = 49580982)
+
+set.seed(8)
+#LCMS.tridentata.nmds <- metaMDS(LCMS.tridentata.r, trymax=500) #solution reached
+#save(LCMS.tridentata.nmds, file = "nmds/LCMS.tridentata.nmds.rda")
+load("nmds/LCMS.tridentata.nmds.rda")
+
+rownames(LCMS.tridentata.nmds$points) == rownames(md.tridentata)
+
+ordiplot(LCMS.tridentata.nmds, type = "t",display = "sites",cex = .5)
+
+# LOCATION 
+plot(LCMS.tridentata.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location and year for tridentata", 
+     col= plotcolor.tri [md.tridentata$Location],
+     pch=c(17,16)[md.tridentata$Year])
+legend("bottomleft", 
+       legend=c("AZ","CA", "ID", "MT", "NM", "NV", "OR", "UT", "WA"),
+       col= plotcolor.tri,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("topleft", 
+       legend=c("2012","2021"),
+       col="black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+tri_LCMS3_loc <- adonis2(LCMS.tridentata.r ~ md.tridentata$Location ,by="margin") 
+tri_LCMS3_loc #location is significant
+
+lm_lcms_t <- lm(LCMS.tridentata.r ~ md.tridentata$Location)
+summary(lm_lcms_t)
+
+#YEAR
+plot(LCMS.tridentata.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by ploidy for tridentata", 
+     col= c("pink","lightblue")[md.tridentata$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n"),
+       col= c("pink","lightblue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(LCMS.tridentata.nmds,groups = md.tridentata$Subsp_ploidy, show.groups = "T_2n", col = "pink")
+ordispider(LCMS.tridentata.nmds,groups = md.tridentata$Subsp_ploidy, show.groups = "T_4n", col = "lightblue")
+
+##Subset LCMS to wyomingensis only ####
+md.wyomingensis <- md.OCG.LCMS.3[md.OCG.LCMS.3$Subspecies == "W", ] #26 plants
+
+LCMS.wyomingensis <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.wyomingensis)) #26
+
+summary(rowSums(LCMS.wyomingensis)) #31016795 
+summary(colSums(LCMS.wyomingensis)) #0
+
+LCMS.wyomingensis.r <- rrarefy(round(LCMS.wyomingensis),sample = 31016795)
+
+set.seed(98)
+LCMS.wyomingensis.nmds <- metaMDS(LCMS.wyomingensis.r, trymax=500) #solution reached
+save(LCMS.wyomingensis.nmds, file = "nmds/LCMS.wyomingensis.nmds.rda")
+load("nmds/LCMS.wyomingensis.nmds.rda")
+
+ordiplot(LCMS.wyomingensis.nmds, type = "t",display = "sites",cex = .5)
+
+# LOCATION 
+plot(LCMS.wyomingensis.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="NMDS of LCMS data by location for wyomingensis", 
+     col= plotcolor [md.wyomingensis$Location],
+     pch=c(17,19)[md.wyomingensis$Year])
+legend("topright", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+# legend("topleft",
+#        legend=c("2012","2021"),
+#        col="black",
+#        pch=c(17,19),
+#        cex=0.6,
+#        bty = "n")
+
+wy_LCMS3_loc <- adonis2(LCMS.wyomingensis.r ~ md.wyomingensis$Location ,by="margin") 
+wy_LCMS3_loc #year is significant
+
+lm_lcms_w <- lm(LCMS.wyomingensis.r ~ md.wyomingensis$Location)
+summary(lm_lcms_w)
+
+## 2012 LCMS NMDS ####
+str(md.OCG.2012)
+#subset to just 2012 data
+OCG_LCMS_2012 <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.OCG.2012)) #40
+md.OCG.LCMS.2012 <- subset(md.OCG.2012, row.names(md.OCG.2012) %in% row.names(OCG_LCMS_2012)) #40
+
+summary(rowSums(OCG_LCMS_2012)) #50540924 area in smallest sample
+summary(colSums(OCG_LCMS_2012)) #0
+
+OCG_LCMS_2012.r <- rrarefy(round(OCG_LCMS_2012),sample = 50540924)
+OCG_LCMS_2012[is.na(OCG_LCMS_2012)] <- 0
+
+set.seed(450)
+#OCG_LCMS_2012_ID.nmds <- metaMDS(t(m_OCG_LCMS_2012.t), trymax=500) #solution reached
+#save(OCG_LCMS_2012_ID.nmds, file = "nmds/OCG_LCMS_2012_ID.nmds.rda")
+load("nmds/OCG_LCMS_2012_ID.nmds.rda")
+
+ordiplot(OCG_LCMS_2012_ID.nmds, type = "t",display = "sites",cex = .7)
+
+#PLOIDY
+plot(OCG_LCMS_2012_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2012 3uL plant by ploidy", 
+     col= c("red","blue")[md.OCG.LCMS.2012$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# PERMANOVAS
+OCG_LCMS_2012_ploidy <- adonis2(OCG_LCMS_2012 ~ md.OCG.LCMS.2012$Ploidy, by="margin") 
+OCG_LCMS_2012_ploidy #ploidy is significant
+
+#by subspecies- only tridentata samples in the 2012 LCMS 3uL data
+plot(OCG_LCMS_2012_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2012 3uL plant by subspecies", 
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.LCMS.2012$Subspecies],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T","V","W"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# Subspecies ploidy NMDS there is T_2n and T_4n 
+plot(OCG_LCMS_2012_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2012 3uL chemistry by subspecies and ploidy", 
+     col= c("red","orange","green","cyan","purple")[md.OCG.LCMS.2012$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("red","orange","green","cyan","purple"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# PERMANOVAS and pairwise adonis for subspecies ploidy ##
+OCG_LCMS_2012_subspploidy <- adonis2(OCG_LCMS_2012 ~ md.OCG.LCMS.2012$Subsp_ploidy, by="margin") 
+OCG_LCMS_2012_subspploidy #subspecies ploidy is significant
+
+#BY LOCATION 
+plot(OCG_LCMS_2012_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 2012 3uL chemistry by location",
+     col = plotcolor [md.OCG.LCMS.2012$Location],
+     pch=19)
+legend("bottomleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.6,
+       bty = "n")
+
+# PERMANOVAS
+OCG_LCMS_2012_loc <- adonis2(OCG_LCMS_2012 ~ md.OCG.LCMS.2012$Location, by="margin") 
+OCG_LCMS_2012_loc #location is significant
+
+## 2021 LCMS NMDS ####
+str(md.OCG.2021) 
+OCG_LCMS_2021 <- subset(OCG_LCMS_3uL, row.names(OCG_LCMS_3uL) %in% row.names(md.OCG.2021)) #71
+md.OCG.LCMS.2021 <- subset(md.OCG.2021, row.names(md.OCG.2021) %in% row.names(OCG_LCMS_2021)) #71
+
+OCG_LCMS_2021[is.na(OCG_LCMS_2021)] <- 0
+#OCG_LCMS_2021.t <- t(OCG_LCMS_2021) 
+#m_OCG_LCMS_2021.t = as.matrix(OCG_LCMS_2021.t)
+
+set.seed(21)
+#OCG_LCMS_2021_ID.nmds <- metaMDS(t(m_OCG_LCMS_2021.t), trymax=500) #solution reached
+#save(OCG_LCMS_2021_ID.nmds, file = "nmds/OCG_LCMS_2021_ID.nmds.rda")
+load("nmds/OCG_LCMS_2021_ID.nmds.rda")
+
+ordiplot(OCG_LCMS_2021_ID.nmds, type = "t",display = "sites",cex = .7)
+
+#PLOIDY
+plot(OCG_LCMS_2021_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2021 3uL plant by ploidy", 
+     col= c("red","blue")[md.OCG.LCMS.2021$Ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# PERMANOVAS
+OCG_LCMS_2021_ploidy <- adonis2(OCG_LCMS_2021 ~ md.OCG.LCMS.2021$Ploidy, by="margin") 
+OCG_LCMS_2021_ploidy #ploidy is significant
+
+#SUBSPECIES
+plot(OCG_LCMS_2021_ID.nmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2021 3uL plant by subspecies", 
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.LCMS.2021$Subspecies],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T","V","W"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+# PERMANOVAS
+OCG_LCMS_2021_subsp <- adonis2(OCG_LCMS_2021 ~ md.OCG.LCMS.2021$Subspecies, by="margin") 
+OCG_LCMS_2021_subsp #subspecies is significant
+
+# SUBSPECIES PLOIDY
+plot(OCG_LCMS_2021_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="LCMS 2021 3uL chemistry by subspecies and ploidy", 
+     col= c("red","orange","green","cyan","purple")[md.OCG.LCMS.2021$Subsp_ploidy],
+     pch=c(19))
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("red","orange","green","cyan","purple"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+# PERMANOVAS
+OCG_LCMS_2021_subspploidy <- adonis2(OCG_LCMS_2021 ~ md.OCG.LCMS.2021$Subsp_ploidy, by="margin") 
+OCG_LCMS_2021_subspploidy #subspecies ploidy is significant
+
+#LOCATION
+plot(OCG_LCMS_2021_ID.nmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 2021 3uL chemistry by location",
+     col = plotcolor [md.OCG.LCMS.2021$Location],
+     pch=19)
+legend("bottomleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=16,
+       cex=0.8,
+       bty = "n")
+# PERMANOVAS
+OCG_LCMS_2021_loc <- adonis2(OCG_LCMS_2021 ~ md.OCG.LCMS.2021$Location, by="margin") 
+OCG_LCMS_2021_loc #location is significant
+
+# Binary jaccard plots ####
+## LCMS binary jaccard ####
+set.seed(8)
+#OCG_LCMS_3uL_ID.jdis <- vegdist(OCG_LCMS_3uL.r, method = "jaccard", binary = TRUE)
+#OCG_LCMS_3uL_ID.jnmds <- metaMDS(OCG_LCMS_3uL_ID.jdis, trymax=500) #solution reached
+#save(OCG_LCMS_3uL_ID.jnmds, file = "jnmds/OCG_LCMS_3uL_ID.jnmds.rda")
+load("jnmds/OCG_LCMS_3uL_ID.jnmds.rda")
+
+ordiplot(OCG_LCMS_3uL_ID.jnmds, type = "t",display = "sites",cex = .7)
+
+plotcolor <- c("olivedrab","cadetblue","magenta","blue","orange","green","darkgreen","firebrick","lightgoldenrod","mediumaquamarine","cornflowerblue")
+
+#BY SUBSPECIES AND LOCATION
+plot(OCG_LCMS_3uL_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="Binary jaccard of LCMS by subspecies and location",
+     col = plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,19,15)[md.OCG.LCMS.3$Subspecies])
+legend("topleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("T","V","W"),
+       col= "black",
+       pch=c(17,19,15),
+       cex=0.8,
+       bty = "n")
+
+#BY PLOIDY AND LOCATION
+plot(OCG_LCMS_3uL_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 3uL chemistry by ploidy and location",
+     col = plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,19)[md.OCG.LCMS.3$Ploidy])
+legend("topleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("2n","4n"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES PLOIDY AND LOCATION
+plot(OCG_LCMS_3uL_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 3uL chemistry by subsp_ploidy and location",
+     col = plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,19,15,18,8)[md.OCG.LCMS.3$Subsp_ploidy])
+legend("topleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= "black",
+       pch=c(17,19,15,18,8),
+       cex=0.8,
+       bty = "n")
+
+#BY YEAR AND LOCATION
+plot(OCG_LCMS_3uL_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="LCMS 3uL chemistry by year and location",
+     col = plotcolor [md.OCG.LCMS.3$Location],
+     pch=c(17,19)[md.OCG.LCMS.3$Year])
+legend("topleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+## GC binary jaccard ####
+set.seed(6)
+OCG_GC <- OCG_GC[-which(colnames(OCG_GC) == "CAT.1.1_2021"), ] #remove this outlier
+OCG_GC_ID.jdis <- vegdist(OCG_GC.r, method = "jaccard", binary = TRUE)
+OCG_GC_ID.jnmds <- metaMDS(OCG_GC_ID.jdis, trymax=500) #solution reached
+#save(OCG_GC_ID.jnmds, file = "jnmds/OCG_GC_ID.jnmds.rda")
+load("jnmds/OCG_GC_ID.jnmds.rda")
+
+ordiplot(OCG_GC_ID.jnmds, type = "t",display = "sites",cex = .7)
+
+### Testing match for row names
+rownames(OCG_GC_ID.jnmds$points) == rownames(md.OCG.GC)
+
+#BY PLOIDY
+plot(OCG_GC_ID.jnmds$points[,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="GC of plant by ploidy and year", 
+     col= c("red","blue")[md.OCG.GC$Ploidy],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n") 
+
+
+#BY SUBSPECIES
+plot(OCG_GC_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2",
+     main="GC chemistry by subspecies & year",
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.GC$Subspecies],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("topleft", 
+       legend=c("Tridentata","Vaseyana","Wyomingensis"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n") 
+
+#BY SUBSPECIES PLOIDY
+plot(OCG_GC_ID.jnmds$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="Binary jaccard of GC data by subspecies, ploidy, & year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+legend("bottomright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+#BY YEAR
+plot(OCG_GC_ID.jnmds$point [,1:2], xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="Binary jaccard of GC data by year", 
+     col= c("maroon","cyan")[md.OCG.GC$Year],
+     pch=c(19))
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+
+# PCoA ####
+## GC PCoA ####
+GC_dist_matrix <- vegdist(OCG_GC.r, method = "bray")
+GC_pcoa <- cmdscale(GC_dist_matrix) #classic multidimensional scaling (cmdscale)
+
+#BY PLOIDY
+plot(GC_pcoa[,1], GC_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "GC by ploidy PCoA", 
+     col= c("red","blue")[md.OCG.GC$Ploidy],
+     pch = 16)
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES
+plot(GC_pcoa[,1], GC_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "GC by subspecies PCoA", 
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.GC$Subspecies],
+     pch = 16)
+legend("topleft", 
+       legend=c("T","V","W"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES PLOIDY
+plot(GC_pcoa[,1], GC_pcoa[,2], 
+     main="PCoA of GC data by subspecies, ploidy, and year", 
+     col= c("pink","brown","darkgreen",'tan','lightblue')[md.OCG.GC$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.GC$Year])
+legend("bottomright", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=19,
+       cex=0.6,
+       bty = "n")
+legend("topright", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.6,
+       bty = "n")
+
+
+#BY YEAR
+plot(GC_pcoa[,1], GC_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "PCoA of GC by year", 
+     col= c("maroon","cyan")[md.OCG.GC$Year],
+     pch = 16)
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("maroon","cyan"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+## LCMS PCoA ####
+LCMS_dist_matrix <- vegdist(OCG_LCMS_3uL.r, method = "bray")
+LCMS_pcoa <- cmdscale(LCMS_dist_matrix)
+
+plot(LCMS_pcoa)
+text(LCMS_pcoa, row.names(LCMS_pcoa), cex = .5)
+
+#BY PLOIDY
+plot(LCMS_pcoa[,1], LCMS_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "LCMS PCoA by ploidy", 
+     col= c("red","blue")[md.OCG.LCMS.3$Ploidy],
+     pch = 16)
+legend("topleft", 
+       legend=c("2n","4n"),
+       col= c("red","blue"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+#BY YEAR
+plot(LCMS_pcoa[,1], LCMS_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "LCMS PCoA Visualization by year", 
+     col= c("red","cyan")[md.OCG.LCMS.3$Year],
+     pch = 16)
+legend("topleft", 
+       legend=c("2012","2021"),
+       col= c("red","cyan"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES
+plot(LCMS_pcoa[,1], LCMS_pcoa[,2], 
+     xlab = "PC1", ylab = "PC2", 
+     main = "LCMS PCoA Visualization by subspecies", 
+     col= c("olivedrab","cadetblue","goldenrod")[md.OCG.LCMS.3$Subspecies],
+     pch = 16)
+legend("topleft", 
+       legend=c("T","V","W"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
+#BY SUBSPECIES PLOIDY
+plot(LCMS_pcoa[,1], LCMS_pcoa[,2],
+     xlab="PC 1", ylab="PC 2", 
+     main="PCoA of LCMS data by subspecies, ploidy, & year", 
+     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
+     pch=c(17,19)[md.OCG.LCMS.3$Year])
+legend("topleft", 
+       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
+       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       pch=16,
+       cex=0.8,
+       bty = "n")
+legend("bottomleft", 
+       legend=c("2012","2021"),
+       col= "black",
+       pch=c(17,19),
+       cex=0.8,
+       bty = "n")
+
+#BY LOCATION
+plot(LCMS_pcoa[,1], LCMS_pcoa[,2],
+     xlab="PC 1", ylab="PC 2", 
+     main="PCoA of LCMS data by location", 
+     col= plotcolor[md.OCG.LCMS.3$Location],
+     pch=c(16))
+legend("topleft", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=16,
+       cex=0.8,
+       bty = "n")
+
 # ANCOM with Chem data ####
 ## Create ANCOM Function ####
 
@@ -1486,9 +2454,9 @@ ANCOM_subspecies_GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Subspecies",NU
 #Create objects of significant ASVs
 sigGC_subspecies <- subset(ANCOM_subspecies_GC$W.taxa, ANCOM_subspecies_GC$W.taxa$W_stat > 0)[,1]
 sigGC_subspecies <- as.data.frame(sigGC_subspecies) 
-row.names(sigGC_subspecies) <- sigGC_subspecies[54:1,1] 
+row.names(sigGC_subspecies) <- sigGC_subspecies[53:1,1] 
 
-sigGC_subspecies[,1] <- c(54:1) 
+sigGC_subspecies[,1] <- c(53:1) 
 sigGC_subspecies_t <- t(sigGC_subspecies) 
 sigGC_subspecies_t <- as.data.frame(sigGC_subspecies_t)
 colnames(sigGC_subspecies_t) <- as.character(colnames(sigGC_subspecies_t))
@@ -1527,52 +2495,52 @@ sp1 <- ggplot(sbsplotGC_sublong, aes(y = value, x = subspecies, color=variable))
   ggtitle("Full GC ANCOM for Subspecies")+ 
   theme_classic()
 
-## YEAR Full GC ####
-#Run ANCOM, specify variable
-ANCOM_yr.GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
-
-sigGC_yr <- subset(ANCOM_yr.GC$W.taxa, ANCOM_yr.GC$W.taxa$W_stat > 0)[,1]
-sigGC_yr <- as.data.frame(sigGC_yr)
-row.names(sigGC_yr) <- sigGC_yr[54:1,1]
-sigGC_yr[,1] <- c(54:1)
-
-sigGC_yr_t <- t(sigGC_yr)
-sigGC_yr_t <- as.data.frame(sigGC_yr_t)
-colnames(sigGC_yr_t) <- as.character(colnames(sigGC_yr_t))
-print(colnames(sigGC_yr_t))
-sigGC_yr_t <- sigGC_yr_t[,order(colnames(sigGC_yr_t))]
-rownames(sigGC_yr_t) <- c("sig_rank")
-
-GC_sig_yr <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_yr)))
-
-GC_sig_yr <- GC_sig_yr[,order(colnames(GC_sig_yr))]
-colnames(sigGC_yr_t) == colnames(GC_sig_yr) #sanity check:TRUE
-
-GC_sig_yr <- rbind(GC_sig_yr, sigGC_yr_t)
-GC_sig_yr_t <- as.data.frame(t(GC_sig_yr))
-GC_sig_yr_t$sig_rank <- as.numeric(GC_sig_yr_t$sig_rank) 
-GC_sig_yr_t <- GC_sig_yr_t[order(GC_sig_yr_t$sig_rank),] 
-GC_sig_yr_t <- subset(GC_sig_yr_t, select=-c(sig_rank))
-GC_sig_yr_t <- as.data.frame(t(GC_sig_yr_t))
-
-#Build objects for plotting
-plotGC.yr <- data.frame(GC_sig_yr_t[,1:10], "year" = md.OCG.GC_sbst$Year, check.names = FALSE)
-plotGC.yr[,1:10] <- lapply(plotGC.yr[,1:10], function(x) as.numeric(as.character(x)))
-plotGC.yr[,1:10] <- log(plotGC.yr[,1:10]+1)
-plotGC.yr_sub <- data.frame(sample=rownames(plotGC.yr),plotGC.yr, check.names = F)
-plotGC.yr_sublong <- melt(plotGC.yr_sub)
-
-plotGC.yr$year <-  factor(plotGC.yr$year, levels = c("2012","2021"))
-
-### FIGURE FOR YEAR ####
-ggplot(plotGC.yr_sublong, aes(y = value, x = year, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
-  ggtitle("GC ANCOM for year")+
-  labs(color = "Compounds") +
-  theme_classic()
+# ## YEAR Full GC ####
+# #Run ANCOM, specify variable
+# ANCOM_yr.GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
+# 
+# sigGC_yr <- subset(ANCOM_yr.GC$W.taxa, ANCOM_yr.GC$W.taxa$W_stat > 0)[,1]
+# sigGC_yr <- as.data.frame(sigGC_yr)
+# row.names(sigGC_yr) <- sigGC_yr[54:1,1]
+# sigGC_yr[,1] <- c(54:1)
+# 
+# sigGC_yr_t <- t(sigGC_yr)
+# sigGC_yr_t <- as.data.frame(sigGC_yr_t)
+# colnames(sigGC_yr_t) <- as.character(colnames(sigGC_yr_t))
+# print(colnames(sigGC_yr_t))
+# sigGC_yr_t <- sigGC_yr_t[,order(colnames(sigGC_yr_t))]
+# rownames(sigGC_yr_t) <- c("sig_rank")
+# 
+# GC_sig_yr <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_yr)))
+# 
+# GC_sig_yr <- GC_sig_yr[,order(colnames(GC_sig_yr))]
+# colnames(sigGC_yr_t) == colnames(GC_sig_yr) #sanity check:TRUE
+# 
+# GC_sig_yr <- rbind(GC_sig_yr, sigGC_yr_t)
+# GC_sig_yr_t <- as.data.frame(t(GC_sig_yr))
+# GC_sig_yr_t$sig_rank <- as.numeric(GC_sig_yr_t$sig_rank) 
+# GC_sig_yr_t <- GC_sig_yr_t[order(GC_sig_yr_t$sig_rank),] 
+# GC_sig_yr_t <- subset(GC_sig_yr_t, select=-c(sig_rank))
+# GC_sig_yr_t <- as.data.frame(t(GC_sig_yr_t))
+# 
+# #Build objects for plotting
+# plotGC.yr <- data.frame(GC_sig_yr_t[,1:10], "year" = md.OCG.GC_sbst$Year, check.names = FALSE)
+# plotGC.yr[,1:10] <- lapply(plotGC.yr[,1:10], function(x) as.numeric(as.character(x)))
+# plotGC.yr[,1:10] <- log(plotGC.yr[,1:10]+1)
+# plotGC.yr_sub <- data.frame(sample=rownames(plotGC.yr),plotGC.yr, check.names = F)
+# plotGC.yr_sublong <- melt(plotGC.yr_sub)
+# 
+# plotGC.yr$year <-  factor(plotGC.yr$year, levels = c("2012","2021"))
+# 
+# ### FIGURE FOR YEAR ####
+# ggplot(plotGC.yr_sublong, aes(y = value, x = year, color=variable))+
+#   geom_boxplot(outlier.shape = NA) + 
+#   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+#   scale_color_brewer(palette = "Spectral")+
+#   ylab("Log  rel. abundance") + xlab("Subspecies") + 
+#   ggtitle("GC ANCOM for year")+
+#   labs(color = "Compounds") +
+#   theme_classic()
 
 # 2012 GC ANCOM ####
 summary(rowSums(OCG_GC_2012_subset)) #7962
@@ -1652,13 +2620,14 @@ sp2 <- ggplot(sbsplotGC2012_sublong, aes(y = value, x = subspecies, color=variab
 
 ## PLOIDY 2012 GC ####
 #Run ANCOM, specify variable
-ANCOM_ploidy_GC <- ANCOM.main(OCG_GC_2012_sbst,md.OCG.GC.2012_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
-#Create objects of significant ASVs
-sigGC.2012_ploidy <- subset(ANCOM_ploidy_GC$W.taxa, ANCOM_ploidy_GC$W.taxa$W_stat > 0)[,1]
-sigGC.2012_ploidy <- as.data.frame(sigGC_ploidy)
-row.names(sigGC.2012_ploidy) <- sigGC.2012_ploidy[47:1,1] 
+ANCOM_ploidy_GC_2012 <- ANCOM.main(OCG_GC_2012_sbst,md.OCG.GC.2012_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
 
-sigGC.2012_ploidy[,1] <- c(47:1) 
+#Create objects of significant compounds
+sigGC.2012_ploidy <- subset(ANCOM_ploidy_GC_2012$W.taxa, ANCOM_ploidy_GC_2012$W.taxa$W_stat > 0)[,1]
+sigGC.2012_ploidy <- as.data.frame(sigGC.2012_ploidy) 
+row.names(sigGC.2012_ploidy) <- sigGC.2012_ploidy[46:1,1] 
+
+sigGC.2012_ploidy[,1] <- c(46:1) 
 sigGC.2012_ploidy_t <- t(sigGC.2012_ploidy) 
 sigGC.2012_ploidy_t <- as.data.frame(sigGC.2012_ploidy_t)
 colnames(sigGC.2012_ploidy_t) <- as.character(colnames(sigGC.2012_ploidy_t))
@@ -1666,7 +2635,6 @@ print(colnames(sigGC.2012_ploidy_t))
 
 sigGC.2012_ploidy_t <- sigGC.2012_ploidy_t[,order(colnames(sigGC.2012_ploidy_t))]
 rownames(sigGC.2012_ploidy_t) <- c("sig_rank")
-
 GC.2012.OCG_sigsbst_ploidy <-  t(subset(t(OCG_GC_2012_sbst), colnames(OCG_GC_2012_sbst) %in% row.names(sigGC.2012_ploidy)))
 
 GC.2012.OCG_sigsbst_ploidy <- GC.2012.OCG_sigsbst_ploidy[,order(colnames(GC.2012.OCG_sigsbst_ploidy))]
@@ -2153,18 +3121,19 @@ ggplot(plotLCMS.yr_sublong, aes(y = value, x = year, color=variable))+
   theme_classic()
 
 # ANCOM BC #### 
-## Make phyloseq objects ####
+## Make phyloseq object
 row.names(OCG_GC_2012_subset) == row.names(md.OCG.GC.2012) #TRUE
 compound_table_GC12 <- otu_table(as.matrix(OCG_GC_2012_subset), taxa_are_rows = FALSE) #create the feature table
 md_GC12_phy <- sample_data(md.OCG.2012) #make metadata into sample data to create phyloseq
-physeqGC12 <- phyloseq(compound_table, md_phy) #create phyloseq object for ANCOM BC
+physeqGC12 <- phyloseq(compound_table_GC12, md_GC12_phy) #create phyloseq object for ANCOM BC
 
+## GC 2012 SUBSPECIES ANCOMBC ####
 result_GC12 <- ancombc2( 
   data = physeqGC12, assay_name = "counts", tax_level = NULL,
-  fix_formula = "Subspecies + Ploidy",
+  fix_formula = "Subsp_ploidy",
   rand_formula = "(1|Plant)",
   p_adj_method = "fdr",
-  group = "Subspecies", #change variable of interest
+  group = "Subsp_ploidy", #change variable of interest
   alpha = 0.05
 )
 
@@ -2173,7 +3142,28 @@ result_GC12 <- ancombc2(
 
 ancomGC12res_df <- result_GC12$res
 
-# LCMS SUBSPECIES ANCOM ####
+## Make phyloseq object
+row.names(OCG_GC_2021_subset) == row.names(md.OCG.GC.2021) #TRUE
+compound_table_GC21 <- otu_table(as.matrix(OCG_GC_2021_subset), taxa_are_rows = FALSE) #create the feature table
+md_GC21_phy <- sample_data(md.OCG.2021) #make metadata into sample data to create phyloseq
+physeqGC21 <- phyloseq(compound_table_GC21, md_GC21_phy) #create phyloseq object for ANCOM BC
+
+## GC 2021 SUBSPECIES ANCOMBC ####
+result_GC21 <- ancombc2( 
+  data = physeqGC21, assay_name = "counts", tax_level = NULL,
+  fix_formula = "Subspecies + Ploidy",
+  rand_formula = "(1|Plant)",
+  p_adj_method = "fdr",
+  group = "Subspecies", #change variable of interest
+  alpha = 0.05
+)
+
+#iter_control = list(tol = 1e-5, max_iter = 200, 
+#verbose = FALSE)
+
+ancomGC21res_df <- result_GC21$res
+
+##LCMS SUBSPECIES ANCOMBC ####
 # Create phyloseq object
 row.names(OCG_LCMS_3uL_subset) == row.names(md.OCG.LCMS.3) #TRUE
 compound_table_LCMS <- otu_table(as.matrix(OCG_LCMS_3uL_subset), taxa_are_rows = FALSE) #create the feature table

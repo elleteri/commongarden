@@ -23,6 +23,15 @@ md <- md[order(row.names(md)),] #alphabetical
 ### Subsetting to just the plant in the common garden (OCG)#
 md.OCG <- subset(md, md$Project=="OCG")#246 of 21 variables
 
+### Remove duplicates from md
+rows_to_remove <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1', 'COVW.2.4_2012')
+md.OCG <- md.OCG[!rownames(md.OCG) %in% rows_to_remove, ] #199
+
+md.OCG.2012 <- subset(md.OCG, md.OCG$Year=="2012")
+sum(duplicated(md.OCG.2012$`Garden Plant ID`)) #7
+md.OCG.2021 <- subset(md.OCG, md.OCG$Year=="2021")
+sum(duplicated(md.OCG.2021$`Garden Plant ID`))
+
 write.csv(md.OCG, file = "data_csv/metadata_OCG.csv")
 
 ## 2012 GC RAW DATA READ IN
@@ -68,9 +77,9 @@ colnames(OCG_GC_2012)[peak_area_cols] <- new_col_names
 
 names(OCG_GC_2012)[names(OCG_GC_2012) == 'Plant_ID'] <- 'Garden Plant ID' 
 
-OCG_GC_2012 <- merge(md.OCG.2012, OCG_GC_2012, by="Garden Plant ID") #156 obs of 90
+OCG_GC_2012 <- merge(md.OCG.2012, OCG_GC_2012, by="Garden Plant ID") #165 obs of 95
 
-OCG_GC_2012 <- OCG_GC_2012[,-c(1:21)] #removing everything except area under the curve 156 obs of variables
+OCG_GC_2012 <- OCG_GC_2012[,-c(1:15,17:21)] #removing everything except area under the curve 165 obs of 75 variables
 
 # OCG_GC_2012_w_RT <- OCG_GC_2012[,-c(1:15)] #removing everything except area under the curve and RT. 156 obs of 149 variables
 
@@ -101,14 +110,14 @@ OCG_GC_2021 <- OCG_GC_2021 [, !grepl("Peak.Area.Percent", colnames(OCG_GC_2021))
 #remove column with compound 1 to match to the 2012 GC data that starts at compound C002. fixed
 #OCG_GC_2021 <- OCG_GC_2021[,-2] #87 of 74 variables
 
-#subset to "Peak Area" 1:74
+#subset to "Peak Area" 1:75
 peak_area_cols <- grep("Peak.Area", colnames(OCG_GC_2021)) 
 
-#the new column "C001" through "C0074" increasing sequentially. 
+#the new column "C001" through "C0075" increasing sequentially. 
 new_col_names <- paste0("C", sprintf("%03d", seq_along(peak_area_cols)))
 
 #Rename
-colnames(OCG_GC_2021)[peak_area_cols] <- new_col_names #87 obs and 74 variables
+colnames(OCG_GC_2021)[peak_area_cols] <- new_col_names #87 obs and 75 variables
 
 # #subset to "RT" 1:74 if keeping in RT
 # RT_cols <- grep("RT", colnames(OCG_GC_2021))
@@ -123,13 +132,13 @@ names(OCG_GC_2021)[names(OCG_GC_2021) == 'Plant_ID'] <- 'Garden Plant ID'
 
 md.OCG.2021$`Garden Plant ID` <- as.character(md.OCG.2021$`Garden Plant ID`)
 
-OCG_GC_2021 <- merge(md.OCG.2021, OCG_GC_2021, by="Garden Plant ID") #70 obs of 89 variables
+OCG_GC_2021 <- merge(md.OCG.2021, OCG_GC_2021, by="Garden Plant ID") #70 obs of 95 variables
 
 #Going to remove everything except AUC and plant ID description and RT
 #OCG_GC_2021_w_RT <- OCG_GC_2021[,-c(1:15,17:18)] #70 obs of 149 variables
 
 #Going to remove everything except AUC and plant ID description
-OCG_GC_2021 <- OCG_GC_2021[,-c(1:21)] #70 obs of 75 variables
+OCG_GC_2021 <- OCG_GC_2021[,-c(1:15,17:21)] #70 obs of 75 variables
 
 # #Save csv with RT
 # write.csv(OCG_GC_2021_w_RT, file = "data_csv/OCG_GC_2021_cleaned_w_RT.csv",row.names = FALSE)
@@ -138,7 +147,7 @@ OCG_GC_2021 <- OCG_GC_2021[,-c(1:21)] #70 obs of 75 variables
 write.csv(OCG_GC_2021, file = "data_csv/OCG_GC_2021.csv",row.names = FALSE)
 
 #FULL GC COMBINED
-OCG_GC <- rbind(OCG_GC_2012, OCG_GC_2021) #226 obs of 75 variables
+OCG_GC <- rbind(OCG_GC_2012, OCG_GC_2021) #235 obs of 75 variables
 
 #FULL GC COMBINED W RT
 #OCG_GC_w_RT <- rbind(OCG_GC_2012_w_RT, OCG_GC_2021_w_RT) #226 obs of 149 variables
@@ -204,17 +213,17 @@ OCG_LCMS_3uL_2012 <- subset(OCG_LCMS_3uL, OCG_LCMS_3uL$Year=="2012") #46 observa
 
 OCG_LCMS_3uL_2012 <- merge(md.OCG.2012, OCG_LCMS_3uL_2012, by="Garden Plant ID") #41 obs of 332 variables
 
-OCG_LCMS_3uL_2012 <- OCG_LCMS_3uL_2012[,-c(1:22)] #41 obs of 309 variables
+OCG_LCMS_3uL_2012 <- OCG_LCMS_3uL_2012[,-c(1:15,17:22)] #42 obs of 309 variables
 
 #2021 LCMS
 OCG_LCMS_3uL_2021 <- subset(OCG_LCMS_3uL, OCG_LCMS_3uL$Year=="2021") #73 observations and 310 variables
 
 OCG_LCMS_3uL_2021 <- merge(md.OCG.2021, OCG_LCMS_3uL_2021, by="Garden Plant ID") #71 obs of 325
 
-OCG_LCMS_3uL_2021 <- OCG_LCMS_3uL_2021[,-c(1:22)] #71 obs of 309 variables
+OCG_LCMS_3uL_2021 <- OCG_LCMS_3uL_2021[,-c(1:15,17:22)] #71 obs of 309 variables
 
 #FULL LCMS
-OCG_LCMS_3uL <- data.frame(rbind(OCG_LCMS_3uL_2012,OCG_LCMS_3uL_2021)) #112 of 309 var
+OCG_LCMS_3uL <- data.frame(rbind(OCG_LCMS_3uL_2012,OCG_LCMS_3uL_2021)) #113 of 309 var
 
 ##Save csv
 write.csv(OCG_LCMS_3uL, file = "data_csv/OCG_LCMS_3uL_cleaned.csv",row.names = FALSE)
