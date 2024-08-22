@@ -3187,8 +3187,107 @@ result_LCMS_sub <- ancombc2(
 ancomLCMSres_df <- result_LCMS_sub$res
 
 
+# ANCOM BC LCMS ####
+packages_to_load <- c(
+  "ggplot2", "vegan", "lme4", "tidyverse", "effects", 
+  "plyr", "dplyr", "reshape", "reshape2", "ape", "DiagrammeR", 
+  "tidybayes", "coefplot", "standardize", "bayesplot", "MCMCvis", "car",
+  "patchwork", "ggpubr", "corrr", "ggcorrplot", "factoextra", "MASS",
+  "pairwiseAdonis", "plotrix", "gridExtra", "multcompView", "ggeffects", "this.path", "brms", "ggmulti",
+  "phyloseq", "qiime2R", "picante","decontam", "performance", "janitor", "ANCOMBC", "pheatmap", "chron",
+  "lubridate"
+)
 
+# Load and install required packages
+for (i in packages_to_load) { #Installs packages if not yet installed
+  if (!require(i, character.only = TRUE)) install.packages(i)
+}
 
+#data
+lcms <- read.csv("data_csv/OCG_LCMS_3uL_cleaned.csv", header=TRUE)
+meta_elle <- read.csv("data_csv/metadata_OCG.csv", header=TRUE)
 
+rownames(lcms) <- lcms$Description
+rownames(meta_elle) <- meta_elle$Description
 
+#filter metadata to fit lcms data
+meta_elle_filt <- subset(meta_elle, row.names(meta_elle) %in% row.names(lcms))
+lcms_filt <- subset(lcms, row.names(lcms) %in% row.names(meta_elle_filt))
 
+dim(meta_elle_filt) #112 rows
+dim(lcms_filt) #112 rows
+
+meta_elle_filt <- meta_elle_filt[order(row.names(meta_elle_filt)),] # order samples alphabetically
+lcms_filt <- lcms_filt[order(row.names(lcms_filt)),] # order samples alphabetically
+
+rownames(lcms_filt) == rownames(meta_elle_filt)
+
+lcms_filt <- lcms_filt[,-1]
+rounded_matrix <- as.matrix(lcms_filt)
+rounded_matrix <- round(rounded_matrix)
+rounded_matrix1<- rounded_matrix
+rounded_matrix1[is.na(rounded_matrix1)] <- 0
+rounded_matrix1 <- as.data.frame(rounded_matrix1)
+
+# Create the tse object
+assays = S4Vectors::SimpleList(counts = t(rounded_matrix1))
+smd = S4Vectors::DataFrame(meta_elle_filt)
+tse = TreeSummarizedExperiment::TreeSummarizedExperiment(assays = assays, colData = smd)
+
+output = ancombc2(data = tse, assay_name = "counts", tax_level = NULL,
+                  fix_formula = "Subspecies", rand_formula = NULL,
+                  p_adj_method = "fdr", pseudo_sens = TRUE,
+                  prv_cut = 0.10, lib_cut = 1000, s0_perc = 0.05,
+                  group = "Subspecies", struc_zero = FALSE, neg_lb = FALSE,
+                  alpha = 0.05, n_cl = 2, verbose = TRUE,
+                  global = TRUE, pairwise = TRUE, 
+                  dunnet = FALSE, trend = FALSE,
+                  iter_control = list(tol = 1e-5, max_iter = 20, 
+                                      verbose = FALSE),
+                  em_control = list(tol = 1e-5, max_iter = 100),
+                  lme_control = NULL, 
+                  mdfdr_control = list(fwer_ctrl_method = "fdr", B = 100), 
+                  trend_control = NULL)
+
+saveRDS(output, "ancombc_lcms_elle_fdr.RDS")
+output <- readRDS("ancombc_lcms_elle_fdr.RDS")
+
+res <- output$res
+pair <- output$res_pair
+
+colnames(pair)[colnames(pair) == "lfc_SubspeciesV"] <- "lfc_SubspeciesV_T"
+colnames(pair)[colnames(pair) == "lfc_SubspeciesW"] <- "lfc_SubspeciesW_T"
+colnames(pair)[colnames(pair) == "lfc_SubspeciesW_SubspeciesV"] <- "lfc_SubspeciesW_V"
+
+colnames(pair)[colnames(pair) == "se_SubspeciesV"] <- "se_SubspeciesV_T"
+colnames(pair)[colnames(pair) == "se_SubspeciesW"] <- "se_SubspeciesW_T"
+colnames(pair)[colnames(pair) == "se_SubspeciesW_SubspeciesV"] <- "se_SubspeciesW_V"
+
+colnames(pair)[colnames(pair) == "diff_SubspeciesV"] <- "diff_SubspeciesV_T"
+colnames(pair)[colnames(pair) == "diff_SubspeciesW"] <- "diff_SubspeciesW_T"
+colnames(pair)[colnames(pair) == "diff_SubspeciesW_SubspeciesV"] <- "diff_SubspeciesW_V"
+
+dim(pair) 
+#302  19
+
+all_pair_sig <- subset(pair, diff_SubspeciesV_T == TRUE |diff_SubspeciesW_T == TRUE | diff_SubspeciesW_V == TRUE)
+#123 19
+
+all_pair_sig_filt <- all_pair_sig[,c(1:7,17:19)]
+
+res_long <- all_pair_sig_filt %>%
+  gather(key = "key", value = "value", -taxon) %>%
+  separate(key, into = c("measure", "subspecies"), sep = "_Subspecies") %>%
+  spread(measure, value)
+
+res_long <- res_long %>%
+  mutate(diff = as.logical(diff))
+
+res_long_filt <- subset(res_long, diff == "TRUE")
+
+ggplot(res_long_filt, aes(x = taxon, y = lfc, color = subspecies)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lfc - se, ymax = lfc + se), width = 0.2) +
+  theme_minimal() + facet_wrap(~subspecies, ncol=1) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")
