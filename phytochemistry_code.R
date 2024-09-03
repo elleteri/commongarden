@@ -462,14 +462,14 @@ kmeans_result <- kmeans(pca_scores_GC12, centers = k)
 cluster_assignments <- kmeans_result$cluster
 
 # Visualize the clusters (optional)
-plot(pca_scores_GC12, col = cluster_assignments, main = "PCA of 2012 GC data with k-means Clustering")
+plot(pca_scores_GC12, col = cluster_assignments, main = "PCA of k-means clustered 2012 GC data")
 
 ## Adding k means clusters to md 
 md.OCG.GC.2012$cluster_assignments <- cluster_assignments
 
 plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
      xlab="PC 1 (19.81%)", ylab="PC 2 (12.46%)", 
-     main="PCA of 2012 GC data with k-means cluster (5 clusters)", 
+     main="PCA of 2012 GC data k-means clustering", 
      pch = 19,
      col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise")[md.OCG.GC.2012$cluster_assignments],
      xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
@@ -612,12 +612,12 @@ md.OCG.GC.2021$cluster_assignments <- cluster_assignments
 
 plot(data.pca_2021_ID$x[, 1], data.pca_2021_ID$x[, 2],
      xlab="PC 1 (20.54%)", ylab="PC 2 (13.33%)", 
-     main="PCA of 2021 GC data with k-means cluster (5 clusters)", 
+     main="PCA of 2021 GC data k-means clustering", 
      pch = 19,
      col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise")[md.OCG.GC.2021$cluster_assignments],
      xlim = range(data.pca_2021_ID$x[, 1], na.rm = TRUE),
      ylim = range(data.pca_2021_ID$x[, 2], na.rm = TRUE))
-legend("topright", 
+legend("bottomright", 
        legend=c("1","2","3","4","5"),
        col= c("lightcoral","rosybrown",'darkseagreen','peachpuff',"darkturquoise"),
        pch=19,
@@ -991,7 +991,7 @@ md.OCG.LCMS.3$cluster_assignments <- cluster_assignments
 
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1 (13.51%)", ylab="PC 2 (9.51%)", 
-     main="PCA of LCMS data with k-means clusters", 
+     main="PCA of LCMS data k-means clustering", 
      pch = 19,
      col= c("lightcoral","rosybrown",'darkseagreen','peachpuff','darkturquoise')[md.OCG.LCMS.3$cluster_assignments],
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
@@ -1179,6 +1179,51 @@ pca_scores_LCloc.tri <- data.pca_LCMS_tri_ID$x
 LCMS.tri_aov_df <- as.data.frame(pca_scores_LCloc.tri)
 pca_model_LCMS.tri <- aov(cbind(PC1, PC2) ~ md.OCG.LCMS.tri$Location, data = LCMS.tri_aov_df)
 summary(pca_model_LCMS.tri) #F(8) = 68.684 p < 0.001 for PC1. F(8) = 2.1365, p < 0.005 
+
+## LCMS tridentata k- means clustering ####
+set.seed(5)
+pca_scores_LCMS_tri <- data.pca_LCMS_tri_ID$x
+
+#ELBOW METHOD
+# plot the within cluster sum of squares against the number of clusters
+wcss <- numeric(10)
+for (i in 1:10) {
+  kmeans_model <- kmeans(pca_scores_LCMS_tri, centers = i)
+  wcss[i] <- kmeans_model$tot.withinss
+}
+plot(1:10, wcss, type = "b", xlab = "Number of Clusters (k)", ylab = "WCSS")
+
+#Look for the "elbow" point where the rate of decrease in WCSS slows down significantly.
+#he elbow point is a good estimate for the optimal k.
+k <- 2
+
+# Perform k-means clustering on the PCA scores
+kmeans_result <- kmeans(pca_scores_LCMS_tri, centers = k)
+
+# Get cluster assignments for each sample
+cluster_assignments <- kmeans_result$cluster
+
+# Visualize the clusters (optional)
+plot(pca_scores_LCMS_tri, col = cluster_assignments, main = "PCA of LCMS data with k-means Clustering")
+
+## Adding k means clusters to md 
+md.OCG.LCMS.tri$cluster_assignments <- cluster_assignments
+
+plot(data.pca_LCMS_tri_ID$x[, 1], data.pca_LCMS_tri_ID$x[, 2],
+     xlab="PC 1 (17.08%)", ylab="PC 2 (9.3%)", 
+     main="PCA of k-means clustered LCMS data for tridentata", 
+     pch = 19,
+     col= c("lightcoral","rosybrown")[md.OCG.LCMS.tri$cluster_assignments],
+     xlim = range(data.pca_LCMS_tri_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_LCMS_tri_ID$x[, 2], na.rm = TRUE))
+legend("topright", 
+       legend=c("1","2"),
+       col= c("lightcoral","rosybrown"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(data.pca_LCMS_tri_ID,groups = md.OCG.LCMS.tri$cluster_assignments, show.groups = "1", col = "lightcoral")
+ordispider(data.pca_LCMS_tri_ID,groups = md.OCG.LCMS.tri$cluster_assignments, show.groups = "2", col = "rosybrown")
 
 ##LCMS PCA of just wyomingensis ####
 #subset LCMS to just wyomingensis
@@ -3289,5 +3334,5 @@ ggplot(res_long_filt, aes(x = taxon, y = lfc, color = subspecies)) +
   geom_point() +
   geom_errorbar(aes(ymin = lfc - se, ymax = lfc + se), width = 0.2) +
   theme_minimal() + facet_wrap(~subspecies, ncol=1) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   geom_hline(yintercept = 0, linetype = "dashed", color = "black")
