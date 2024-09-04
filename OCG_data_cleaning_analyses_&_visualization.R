@@ -77,7 +77,7 @@ summary(rowSums(asvITS.OCG)) #0
 summary(colSums(asvITS.OCG)) #1
 
 ### Remove duplicates from ASV
-rows_to_remove <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1', 'COVW.2.4_2012')
+rows_to_remove <- c('CAT.2.9_2012v1', 'CAV.2.7_2012v2','NVT.2.9_2012v2','ORT.2.10_2012v1','WAT.1.4_2012v2','WAT.1.9_2012v2','WAT.2.8_2012v1')
 asvITS.OCG <- asvITS.OCG[!rownames(asvITS.OCG) %in% rows_to_remove, ] #199
 
 ## Remove negative control
@@ -117,7 +117,7 @@ asvITS.OCG.efr <- round(asvITS.OCG.ef)
 mdITS.OCG <- cbind(mdITS.OCG, effective_species = asvITS.OCG.efr)
 
 glm.OCG <- glm(effective_species ~ Subspecies + Year, family = poisson, data=mdITS.OCG)
-summary(glm.OCG) # year p-value = 0.000460
+summary(glm.OCG) 
 
 glm.OCG.gamma <- glm(effective_species ~ Subspecies + Year, family = Gamma, data=mdITS.OCG)
 summary(glm.OCG.gamma) #year is significant
@@ -136,8 +136,8 @@ ggplot(data = mdITS.OCG, mapping = aes(x = Subspecies, y = effective_species, fi
   theme_classic()
 
 #Beta diversity - NMDS plots#### 
-set.seed(41)
-# asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=500) ### Solution reached
+set.seed(1)
+asvITS.OCG.nmds <- metaMDS(asvITS.OCG.r, trymax=500) ### Solution reached
 # save(asvITS.OCG.nmds, file = "nmds/asvITS_OCG_nmds.rda") #save the nmds so you won't need to run it again
 load("nmds/asvITS_OCG_nmds.rda") #load it to use in code anytime after the initial run
 
@@ -239,7 +239,51 @@ asvITS.OCG.subsp_yr <- adonis2(asvITS.OCG.r ~ mdITS.OCG$Subspecies*mdITS.OCG$Yea
 asvITS.OCG.subsp_yr #year and subspecies are sig
 
 asvITS.OCG.yr <- adonis2(asvITS.OCG.r ~ mdITS.OCG$Year) 
-asvITS.OCG.yr #year is significant
+asvITS.OCG.yr #year is significant'
+
+# k- means clustering #####
+#read in lcms with cluster data saved
+md_LCMS_cluster <- read.csv("data_csv/md.OCG.LCMS_cluster.csv", row.names = 1)
+md_LCMS_cluster <- md_LCMS_cluster[order(row.names(md_LCMS_cluster)),]
+md_LCMS_cluster <- subset(md_LCMS_cluster, row.names(md_LCMS_cluster) %in% row.names(asvITS.OCG))
+asvITS.OCG_lcms <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(md_LCMS_cluster))
+row.names(asvITS.OCG_lcms) == row.names(md_LCMS_cluster) # sanity check:TRUE
+
+# rarefy the asv data
+asvITS.OCG_lcms <- asvITS.OCG_lcms[,colSums(asvITS.OCG_lcms) > 999]
+summary(colSums(asvITS.OCG_lcms)) #1002
+summary(rowSums(asvITS.OCG_lcms)) #17
+asvITS.OCG_lcms.r <- rrarefy(asvITS.OCG_lcms, 17)
+
+# model
+k_means_asv_fit <- adonis2(asvITS.OCG_lcms.r ~ md.OCG.LCMS.3.asv$cluster_assignments, by = "margin")
+k_means_asv_fit #subspecies ploidy is significant 0.001
+
+asv_subsp_LCMS <- adonis2(asvITS.OCG_lcms.r ~ md.OCG.LCMS.3.asv$Subsp_ploidy, by = "margin")
+
+# read in GC clustering data
+md_gc_2012_cluster <- read.csv("data_csv/md.OCG.GC.2012_cluster.csv")
+md_gc_2021_cluster <- read.csv("data_csv/md.OCG.GC.2021_cluster.csv")
+md_gc_cluster <- merge(md_gc_2012_cluster, md_gc_2021_cluster, all = TRUE)
+rownames(md_gc_cluster) <- md_gc_cluster[, 1]
+md_gc_cluster <- md_gc_cluster[, -1]
+
+md_gc_cluster <- md_gc_cluster[order(row.names(md_gc_cluster)),]
+md_gc_cluster <- subset(md_gc_cluster, row.names(md_gc_cluster) %in% row.names(asvITS.OCG)) ##166 of 21 var
+asvITS.OCG_gc <- subset(asvITS.OCG, row.names(asvITS.OCG) %in% row.names(md_gc_cluster)) ##166 of 21 var
+row.names(asvITS.OCG_gc) == row.names(md_gc_cluster) # sanity check:TRUE
+
+# rarefy the asv data
+asvITS.OCG_gc <- asvITS.OCG_gc[,colSums(asvITS.OCG_gc) > 999]
+summary(colSums(asvITS.OCG_gc)) #1002
+summary(rowSums(asvITS.OCG_gc)) #16
+asvITS.OCG_gc.r <- rrarefy(asvITS.OCG_gc, 16)
+
+# model
+k_means_asv.gc_fit <- adonis2(asvITS.OCG_gc.r ~ md_gc_cluster$cluster_assignments, by = "margin")
+k_means_asv.gc_fit #subspecies ploidy is significant 0.001
+
+asv_subsp_GC <- adonis2(asvITS.OCG_gc.r ~ md_gc_cluster$Subspecies, by = "margin")
 
 ## 2012 asv NMDS ####
 #NMDS

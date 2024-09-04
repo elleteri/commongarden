@@ -437,6 +437,19 @@ GC12_aov_df <- as.data.frame(pca_scores_GC12)
 pca_model_GC_12_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2012$Subsp_ploidy, data = GC12_aov_df)
 summary(pca_model_GC_12_subsppl) #PC 1 1.067e-15, PC2 0.0006886 of 2 dof. F(4) = 32.893, p < 0.001 for PC1. F(4) = 5.5143, p < 0.001
 
+# rarefy and run permanova of 2012 GC
+OCG_GC_2012_subset[is.na(OCG_GC_2012_subset)] <- 0
+summary(rowSums(OCG_GC_2012_subset)) #7962 seqs in smallest sample
+summary(colSums(OCG_GC_2012_subset)) #2358
+OCG_GC_2012_subset <- OCG_GC_2012_subset[,colSums(OCG_GC_2012_subset) > 0]
+summary(colSums(OCG_GC_2012_subset)) #2358
+
+OCG_GC_2012_subset.r <- rrarefy(round(OCG_GC_2012_subset),sample = 7962)
+
+#permanova by subspecies ploidy
+PCA_gc_12_subsploi <- adonis2(OCG_GC_2012_subset.r ~ md.OCG.GC.2012$Subsp_ploidy, by = "margin")
+PCA_gc_12_subsploi #subspecies ploidy is significant 0.001
+
 #### k- means clustering on 2012 GC####
 set.seed(92)
 pca_scores_GC12 <- data.pca_2012_ID$x 
@@ -486,6 +499,10 @@ ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$cluster_assignments, show.gr
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$cluster_assignments, show.groups = "4", col = "peachpuff")
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$cluster_assignments, show.groups = "5", col = "darkturquoise")
 
+k_means_12GC_fit <- adonis2(OCG_GC_2012_subset.r ~ md.OCG.GC.2012$cluster_assignments, by = "margin")
+k_means_12GC_fit #0.001
+
+write.csv(md.OCG.GC.2012, file = "data_csv/md.OCG.GC.2012_cluster.csv")
 
 # #SPECTRAL CLUSTERING 2012 GC 
 # set.seed(75)
@@ -580,6 +597,19 @@ GC21_aov_df <- as.data.frame(pca_scores_GC21)
 pca_model_GC_21_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2021$Subsp_ploidy, data = GC21_aov_df)
 summary(pca_model_GC_21_subsppl) #F(4) = 4.5663 p < 0.005 (0.002598) for PC1. F(4) = 5.3852, p < 0.001 
 
+# rarefy and run permanova of 2021 GC
+OCG_GC_2021_subset[is.na(OCG_GC_2021_subset)] <- 0
+summary(rowSums(OCG_GC_2021_subset)) #179 seqs in smallest sample
+summary(colSums(OCG_GC_2021_subset)) #842.5
+OCG_GC_2021_subset <- OCG_GC_2021_subset[,colSums(OCG_GC_2021_subset) > 0]
+summary(colSums(OCG_GC_2021_subset)) #842.5
+
+OCG_GC_2021_subset.r <- rrarefy(round(OCG_GC_2021_subset),sample = 179)
+
+#permanova by subspecies ploidy
+PCA_gc_21_subsploi <- adonis2(OCG_GC_2021_subset.r ~ md.OCG.GC.2021$Subsp_ploidy, by = "margin")
+PCA_gc_21_subsploi #subspecies ploidy is significant 0.001 R^
+
 #### k- means clustering attempt on 2021 GC####
 set.seed(64)
 pca_scores_GC21 <- data.pca_2021_ID$x
@@ -628,6 +658,11 @@ ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$cluster_assignments, show.gr
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$cluster_assignments, show.groups = "3", col = "darkseagreen")
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$cluster_assignments, show.groups = "4", col = "peachpuff")
 ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$cluster_assignments, show.groups = "5", col = "darkturquoise")
+
+k_means_21GC_fit <- adonis2(OCG_GC_2021_subset.r ~ md.OCG.GC.2021$cluster_assignments, by = "margin")
+k_means_21GC_fit #subspecies ploidy is significant 0.001
+
+write.csv(md.OCG.GC.2021, file = "data_csv/md.OCG.GC.2021_cluster.csv")
 
 # #SPECTRAL CLUSTERING 2021 GC 
 # set.seed(24)
@@ -907,7 +942,7 @@ summary(colSums(OCG_LCMS_3uL_subset)) #384380
 OCG_LCMS_3uL_subset <- OCG_LCMS_3uL_subset[,colSums(OCG_LCMS_3uL_subset) > 0]
 summary(colSums(OCG_LCMS_3uL_subset)) #384380
 
-#OCG_LCMS_3uL_subset.r <- rrarefy(round(OCG_LCMS_3uL_subset),sample = 31016795)
+OCG_LCMS_3uL_subset.r <- rrarefy(round(OCG_LCMS_3uL_subset),sample = 31016795) #warning
 
 #permanova for subspecies ploidy
 PCA_lcms_subsploi.r <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$Subsp_ploidy, by = "margin")
@@ -1007,6 +1042,23 @@ ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$cluster_assignments, show.gr
 ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$cluster_assignments, show.groups = "3", col = "darkseagreen")
 ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$cluster_assignments, show.groups = "4", col = "peachpuff")
 ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$cluster_assignments, show.groups = "5", col = "darkturquoise")
+
+# calculating R^2 for this data 
+#To calculate the R^2 value for a k-means clustering analysis in R, you'll need to approach it indirectly. Since k-means clustering is an unsupervised learning method, it doesn't directly predict a continuous target variable. However, you can still assess the model's performance by comparing the within-cluster sum of squares (WCSS) to the total sum of squares (TSS).
+
+#tss 
+tssLCMS <- sum(apply(pca_scores_LCMS, 2, var))
+
+#wcss
+wcssLCMS <- sum(kmeans_result$withinss)
+
+#R^2
+r_squared_LCMS <- 1 - (wcssLCMS / tssLCMS) # doesnt work 
+
+k_means_LCMS_fit <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$cluster_assignments, by = "margin")
+k_means_LCMS_fit #subspecies ploidy is significant 0.001
+
+write.csv(md.OCG.LCMS.3, file = "data_csv/md.OCG.LCMS_cluster.csv")
 
 # ##DBSCAN ####
 # # Perform DBSCAN clustering

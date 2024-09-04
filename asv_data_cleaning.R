@@ -46,9 +46,9 @@ summary(colSums(asvITS.t))
 
 mdITS <- subset(mdITS, row.names(mdITS) %in% row.names(asvITS.t)) 
 
-asvITS.t2 <- asvITS.t[!(row.names(asvITS.t) %in% c("NEG_9-30-21","AH1919","AHM20207","AHM20125","UTWV.2.7_2012", "UTWV.2.8_2012","WAW.1.4_2012")),] #outliers that need to be removed
+asvITS.t2 <- asvITS.t[!(row.names(asvITS.t) %in% c("NEG_9-30-21","AH1919","AHM20207","AHM20125")),] #outliers that need to be removed
 
-#"COVW.2.2_2012","IDV.5.1_2012","CAV.1.7_2012"
+# "UTWV.2.7_2012","COVW.2.2_2012","IDV.5.1_2012","CAV.1.7_2012", "UTWV.2.8_2012","WAW.1.4_2012", 'COVW.2.4_2012', 'IDV.2.8_2012'
 
 asvITS.t2 <- asvITS.t2[,colSums(asvITS.t2) > 0]
 
