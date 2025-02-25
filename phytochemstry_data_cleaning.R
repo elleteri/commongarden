@@ -181,6 +181,9 @@ OCG_LCMS_3uL <- read.csv("data_csv/3uL_injection_results_LCMS.csv", head=T, chec
 
 sum(duplicated(OCG_LCMS_3uL$Plant_ID)) #0
 
+# OCG_LCMS_3uL <- OCG_LCMS_3uL[,-c(2:3, 6)] # check and remove any empty columns 2:3, 6, 8?
+# OCG_LCMS_3uL <- OCG_LCMS_3uL[,-c(5)]
+
 ## LCMS 3UL CLEANING
 OCG_LCMS_3uL <- OCG_LCMS_3uL [, grepl("Peak.Area|Plant_ID", colnames(OCG_LCMS_3uL))] #120 obs of 617 variables
 
@@ -195,6 +198,15 @@ peak_area_cols <- grep("Peak.Area", colnames(OCG_LCMS_3uL))
 new_col_names <- paste0("C", sprintf("%03d", seq_along(OCG_LCMS_3uL)))
 
 colnames(OCG_LCMS_3uL)[peak_area_cols] <- new_col_names #120 obs of 309 variables 
+
+# #subset to "RT" 1:74 if keeping in RT
+# RT_cols <- grep("RT", colnames(OCG_LCMS_3uL))
+# 
+# #the new column "C001" through "C0074" increasing sequentially.
+# new_col_names_RT <- paste0("RT", sprintf("%03d", seq_along(RT_cols)))
+# 
+# #Rename
+# colnames(OCG_LCMS_3uL)[RT_cols] <- new_col_names_RT #87 obs and 151 variables
 
 #column names are now C001-C309
 
@@ -225,8 +237,18 @@ OCG_LCMS_3uL_2021 <- OCG_LCMS_3uL_2021[,-c(1:15,17:22)] #71 obs of 309 variables
 #FULL LCMS
 OCG_LCMS_3uL <- data.frame(rbind(OCG_LCMS_3uL_2012,OCG_LCMS_3uL_2021)) #113 of 309 var
 
+# #restructure the RT GC full data. 
+# #remove plant ID?
+# #make the row names the plant id
+# rownames(OCG_LCMS_3uL) <- OCG_LCMS_3uL[,1]
+# OCG_LCMS_3uL <- OCG_LCMS_3uL[order(row.names(OCG_LCMS_3uL)),] # order samples alphabetically
+# OCG_LCMS_3uL <- OCG_LCMS_3uL[,-c(1)]
+# 
+# write.csv(OCG_LCMS_3uL, file = "data_csv/OCG_LCMS_3uL_cleaned_w_RT.csv",row.names = FALSE)
+
 ##Save csv
 write.csv(OCG_LCMS_3uL, file = "data_csv/OCG_LCMS_3uL_cleaned.csv",row.names = FALSE)
 
 #Clear Global Environment
 rm(list = ls())
+

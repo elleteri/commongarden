@@ -256,7 +256,7 @@ summary(rowSums(asvITS.OCG_lcms)) #17
 asvITS.OCG_lcms.r <- rrarefy(asvITS.OCG_lcms, 17)
 
 # model
-k_means_asv_fit <- adonis2(asvITS.OCG_lcms.r ~ md.OCG.LCMS.3.asv$cluster_assignments, by = "margin")
+k_means_asv_fit <- adonis2(asvITS.OCG_lcms.r ~ md_LCMS_cluster$cluster_assignments, by = "margin")
 k_means_asv_fit #subspecies ploidy is significant 0.001
 
 asv_subsp_LCMS <- adonis2(asvITS.OCG_lcms.r ~ md.OCG.LCMS.3.asv$Subsp_ploidy, by = "margin")
@@ -284,6 +284,23 @@ k_means_asv.gc_fit <- adonis2(asvITS.OCG_gc.r ~ md_gc_cluster$cluster_assignment
 k_means_asv.gc_fit #subspecies ploidy is significant 0.001
 
 asv_subsp_GC <- adonis2(asvITS.OCG_gc.r ~ md_gc_cluster$Subspecies, by = "margin")
+
+asvnmds_gc_cluster <- metaMDS(asvITS.OCG_gc.r, trymax = 500)
+ordiplot(asvnmds_gc_cluster, type = "t", display = "sites",cex = .6)
+
+plot(asvnmds_gc_cluster$points, xlab="NMDS Axis 1", ylab="NMDS Axis 2", 
+     main="Sagebrush 2012 fungal community by subspecies", 
+     col= c("olivedrab","cadetblue","goldenrod", "magenta", "green")[md_gc_cluster$cluster_assignments],
+     pch=19)
+legend("topright", 
+       legend=c("T","V","W"),
+       col= c("olivedrab","cadetblue","goldenrod"),
+       pch=19,
+       cex=0.8,
+       bty = "n")
+ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subspecies, show.groups = "T", col = "olivedrab")
+ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subspecies, show.groups = "V", col = "cadetblue")
+ordispider(asvITS.2012.nmds,groups = mdITS.2012$Subspecies, show.groups = "W", col = "goldenrod")
 
 ## 2012 asv NMDS ####
 #NMDS
@@ -1306,8 +1323,9 @@ load("nmds/OCG_GCp2_pro.nmds.rda") #all GC file for LCMS 3uL data = OCG_GCp2
 
 # Procrustes plots ####
 # LCMS 3uL procrustes ####
+rownames(asvITS_OCG_LCMS3.nmds$points) == rownames(OCG_LCMS3_pro.nmds$points)
 asv_LCMS_3.pro <- protest(asvITS_OCG_LCMS3.nmds, OCG_LCMS3_pro.nmds, symmetric=T) 
-asv_LCMS_3.pro ## Correlation in a symmetric Procrustes rotation: 0.1575, Significance: 0.434
+asv_LCMS_3.pro ## Correlation in a symmetric Procrustes rotation: 0.1832, Significance: 0.277
 summary(asv_LCMS_3.pro) 
 plot(asv_LCMS_3.pro)
 
@@ -1325,6 +1343,7 @@ ggplot() +
   theme_classic() 
 
 # All GC procrustes ####
+rownames(asvITS_OCG_GCpp.nmds$points) == rownames(OCG_GCp_pro.nmds$points)
 asv_GC.pro <- protest(asvITS_OCG_GCpp.nmds, OCG_GCp_pro.nmds, symmetric=T) 
 asv_GC.pro ## Correlation in a symmetric Procrustes rotation: 0.348, Significance: 0.001
 summary(asv_GC.pro) 
@@ -1359,7 +1378,7 @@ ggplot() +
   geom_segment(data=LCMS_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2, xend=Xend, yend=Yend), size=0.6, color="lightgrey") + 
   geom_point(data=LCMS_GC.pro_prodat, mapping=aes(x=NMDS1, y=NMDS2), size=2, shape=19, color = "maroon") +
   geom_point(data=LCMS_GC.pro_prodat, mapping=aes(x=Xend, y=Yend), size=2, shape=17, color = "lightseagreen") +
-  labs(x="Procrustes axis 1", y="Procrustes axis 2",title = "GC vs LCMS Procrustes Plot") +
+  labs(x="Procrustes axis 1", y="Procrustes axis 2") +
   theme_classic() 
 
 # #LCMS against 1ul and 3ul procrustes to check #### 

@@ -238,3 +238,51 @@ plot(OCG_GC_w_RT_2021$RT002, OCG_GC_w_RT_2021$C002, type = "b",
      main = "Peaks at Retention Times")
 
 #these ones are different
+
+# LCMS RT plot
+## 3UL LCMS RAW DATA READ IN
+OCG_LCMS_3uL <- read.csv("data_csv/OCG_LCMS_3uL_cleaned_w_RT.csv", head=T, check.names = F,stringsAsFactors = T, row.names = 1) #120 of 929 variables
+
+df_long_lcms <- OCG_LCMS_3uL %>%
+  pivot_longer(cols = starts_with("RT"), names_to = "Retention_Time_Column", values_to = "Retention_Time") %>%
+  pivot_longer(cols = starts_with("C"), names_to = "Peak_Area_Column", values_to = "Peak_Area") %>%
+  mutate(
+    Retention_Time_Column = gsub("RT", "", Retention_Time_Column),  # Extract numeric part from RT column name
+    Peak_Area_Column = gsub("C", "", Peak_Area_Column),  # Extract numeric part from C column name
+    Compound = paste0("C", Peak_Area_Column)
+  ) %>%
+  filter(as.numeric(Retention_Time_Column) == as.numeric(Peak_Area_Column))  # Filter to ensure correspondence
+
+ggplot(df_long_lcms, aes(Retention_Time, Peak_Area, color = Compound))+
+  geom_line()+
+  theme_clean()+
+  theme(legend.position = "none")+
+  scale_x_continuous(breaks = seq(1,30, by = 1))+
+  labs(x = "Retention time (min)", y = "Peak Area", title = "LCMS")
+
+# compounds that occur before 5 minutes (coumarins)
+# compounds that occur after 5 minutes (flavonoids)
+
+df_long_lcms <- df_long_lcms %>%
+  mutate(compound_class = case_when(
+    Retention_Time >= 0 & Retention_Time < 3 ~ "Coumarin",
+    Retention_Time >= 3 & Retention_Time < 6 ~ "Glycosylated Coumarin",
+    Retention_Time >= 6 & Retention_Time < 8 ~ "Flavonoid",
+    Retention_Time >= 8 ~ "Glycosylated Flavonoid",
+    TRUE ~ "Unknown"
+  ))
+
+df_long_lcms <- df_long_lcms %>%
+  filter(compound_class != "Unknown")
+
+df_long_lcms <- df_long_lcms[,-c(1:4)]
+
+df_long_lcms$compound_class <- as.factor(df_long_lcms$compound_class)
+str(df_long_lcms)
+
+df_long_lcms <- df_long_lcms %>%
+  distinct(Compound, .keep_all = TRUE)
+
+write.csv(df_long_lcms, file = "data_csv/lcms_compound_class.csv",row.names = FALSE)
+
+

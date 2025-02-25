@@ -121,9 +121,6 @@ md.OCG.GC <- cbind(md.OCG.GC, effective_species = OCG.GC.ef.r)
 glm.OCG.GC <- glm(effective_species ~ Year + Subspecies + Ploidy, family = poisson, data = md.OCG.GC)
 summary(glm.OCG.GC) #year and subspecies sig
 
-glm.OCG.GC.gamma <- glm(effective_species ~ Subspecies + Year + Ploidy, family = Gamma, data=md.OCG.GC)
-summary(glm.OCG.GC.gamma) #year and subspecies is significant
-
 plot(allEffects(glm.OCG.GC))
 
 plot(md.OCG.GC$Year,OCG.GC.ef)
@@ -143,25 +140,21 @@ OCG.LCMS.ef <- exp(OCG.LCMS.shannon)
 OCG.LCMS.ef.r <- round(OCG.LCMS.ef)
 
 md.OCG.LCMS.3 <- cbind(md.OCG.LCMS.3, effective_species = OCG.LCMS.ef.r)
-glm.OCG.LCMS <- glm(effective_species ~ Subspecies + Year, family = poisson, data = md.OCG.LCMS.3)
+glm.OCG.LCMS <- glm(effective_species ~ Subspecies + Year + Ploidy, family = poisson, data = md.OCG.LCMS.3)
 summary(glm.OCG.LCMS)
 
-glm.OCG.LCMS.gamma <- glm(effective_species ~ Subspecies + Year + Ploidy + Location, family = Gamma, data=md.OCG.LCMS.3)
+glm.OCG.LCMS.gamma <- glm(effective_species ~ Subspecies + Year + Ploidy, family = Gamma, data=md.OCG.LCMS.3)
 summary(glm.OCG.LCMS.gamma) #location, subspecies and ploidy is significant
 
 plot(allEffects(glm.OCG.LCMS))
 
-plot(md.OCG.LCMS.3$Year,OCG.LCMS.ef)
-plot(md.OCG.LCMS.3$Subspecies,OCG.LCMS.ef)
-
-ggplot(md.OCG.LCMS.3, aes(Year, effective_species))+
-  geom_boxplot(aes(group = Year, fill = Year))+
-  theme_classic()
+plot(md.OCG.LCMS.3$Year,OCG.LCMS.ef.r)
+plot(md.OCG.LCMS.3$Subspecies,OCG.LCMS.ef.r)
+plot(md.OCG.LCMS.3$Location, OCG.LCMS.ef.r)
 
 ggplot(data = md.OCG.LCMS.3, mapping = aes(x = Subspecies, y = effective_species, fill = Subspecies)) +
   geom_boxplot() +
   theme_classic()
-
 
 # Cleaning for PCAs####
 ## 2012 GC threshold defined ####
@@ -273,36 +266,36 @@ data_normalized_GC.ID <- scale(OCG_GC_subset.t) #1:54, 1:217
 # OCG_GC_yr12 <- merge(OCG_GC_yr12, md.OCG.2012, by = "row.names", all.x = TRUE) #147 of 64
 # OCG_GC_yr21 <- merge(OCG_GC_yr21, md.OCG.2021, by = "row.names", all.x = TRUE) #147 of 59
 
-OCG_GC_btyr <- subset(OCG_GC_subset, row.names(OCG_GC_subset) %in% row.names(md.OCG.GC)) #217 of 54. 
-OCG_GC_btyr <- merge(OCG_GC_btyr, md.OCG.GC, by = "row.names", all.x = TRUE) #217 of 71
-
-# Identify plant IDs with duplicates in both years
-duplicated_plant_ids <- OCG_GC_btyr[duplicated(OCG_GC_btyr$Plant),] #65 of 71 var
-
-#subset to include only 'TRUE' for paired
-OCG_GC_btyr <- OCG_GC_btyr[OCG_GC_btyr$Paired == TRUE, ] #139 of 71 var
-
-# Plant names to remove since they didnt meet the threshold parameters
-plants_to_remove <- c("WAT.2.8", "WAT.2.4", "UTWV.2.10", "UTW.1.10", "UTV.3.5", "UTT.1.1", "MTT.1.6", "IDW.1.6", "CAT.2.9")
-
-# Filter to exclude specified plant names
-OCG_GC_btyr <- OCG_GC_btyr %>%
-  filter(!Plant %in% plants_to_remove) #130 of 71 variables
-
-#cleaning to remove everything except plant ID and compounds
-#5671
-OCG_GC_btyr <- OCG_GC_btyr[, -c(56:71)] #130 of 55
-
-#make the row names the plant id
-rownames(OCG_GC_btyr) <- OCG_GC_btyr[,1]
-
-# Remove the column with the rownames from the dataframe
-OCG_GC_btyr <- OCG_GC_btyr[,-1 ] #130 obs of 54 var
-
-#Compound
-data_normalized_GC_btyr <- scale(OCG_GC_btyr) #1:130, 1:54
-OCG_GC_btyr.t <- t(OCG_GC_btyr)
-data_normalized_GC_btyr.ID <- scale(OCG_GC_btyr.t) #1:54, 1:130
+# OCG_GC_btyr <- subset(OCG_GC_subset, row.names(OCG_GC_subset) %in% row.names(md.OCG.GC)) #217 of 54. 
+# OCG_GC_btyr <- merge(OCG_GC_btyr, md.OCG.GC, by = "row.names", all.x = TRUE) #217 of 71
+# 
+# # Identify plant IDs with duplicates in both years
+# duplicated_plant_ids <- OCG_GC_btyr[duplicated(OCG_GC_btyr$Plant),] #65 of 71 var
+# 
+# #subset to include only 'TRUE' for paired
+# OCG_GC_btyr <- OCG_GC_btyr[OCG_GC_btyr$Paired == TRUE, ] #139 of 71 var
+# 
+# # Plant names to remove since they didnt meet the threshold parameters
+# plants_to_remove <- c("WAT.2.8", "WAT.2.4", "UTWV.2.10", "UTW.1.10", "UTV.3.5", "UTT.1.1", "MTT.1.6", "IDW.1.6", "CAT.2.9")
+# 
+# # Filter to exclude specified plant names
+# OCG_GC_btyr <- OCG_GC_btyr %>%
+#   filter(!Plant %in% plants_to_remove) #130 of 71 variables
+# 
+# #cleaning to remove everything except plant ID and compounds
+# #5671
+# OCG_GC_btyr <- OCG_GC_btyr[, -c(56:71)] #130 of 55
+# 
+# #make the row names the plant id
+# rownames(OCG_GC_btyr) <- OCG_GC_btyr[,1]
+# 
+# # Remove the column with the rownames from the dataframe
+# OCG_GC_btyr <- OCG_GC_btyr[,-1 ] #130 obs of 54 var
+# 
+# #Compound
+# data_normalized_GC_btyr <- scale(OCG_GC_btyr) #1:130, 1:54
+# OCG_GC_btyr.t <- t(OCG_GC_btyr)
+# data_normalized_GC_btyr.ID <- scale(OCG_GC_btyr.t) #1:54, 1:130
 
 ## LCMS scaling ####
 #Compound
@@ -334,12 +327,6 @@ corr_matrix_GC <- cor(data_normalized_GC) #54 compounds
 #ggcorrplot(corr_matrix_GC)
 #Plant ID
 corr_matrix_GC.ID <- cor(data_normalized_GC.ID) # 217 plants
-
-###GC CORRELATION BOTH YEAR
-corr_matrix_GC_btyr <- cor(data_normalized_GC_btyr) #55 compounds
-#ggcorrplot(corr_matrix_GC)
-#Plant ID
-corr_matrix_GC_btyr.ID <- cor(data_normalized_GC_btyr.ID) # 217 plants
 
 ### LCMS CORRELATION 
 #Compound
@@ -431,11 +418,40 @@ ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = 
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "V_4n", col = "tan")
 ordispider(data.pca_2012_ID,groups = md.OCG.GC.2012$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
 
+plotcolor <- c("firebrick","cadetblue","sienna","skyblue","rosybrown","tomato","olivedrab","turquoise","burlywood","mediumaquamarine","darkseagreen")
+
+plot(data.pca_2012_ID$x[, 1], data.pca_2012_ID$x[, 2],
+     xlab="PC 1 (19.81%)", ylab="PC 2 (12.46%)", 
+     main="PCA of gc data by location and subspecies", 
+     col= plotcolor[md.OCG.GC.2012$Location],
+     pch=c(17,16,15)[md.OCG.GC.2012$Subspecies],
+     xlim = range(data.pca_2012_ID$x[, 1], na.rm = TRUE),
+     ylim = range(data.pca_2012_ID$x[, 2], na.rm = TRUE))
+legend("topright", 
+       legend=c("AZ","CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"),
+       col= plotcolor,
+       pch=16,
+       cex=0.8,
+       bty = "n")
+legend("topleft", 
+       legend=c("T","V","W"),
+       col= "black",
+       pch=c(17,19,15),
+       cex=0.8,
+       bty = "n")
+
+
 ### ANOVA for 2012 GC subspecies ploidy ####
 pca_scores_GC12 <- data.pca_2012_ID$x
 GC12_aov_df <- as.data.frame(pca_scores_GC12)
 pca_model_GC_12_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2012$Subsp_ploidy, data = GC12_aov_df)
 summary(pca_model_GC_12_subsppl) #PC 1 1.067e-15, PC2 0.0006886 of 2 dof. F(4) = 32.893, p < 0.001 for PC1. F(4) = 5.5143, p < 0.001
+
+### PERMANOVA for 2012 GC subspecies ploidy ####
+pca_scores_GC12 <- data.pca_2012_ID$x[, 1:2]
+GC_12_PCA_df <- as.data.frame(pca_scores_GC12)
+pca_perm_GC_12_subsppl <- adonis2(pca_scores_GC12 ~ md.OCG.GC.2012$Location + md.OCG.GC.2012$Subsp_ploidy, data = GC_12_PCA_df, method = "euclidean", by = "margin")
+pca_perm_GC_12_subsppl # p = 0.001, R2 = 0.34638
 
 # rarefy and run permanova of 2012 GC
 OCG_GC_2012_subset[is.na(OCG_GC_2012_subset)] <- 0
@@ -595,7 +611,13 @@ ordispider(data.pca_2021_ID,groups = md.OCG.GC.2021$Subsp_ploidy, show.groups = 
 pca_scores_GC21 <- data.pca_2021_ID$x
 GC21_aov_df <- as.data.frame(pca_scores_GC21)
 pca_model_GC_21_subsppl <- aov(cbind(PC1, PC2) ~ md.OCG.GC.2021$Subsp_ploidy, data = GC21_aov_df)
-summary(pca_model_GC_21_subsppl) #F(4) = 4.5663 p < 0.005 (0.002598) for PC1. F(4) = 5.3852, p < 0.001 
+summary(pca_model_GC_21_subsppl) #F(4,65) = 4.5663 p < 0.005 (0.002598) for PC1. F(4) = 5.3852, p < 0.001 
+
+### PERMANOVA for 2021 GC subspecies ploidy ####
+pca_scores_GC21 <- data.pca_2021_ID$x[, 1:2]
+GC_21_PCA_df <- as.data.frame(pca_scores_GC21)
+pca_perm_GC_21_subsppl <- adonis2(pca_scores_GC21 ~ md.OCG.GC.2021$Subsp_ploidy + md.OCG.GC.2021$Location, data = GC_21_PCA_df, method = "euclidean", by = "margin")
+pca_perm_GC_21_subsppl # p = 0.002, R2 = 0.23099
 
 # rarefy and run permanova of 2021 GC
 OCG_GC_2021_subset[is.na(OCG_GC_2021_subset)] <- 0
@@ -719,8 +741,7 @@ legend("topleft",
 #BY SUBSPECIES PLOIDY
 #### This is a nice plot to share!
 plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="PCA of GC data by subspecies, ploidy, and year", 
+     xlab="PC 1 (17.6%)", ylab="PC 2 (10.3%)", 
      col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.GC$Subsp_ploidy],
      pch=c(17,19)[md.OCG.GC$Year],
      xlim = range(data.pca_GC_ID$x[, 1], na.rm = TRUE),
@@ -729,14 +750,20 @@ legend("topright",
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
        col= c("pink","brown","darkgreen",'tan','lightblue'),
        pch=19,
-       cex=0.6,
+       cex=0.8,
        bty = "n")
 legend("topleft", 
        legend=c("2012","2021"),
        col= "black",
        pch=c(17,19),
-       cex=0.6,
+       cex=0.8,
        bty = "n")
+
+### PERMANOVA for GC subspecies ploidy ####
+pca_scores_GC <- data.pca_GC_ID$x[, 1:2]
+GC_PCA_df <- as.data.frame(pca_scores_GC)
+pca_perm_GC_subsppl <- adonis2(pca_scores_GC ~ md.OCG.GC$Subsp_ploidy + md.OCG.GC$Year, data = GC_PCA_df, method = "euclidean")
+pca_perm_GC_subsppl # p = 0.001, R2 = 0.15791 for subbspl R2 = 0.51987, p = 0.001 for year
 
 OCG_GC_subset[is.na(OCG_GC_subset)] <- 0
 summary(rowSums(OCG_GC_subset)) #179 seqs in smallest sample
@@ -752,8 +779,7 @@ PCA_gc_subsploi #subspecies ploidy is significant 0.001
 
 #BY YEAR
 plot(data.pca_GC_ID$x[, 1], data.pca_GC_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="PCA of GC data by year", 
+     xlab = "PC 1 (17.6%)", ylab = "PC 2 (10.3%)",
      col= c("maroon","cyan")[md.OCG.GC$Year],
      pch=19)
 legend("topleft", 
@@ -765,89 +791,6 @@ legend("topleft",
 
 PCA_gc_yr <- adonis2(OCG_GC_subset.r ~ md.OCG.GC$Year, by = "margin")
 PCA_gc_yr #year is significant 0.001
-
-## GC PCA for existing in both years ####
-data.pca_GC_btyr_ID <- prcomp(data_normalized_GC_btyr)
-summary(data.pca_GC_btyr_ID)
-fviz_eig(data.pca_GC_btyr_ID, addlabels = TRUE) #22% and 9.7%
-fviz_cos2(data.pca_GC_btyr_ID, choice = "var", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each compound
-fviz_cos2(data.pca_GC_btyr_ID, choice = "ind", axes = 1:2, xtickslab.rt = 90, top = 20) #Contribution of each plant
-autoplot(data.pca_GC_btyr_ID)
-autoplot(data.pca_GC_btyr_ID, label = TRUE)
-
-md.OCG.GC.btyr <- subset(md.OCG, row.names(md.OCG) %in% row.names(OCG_GC_btyr)) #130
-
-rownames(OCG_GC_btyr) == rownames(md.OCG.GC.btyr) 
-
-#BY PLOIDY
-plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="GC plants in both years by ploidy", 
-     col= c("red","blue")[md.OCG.GC.btyr$Ploidy],
-     pch=c(19),
-     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
-     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
-legend("topleft", 
-       legend=c("2n","4n"),
-       col= c("red","blue"),
-       pch=19,
-       cex=0.8,
-       bty = "n")
-
-#BY SUBSPECIES
-plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="GC of plants from both years by subspecies", 
-     col= c("pink","brown",'darkgreen')[md.OCG.GC.btyr$Subspecies],
-     pch=c(19),
-     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
-     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
-legend("topleft",
-       legend=c("Tridentata","Vaseyana","Wyomingensis"),
-       col= c("pink","brown","darkgreen"),
-       pch=19,
-       cex=0.8,
-       bty = "n")
-
-#BY SUBSPECIES PLOIDY
-plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="PCA of GC from plants in both years by subspecies, ploidy, and year", 
-     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.GC.btyr$Subsp_ploidy],
-     pch=c(17,19)[md.OCG.GC.btyr$Year],
-     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
-     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
-legend("topright", 
-       legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("pink","brown","darkgreen",'tan','lightblue'),
-       pch=19,
-       cex=0.6,
-       bty = "n")
-legend("topleft", 
-       legend=c("2012","2021"),
-       col= "black",
-       pch=c(17,19),
-       cex=0.6,
-       bty = "n")
-
-#permanova for subspecies ploidy
-PCA_GCbtyr_subsploi <- adonis2(OCG_GC_btyr ~ md.OCG.GC.btyr$Subsp_ploidy, by = "margin")
-PCA_GCbtyr_subsploi #subspecies ploidy is significant 0.001
-
-#BY YEAR
-plot(data.pca_GC_btyr_ID$x[, 1], data.pca_GC_btyr_ID$x[, 2],
-     xlab="PC 1", ylab="PC 2", 
-     main="GC of plants in both years by year", 
-     col= c("maroon","cyan")[md.OCG.GC.btyr$Year],
-     pch=c(19),
-     xlim = range(data.pca_GC_btyr_ID$x[, 1], na.rm = TRUE),
-     ylim = range(data.pca_GC_btyr_ID$x[, 2], na.rm = TRUE))
-legend("topleft", 
-       legend=c("2012","2021"),
-       col= c("maroon","cyan"),
-       pch=19,
-       cex=0.8,
-       bty = "n")
 
 ## Full LCMS PCA ####
 data_LCMS3_normalized.t <- t(data_LCMS3_normalized)
@@ -915,13 +858,13 @@ legend("topleft",
 plot(data.pca_LCMS3_ID$x[, 1], data.pca_LCMS3_ID$x[, 2],
      xlab="PC 1 (13.51%)", ylab="PC 2 (9.51%)", 
      main="PCA of LCMS data by subspecies, ploidy, and year", 
-     col= c("pink","brown",'darkgreen','tan','lightblue')[md.OCG.LCMS.3$Subsp_ploidy],
+     col= c("lightcoral","goldenrod",'olivedrab','lightseagreen','thistle')[md.OCG.LCMS.3$Subsp_ploidy],
      pch=c(17,19)[md.OCG.LCMS.3$Year],
      xlim = range(data.pca_LCMS3_ID$x[, 1], na.rm = TRUE),
      ylim = range(data.pca_LCMS3_ID$x[, 2], na.rm = TRUE))
 legend("topright", 
        legend=c("T_2n","T_4n","V_2n","V_4n","W_4n"),
-       col= c("pink","brown","darkgreen",'tan','lightblue'),
+       col= c("lightcoral","goldenrod",'olivedrab','lightseagreen','thistle'),
        pch=19,
        cex=0.8,
        bty = "n")
@@ -931,11 +874,11 @@ legend("topleft",
        pch=c(17,19),
        cex=0.8,
        bty = "n")
-ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_2n", col = "pink")
-ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_4n", col = "brown")
-ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_2n", col = "darkgreen")
-ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_4n", col = "tan")
-ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "W_4n", col = "lightblue")
+ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_2n", col = "lightcoral")
+ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "T_4n", col = "goldenrod")
+ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_2n", col = "olivedrab")
+ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "V_4n", col = "lightseagreen")
+ordispider(data.pca_LCMS3_ID,groups = md.OCG.LCMS.3$Subsp_ploidy, show.groups = "W_4n", col = "thistle")
 
 summary(rowSums(OCG_LCMS_3uL_subset)) #31016795 seqs in smallest sample
 summary(colSums(OCG_LCMS_3uL_subset)) #384380
@@ -945,6 +888,8 @@ summary(colSums(OCG_LCMS_3uL_subset)) #384380
 OCG_LCMS_3uL_subset.r <- rrarefy(round(OCG_LCMS_3uL_subset),sample = 31016795) #warning
 
 #permanova for subspecies ploidy
+
+
 PCA_lcms_subsploi.r <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$Subsp_ploidy, by = "margin")
 PCA_lcms_subsploi.r #subspecies ploidy is significant 0.001
 
@@ -991,6 +936,16 @@ legend("topleft",
        pch=c(17,19,15),
        cex=0.8,
        bty = "n")
+
+### PERMANOVA for LCMS subspecies ploidy ####
+pca_scores_LCMS <- data.pca_LCMS3_ID$x[, 1:2]
+LCMS_PCA_df <- as.data.frame(pca_scores_LCMS)
+pca_perm_lcms_subsppl <- adonis2(pca_scores_LCMS ~ md.OCG.LCMS.3$Subsp_ploidy + md.OCG.LCMS.3$Year, data = LCMS_PCA_df, method = "euclidean")
+pca_perm_lcms_subsppl # p = 0.001, R2 = 0.4620 for subbspl R2 = 0.01115, p = 0.120 for year
+
+### PERMANOVA for LCMS Location ####
+pca_perm_lcms_loc <- adonis2(pca_scores_LCMS ~ md.OCG.LCMS.3$Location + md.OCG.LCMS.3$Subsp_ploidy + md.OCG.LCMS.3$Year, data = LCMS_PCA_df, by = "margin", method = "euclidean")
+pca_perm_lcms_loc # p = 0.001, R2 = 0.59972 for location R2 = 0.02828, p = 0.002 for year
 
 PCA_lcms_loc.r <- adonis2(OCG_LCMS_3uL_subset.r ~ md.OCG.LCMS.3$Location, by = "margin")
 PCA_lcms_loc.r #subspecies ploidy is significant 0.001
@@ -2515,131 +2470,131 @@ ANCOM.main = function(OTUdat,Vardat,
 
 #####End of functions
 
-#FULL GC ANCOM ####
-##Remove entries with insufficient areas
-OCG_GC_subset[OCG_GC_subset < 10] <- 0
-OCG_GC_subset.a <- OCG_GC_subset[rowSums(OCG_GC_subset) > 0,] # each observation needs at least 10
-
-summary(rowSums(OCG_GC_subset.a)) #179
-summary(colSums(OCG_GC_subset.a)) #2500
-
-OCG_GC_subset.a <- OCG_GC_subset.a[,colSums(OCG_GC_subset.a) > 10] # each sample needs at least 10 
-
-md.OCG.GC.a <- subset(md.OCG.GC, row.names(md.OCG.GC) %in% row.names(OCG_GC_subset.a)) 
-
-OCG_GC_subset.a.t <- t(OCG_GC_subset.a) 
-OCG_GC_subset.a_t <- OCG_GC_subset.a.t[, colnames(OCG_GC_subset.a.t) %in% row.names(md.OCG.GC.a), drop = FALSE]
-OCG_GC_subset.a <- t(OCG_GC_subset.a_t)
-OCG_GC_subset.a <- as.data.frame(OCG_GC_subset.a) 
-
-OCG_GC_subset.a[OCG_GC_subset.a < 10] <- 0  # repeat cleaning after trimming
-OCG_GC_subset.a <- OCG_GC_subset.a[rowSums(OCG_GC_subset.a) > 0,] # each observation needs at least 10
-
-summary(rowSums(OCG_GC_subset.a)) #179
-summary(colSums(OCG_GC_subset.a)) #2500
-
-OCG_GC_subset.a <- OCG_GC_subset.a[,colSums(OCG_GC_subset.a) > 10]
-
-#ANCOM requires that data be formatted so that first *column* is named "Sample.ID"
-md.OCG.GC_sbst <- data.frame("Sample.ID" = row.names(md.OCG.GC.a), md.OCG.GC.a)
-OCG_GC_sbst <- data.frame("Sample.ID" = row.names(OCG_GC_subset.a), OCG_GC_subset.a, check.names = F)
-row.names(OCG_GC_sbst) == row.names(md.OCG.GC_sbst) #TRUE
-
-### ANCOM SUBSPECIES GC ####
-ANCOM_subspecies_GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Subspecies",NULL,NULL,F,NULL,2,.05,.9)
-
-#Create objects of significant ASVs
-sigGC_subspecies <- subset(ANCOM_subspecies_GC$W.taxa, ANCOM_subspecies_GC$W.taxa$W_stat > 0)[,1]
-sigGC_subspecies <- as.data.frame(sigGC_subspecies) 
-row.names(sigGC_subspecies) <- sigGC_subspecies[53:1,1] 
-
-sigGC_subspecies[,1] <- c(53:1) 
-sigGC_subspecies_t <- t(sigGC_subspecies) 
-sigGC_subspecies_t <- as.data.frame(sigGC_subspecies_t)
-colnames(sigGC_subspecies_t) <- as.character(colnames(sigGC_subspecies_t))
-print(colnames(sigGC_subspecies_t))   
-sigGC_subspecies_t <- sigGC_subspecies_t[,order(colnames(sigGC_subspecies_t))]
-rownames(sigGC_subspecies_t) <- c("sig_rank")
-
-GC.OCG_sig_subspecies <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_subspecies)))
-GC.OCG_sig_subspecies <- GC.OCG_sig_subspecies[,order(colnames(GC.OCG_sig_subspecies))]
-colnames(sigGC_subspecies_t) == colnames(GC.OCG_sig_subspecies) #TRUE
-
-GC.OCG_sig_subspecies <- rbind(GC.OCG_sig_subspecies, sigGC_subspecies_t)
-GC.OCG_sig_subspecies_t <- as.data.frame(t(GC.OCG_sig_subspecies))
-GC.OCG_sig_subspecies_t$sig_rank <- as.numeric(GC.OCG_sig_subspecies_t$sig_rank) 
-GC.OCG_sig_subspecies_t <- GC.OCG_sig_subspecies_t[order(GC.OCG_sig_subspecies_t$sig_rank),] 
-GC.OCG_sig_subspecies_t <- subset(GC.OCG_sig_subspecies_t, select=-c(sig_rank))
-GC.OCG_sig_subspecies_t <- as.data.frame(t(GC.OCG_sig_subspecies_t))
-
-#Build objects for plotting
-sbsplotGC <- data.frame(GC.OCG_sig_subspecies_t[,1:10], "subspecies" = md.OCG.GC_sbst$Subspecies, check.names = FALSE)
-sbsplotGC[,1:10] <- lapply(sbsplotGC[,1:10], function(x) as.numeric(as.character(x)))
-sbsplotGC[,1:10] <- log(sbsplotGC[,1:10]+1)
-sbsplotGC_sub <- data.frame(sample=rownames(sbsplotGC),sbsplotGC, check.names = F)
-sbsplotGC_sublong <- melt(sbsplotGC_sub)
-
-ANCOM_subspecies_GC$W.taxa
-
-sbsplotGC_sublong$subspecies <-  factor(sbsplotGC_sublong$subspecies, levels = c("T", "V", "W"))
-
-##### SUBSPECIES FIGURE TOP ANCOM COMPOUNDS ALL GC ####
-sp1 <- ggplot(sbsplotGC_sublong, aes(y = value, x = subspecies, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
-  ggtitle("Full GC ANCOM for Subspecies")+ 
-  theme_classic()
-
-# ## YEAR Full GC ####
-# #Run ANCOM, specify variable
-# ANCOM_yr.GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
+# #FULL GC ANCOM ####
+# ##Remove entries with insufficient areas
+# OCG_GC_subset[OCG_GC_subset < 10] <- 0
+# OCG_GC_subset.a <- OCG_GC_subset[rowSums(OCG_GC_subset) > 0,] # each observation needs at least 10
 # 
-# sigGC_yr <- subset(ANCOM_yr.GC$W.taxa, ANCOM_yr.GC$W.taxa$W_stat > 0)[,1]
-# sigGC_yr <- as.data.frame(sigGC_yr)
-# row.names(sigGC_yr) <- sigGC_yr[54:1,1]
-# sigGC_yr[,1] <- c(54:1)
+# summary(rowSums(OCG_GC_subset.a)) #179
+# summary(colSums(OCG_GC_subset.a)) #2500
 # 
-# sigGC_yr_t <- t(sigGC_yr)
-# sigGC_yr_t <- as.data.frame(sigGC_yr_t)
-# colnames(sigGC_yr_t) <- as.character(colnames(sigGC_yr_t))
-# print(colnames(sigGC_yr_t))
-# sigGC_yr_t <- sigGC_yr_t[,order(colnames(sigGC_yr_t))]
-# rownames(sigGC_yr_t) <- c("sig_rank")
+# OCG_GC_subset.a <- OCG_GC_subset.a[,colSums(OCG_GC_subset.a) > 10] # each sample needs at least 10 
 # 
-# GC_sig_yr <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_yr)))
+# md.OCG.GC.a <- subset(md.OCG.GC, row.names(md.OCG.GC) %in% row.names(OCG_GC_subset.a)) 
 # 
-# GC_sig_yr <- GC_sig_yr[,order(colnames(GC_sig_yr))]
-# colnames(sigGC_yr_t) == colnames(GC_sig_yr) #sanity check:TRUE
+# OCG_GC_subset.a.t <- t(OCG_GC_subset.a) 
+# OCG_GC_subset.a_t <- OCG_GC_subset.a.t[, colnames(OCG_GC_subset.a.t) %in% row.names(md.OCG.GC.a), drop = FALSE]
+# OCG_GC_subset.a <- t(OCG_GC_subset.a_t)
+# OCG_GC_subset.a <- as.data.frame(OCG_GC_subset.a) 
 # 
-# GC_sig_yr <- rbind(GC_sig_yr, sigGC_yr_t)
-# GC_sig_yr_t <- as.data.frame(t(GC_sig_yr))
-# GC_sig_yr_t$sig_rank <- as.numeric(GC_sig_yr_t$sig_rank) 
-# GC_sig_yr_t <- GC_sig_yr_t[order(GC_sig_yr_t$sig_rank),] 
-# GC_sig_yr_t <- subset(GC_sig_yr_t, select=-c(sig_rank))
-# GC_sig_yr_t <- as.data.frame(t(GC_sig_yr_t))
+# OCG_GC_subset.a[OCG_GC_subset.a < 10] <- 0  # repeat cleaning after trimming
+# OCG_GC_subset.a <- OCG_GC_subset.a[rowSums(OCG_GC_subset.a) > 0,] # each observation needs at least 10
+# 
+# summary(rowSums(OCG_GC_subset.a)) #179
+# summary(colSums(OCG_GC_subset.a)) #2500
+# 
+# OCG_GC_subset.a <- OCG_GC_subset.a[,colSums(OCG_GC_subset.a) > 10]
+# 
+# #ANCOM requires that data be formatted so that first *column* is named "Sample.ID"
+# md.OCG.GC_sbst <- data.frame("Sample.ID" = row.names(md.OCG.GC.a), md.OCG.GC.a)
+# OCG_GC_sbst <- data.frame("Sample.ID" = row.names(OCG_GC_subset.a), OCG_GC_subset.a, check.names = F)
+# row.names(OCG_GC_sbst) == row.names(md.OCG.GC_sbst) #TRUE
+# 
+# ### ANCOM SUBSPECIES GC ####
+# ANCOM_subspecies_GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Subspecies",NULL,NULL,F,NULL,2,.05,.9)
+# 
+# #Create objects of significant ASVs
+# sigGC_subspecies <- subset(ANCOM_subspecies_GC$W.taxa, ANCOM_subspecies_GC$W.taxa$W_stat > 0)[,1]
+# sigGC_subspecies <- as.data.frame(sigGC_subspecies) 
+# row.names(sigGC_subspecies) <- sigGC_subspecies[53:1,1] 
+# 
+# sigGC_subspecies[,1] <- c(53:1) 
+# sigGC_subspecies_t <- t(sigGC_subspecies) 
+# sigGC_subspecies_t <- as.data.frame(sigGC_subspecies_t)
+# colnames(sigGC_subspecies_t) <- as.character(colnames(sigGC_subspecies_t))
+# print(colnames(sigGC_subspecies_t))   
+# sigGC_subspecies_t <- sigGC_subspecies_t[,order(colnames(sigGC_subspecies_t))]
+# rownames(sigGC_subspecies_t) <- c("sig_rank")
+# 
+# GC.OCG_sig_subspecies <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_subspecies)))
+# GC.OCG_sig_subspecies <- GC.OCG_sig_subspecies[,order(colnames(GC.OCG_sig_subspecies))]
+# colnames(sigGC_subspecies_t) == colnames(GC.OCG_sig_subspecies) #TRUE
+# 
+# GC.OCG_sig_subspecies <- rbind(GC.OCG_sig_subspecies, sigGC_subspecies_t)
+# GC.OCG_sig_subspecies_t <- as.data.frame(t(GC.OCG_sig_subspecies))
+# GC.OCG_sig_subspecies_t$sig_rank <- as.numeric(GC.OCG_sig_subspecies_t$sig_rank) 
+# GC.OCG_sig_subspecies_t <- GC.OCG_sig_subspecies_t[order(GC.OCG_sig_subspecies_t$sig_rank),] 
+# GC.OCG_sig_subspecies_t <- subset(GC.OCG_sig_subspecies_t, select=-c(sig_rank))
+# GC.OCG_sig_subspecies_t <- as.data.frame(t(GC.OCG_sig_subspecies_t))
 # 
 # #Build objects for plotting
-# plotGC.yr <- data.frame(GC_sig_yr_t[,1:10], "year" = md.OCG.GC_sbst$Year, check.names = FALSE)
-# plotGC.yr[,1:10] <- lapply(plotGC.yr[,1:10], function(x) as.numeric(as.character(x)))
-# plotGC.yr[,1:10] <- log(plotGC.yr[,1:10]+1)
-# plotGC.yr_sub <- data.frame(sample=rownames(plotGC.yr),plotGC.yr, check.names = F)
-# plotGC.yr_sublong <- melt(plotGC.yr_sub)
+# sbsplotGC <- data.frame(GC.OCG_sig_subspecies_t[,1:10], "subspecies" = md.OCG.GC_sbst$Subspecies, check.names = FALSE)
+# sbsplotGC[,1:10] <- lapply(sbsplotGC[,1:10], function(x) as.numeric(as.character(x)))
+# sbsplotGC[,1:10] <- log(sbsplotGC[,1:10]+1)
+# sbsplotGC_sub <- data.frame(sample=rownames(sbsplotGC),sbsplotGC, check.names = F)
+# sbsplotGC_sublong <- melt(sbsplotGC_sub)
 # 
-# plotGC.yr$year <-  factor(plotGC.yr$year, levels = c("2012","2021"))
+# ANCOM_subspecies_GC$W.taxa
 # 
-# ### FIGURE FOR YEAR ####
-# ggplot(plotGC.yr_sublong, aes(y = value, x = year, color=variable))+
+# sbsplotGC_sublong$subspecies <-  factor(sbsplotGC_sublong$subspecies, levels = c("T", "V", "W"))
+# 
+# ##### SUBSPECIES FIGURE TOP ANCOM COMPOUNDS ALL GC ####
+# sp1 <- ggplot(sbsplotGC_sublong, aes(y = value, x = subspecies, color=variable))+
 #   geom_boxplot(outlier.shape = NA) + 
 #   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
 #   scale_color_brewer(palette = "Spectral")+
 #   ylab("Log  rel. abundance") + xlab("Subspecies") + 
-#   ggtitle("GC ANCOM for year")+
-#   labs(color = "Compounds") +
+#   ggtitle("Full GC ANCOM for Subspecies")+ 
 #   theme_classic()
-
-# 2012 GC ANCOM ####
+# 
+# # ## YEAR Full GC ####
+# # #Run ANCOM, specify variable
+# # ANCOM_yr.GC <- ANCOM.main(OCG_GC_sbst,md.OCG.GC_sbst,F,F,"Year",NULL,NULL,F,NULL,2,.05,.9)
+# # 
+# # sigGC_yr <- subset(ANCOM_yr.GC$W.taxa, ANCOM_yr.GC$W.taxa$W_stat > 0)[,1]
+# # sigGC_yr <- as.data.frame(sigGC_yr)
+# # row.names(sigGC_yr) <- sigGC_yr[54:1,1]
+# # sigGC_yr[,1] <- c(54:1)
+# # 
+# # sigGC_yr_t <- t(sigGC_yr)
+# # sigGC_yr_t <- as.data.frame(sigGC_yr_t)
+# # colnames(sigGC_yr_t) <- as.character(colnames(sigGC_yr_t))
+# # print(colnames(sigGC_yr_t))
+# # sigGC_yr_t <- sigGC_yr_t[,order(colnames(sigGC_yr_t))]
+# # rownames(sigGC_yr_t) <- c("sig_rank")
+# # 
+# # GC_sig_yr <-  t(subset(t(OCG_GC_sbst), colnames(OCG_GC_sbst) %in% row.names(sigGC_yr)))
+# # 
+# # GC_sig_yr <- GC_sig_yr[,order(colnames(GC_sig_yr))]
+# # colnames(sigGC_yr_t) == colnames(GC_sig_yr) #sanity check:TRUE
+# # 
+# # GC_sig_yr <- rbind(GC_sig_yr, sigGC_yr_t)
+# # GC_sig_yr_t <- as.data.frame(t(GC_sig_yr))
+# # GC_sig_yr_t$sig_rank <- as.numeric(GC_sig_yr_t$sig_rank) 
+# # GC_sig_yr_t <- GC_sig_yr_t[order(GC_sig_yr_t$sig_rank),] 
+# # GC_sig_yr_t <- subset(GC_sig_yr_t, select=-c(sig_rank))
+# # GC_sig_yr_t <- as.data.frame(t(GC_sig_yr_t))
+# # 
+# # #Build objects for plotting
+# # plotGC.yr <- data.frame(GC_sig_yr_t[,1:10], "year" = md.OCG.GC_sbst$Year, check.names = FALSE)
+# # plotGC.yr[,1:10] <- lapply(plotGC.yr[,1:10], function(x) as.numeric(as.character(x)))
+# # plotGC.yr[,1:10] <- log(plotGC.yr[,1:10]+1)
+# # plotGC.yr_sub <- data.frame(sample=rownames(plotGC.yr),plotGC.yr, check.names = F)
+# # plotGC.yr_sublong <- melt(plotGC.yr_sub)
+# # 
+# # plotGC.yr$year <-  factor(plotGC.yr$year, levels = c("2012","2021"))
+# # 
+# # ### FIGURE FOR YEAR ####
+# # ggplot(plotGC.yr_sublong, aes(y = value, x = year, color=variable))+
+# #   geom_boxplot(outlier.shape = NA) + 
+# #   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+# #   scale_color_brewer(palette = "Spectral")+
+# #   ylab("Log  rel. abundance") + xlab("Subspecies") + 
+# #   ggtitle("GC ANCOM for year")+
+# #   labs(color = "Compounds") +
+# #   theme_classic()
+# 
+# # 2012 GC ANCOM ####
 summary(rowSums(OCG_GC_2012_subset)) #7962
 summary(colSums(OCG_GC_2012_subset)) #2358
 
@@ -2695,9 +2650,9 @@ GC.2012.OCG_sigsbst_subspecies_t <- subset(GC.2012.OCG_sigsbst_subspecies_t, sel
 GC.2012.OCG_sigsbst_subspecies_t <- as.data.frame(t(GC.2012.OCG_sigsbst_subspecies_t))
 
 #Build objects for plotting
-sbsplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_subspecies_t[,1:10], "subspecies" = md.OCG.GC.2012_sbst$Subspecies, check.names = FALSE)
-sbsplotGC2012[,1:10] <- lapply(sbsplotGC2012[,1:10], function(x) as.numeric(as.character(x)))
-sbsplotGC2012[,1:10] <- log(sbsplotGC2012[,1:10]+1)
+sbsplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_subspecies_t[,1:7], "subspecies" = md.OCG.GC.2012_sbst$Subspecies, check.names = FALSE)
+sbsplotGC2012[,1:7] <- lapply(sbsplotGC2012[,1:7], function(x) as.numeric(as.character(x)))
+sbsplotGC2012[,1:7] <- log(sbsplotGC2012[,1:7]+1)
 sbsplotGC2012_sub <- data.frame(sample=rownames(sbsplotGC2012),sbsplotGC2012, check.names = F)
 sbsplotGC2012_sublong <- melt(sbsplotGC2012_sub)
 
@@ -2706,68 +2661,68 @@ ANCOM_subspecies_GC.2012$W.taxa
 sbsplotGC2012_sublong$subspecies <-  factor(sbsplotGC2012_sublong$subspecies, levels = c("T", "V", "W"))
 
 #### SUBSPECIES FIGURE TOP ANCOM COMPOUNDS 2012 GC ####
-sp2 <- ggplot(sbsplotGC2012_sublong, aes(y = value, x = subspecies, color=variable))+
+ggplot(sbsplotGC2012_sublong, aes(y = value, x = subspecies, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
+  scale_color_brewer(palette = "Dark2")+
   ylab("Log  rel. abundance") + xlab("Subspecies") + 
   ggtitle("2012 GC ANCOM for Subspecies")+
   labs(color = "Compounds") +
   theme_classic()
 
-## PLOIDY 2012 GC ####
-#Run ANCOM, specify variable
-ANCOM_ploidy_GC_2012 <- ANCOM.main(OCG_GC_2012_sbst,md.OCG.GC.2012_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
-
-#Create objects of significant compounds
-sigGC.2012_ploidy <- subset(ANCOM_ploidy_GC_2012$W.taxa, ANCOM_ploidy_GC_2012$W.taxa$W_stat > 0)[,1]
-sigGC.2012_ploidy <- as.data.frame(sigGC.2012_ploidy) 
-row.names(sigGC.2012_ploidy) <- sigGC.2012_ploidy[46:1,1] 
-
-sigGC.2012_ploidy[,1] <- c(46:1) 
-sigGC.2012_ploidy_t <- t(sigGC.2012_ploidy) 
-sigGC.2012_ploidy_t <- as.data.frame(sigGC.2012_ploidy_t)
-colnames(sigGC.2012_ploidy_t) <- as.character(colnames(sigGC.2012_ploidy_t))
-print(colnames(sigGC.2012_ploidy_t))
-
-sigGC.2012_ploidy_t <- sigGC.2012_ploidy_t[,order(colnames(sigGC.2012_ploidy_t))]
-rownames(sigGC.2012_ploidy_t) <- c("sig_rank")
-GC.2012.OCG_sigsbst_ploidy <-  t(subset(t(OCG_GC_2012_sbst), colnames(OCG_GC_2012_sbst) %in% row.names(sigGC.2012_ploidy)))
-
-GC.2012.OCG_sigsbst_ploidy <- GC.2012.OCG_sigsbst_ploidy[,order(colnames(GC.2012.OCG_sigsbst_ploidy))]
-colnames(sigGC.2012_subspecies_t) == colnames(GC.2012.OCG_sigsbst_ploidy) #sanity check:TRUE
-
-GC.2012.OCG_sigsbst_ploidy <- rbind(GC.2012.OCG_sigsbst_ploidy, sigGC.2012_ploidy_t)
-GC.2012.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_ploidy))
-GC.2012.OCG_sigsbst_ploidy_t$sig_rank <- as.numeric(GC.2012.OCG_sigsbst_ploidy_t$sig_rank) 
-GC.2012.OCG_sigsbst_ploidy_t <- GC.2012.OCG_sigsbst_ploidy_t[order(GC.2012.OCG_sigsbst_ploidy_t$sig_rank),] 
-GC.2012.OCG_sigsbst_ploidy_t <- subset(GC.2012.OCG_sigsbst_ploidy_t, select=-c(sig_rank))
-GC.2012.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_ploidy_t))
-
-#Build objects for plotting
-plplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_ploidy_t[,1:10], "ploidy" = md.OCG.GC.2012_sbst$Ploidy, check.names = FALSE)
-plplotGC2012[,1:10] <- lapply(plplotGC2012[,1:10], function(x) as.numeric(as.character(x)))
-plplotGC2012[,1:10] <- log(plplotGC2012[,1:10]+1)
-plplotGC2012_sub <- data.frame(sample=rownames(plplotGC2012),plplotGC2012, check.names = F)
-plplotGC2012_sublong <- melt(plplotGC2012_sub)
-
-ANCOM_subspecies_GC.2012$W.taxa
-
-plplotGC2012_sublong$ploidy<-  factor(plplotGC2012_sublong$ploidy, levels = c("2n", "4n"))
-
-#### PLOIDY FIGURE TOP ANCOM COMPOUNDS 2012 GC ####
-pl1 <- ggplot(sbsplotGC2012.ploidy_sublong, aes(y = value, x = subspecies, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
-  ggtitle("2012 GC ANCOM for Ploidy")+
-  labs(color = "Compounds") +
-  theme_classic()
-
-
-## SUBSPECIES PLOIDY 2012 GC ####
-#Run ANCOM, specify variable
+# ## PLOIDY 2012 GC ####
+# #Run ANCOM, specify variable
+# ANCOM_ploidy_GC_2012 <- ANCOM.main(OCG_GC_2012_sbst,md.OCG.GC.2012_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
+# 
+# #Create objects of significant compounds
+# sigGC.2012_ploidy <- subset(ANCOM_ploidy_GC_2012$W.taxa, ANCOM_ploidy_GC_2012$W.taxa$W_stat > 0)[,1]
+# sigGC.2012_ploidy <- as.data.frame(sigGC.2012_ploidy) 
+# row.names(sigGC.2012_ploidy) <- sigGC.2012_ploidy[46:1,1] 
+# 
+# sigGC.2012_ploidy[,1] <- c(46:1) 
+# sigGC.2012_ploidy_t <- t(sigGC.2012_ploidy) 
+# sigGC.2012_ploidy_t <- as.data.frame(sigGC.2012_ploidy_t)
+# colnames(sigGC.2012_ploidy_t) <- as.character(colnames(sigGC.2012_ploidy_t))
+# print(colnames(sigGC.2012_ploidy_t))
+# 
+# sigGC.2012_ploidy_t <- sigGC.2012_ploidy_t[,order(colnames(sigGC.2012_ploidy_t))]
+# rownames(sigGC.2012_ploidy_t) <- c("sig_rank")
+# GC.2012.OCG_sigsbst_ploidy <-  t(subset(t(OCG_GC_2012_sbst), colnames(OCG_GC_2012_sbst) %in% row.names(sigGC.2012_ploidy)))
+# 
+# GC.2012.OCG_sigsbst_ploidy <- GC.2012.OCG_sigsbst_ploidy[,order(colnames(GC.2012.OCG_sigsbst_ploidy))]
+# colnames(sigGC.2012_subspecies_t) == colnames(GC.2012.OCG_sigsbst_ploidy) #sanity check:TRUE
+# 
+# GC.2012.OCG_sigsbst_ploidy <- rbind(GC.2012.OCG_sigsbst_ploidy, sigGC.2012_ploidy_t)
+# GC.2012.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_ploidy))
+# GC.2012.OCG_sigsbst_ploidy_t$sig_rank <- as.numeric(GC.2012.OCG_sigsbst_ploidy_t$sig_rank) 
+# GC.2012.OCG_sigsbst_ploidy_t <- GC.2012.OCG_sigsbst_ploidy_t[order(GC.2012.OCG_sigsbst_ploidy_t$sig_rank),] 
+# GC.2012.OCG_sigsbst_ploidy_t <- subset(GC.2012.OCG_sigsbst_ploidy_t, select=-c(sig_rank))
+# GC.2012.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_ploidy_t))
+# 
+# #Build objects for plotting
+# plplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_ploidy_t[,1:10], "ploidy" = md.OCG.GC.2012_sbst$Ploidy, check.names = FALSE)
+# plplotGC2012[,1:10] <- lapply(plplotGC2012[,1:10], function(x) as.numeric(as.character(x)))
+# plplotGC2012[,1:10] <- log(plplotGC2012[,1:10]+1)
+# plplotGC2012_sub <- data.frame(sample=rownames(plplotGC2012),plplotGC2012, check.names = F)
+# plplotGC2012_sublong <- melt(plplotGC2012_sub)
+# 
+# ANCOM_subspecies_GC.2012$W.taxa
+# 
+# plplotGC2012_sublong$ploidy<-  factor(plplotGC2012_sublong$ploidy, levels = c("2n", "4n"))
+# 
+# #### PLOIDY FIGURE TOP ANCOM COMPOUNDS 2012 GC ####
+# pl1 <- ggplot(sbsplotGC2012.ploidy_sublong, aes(y = value, x = subspecies, color=variable))+
+#   geom_boxplot(outlier.shape = NA) + 
+#   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+#   scale_color_brewer(palette = "Spectral")+
+#   ylab("Log  rel. abundance") + xlab("Subspecies") + 
+#   ggtitle("2012 GC ANCOM for Ploidy")+
+#   labs(color = "Compounds") +
+#   theme_classic()
+# 
+# 
+# ## SUBSPECIES PLOIDY 2012 GC ####
+# #Run ANCOM, specify variable
 ANCOM_subsp_ploidy.GC12 <- ANCOM.main(OCG_GC_2012_sbst, md.OCG.GC.2012_sbst,F,F,"Subsp_ploidy",NULL,NULL,F,NULL,2,.05,.9)
 
 sigGC.2012_subsp_ploidy <- subset(ANCOM_subsp_ploidy.GC12$W.taxa, ANCOM_subsp_ploidy.GC12$W.taxa$W_stat > 0)[,1]
@@ -2791,15 +2746,15 @@ colnames(sigGC.2012_subsp_ploidy_t) == colnames(GC.2012.OCG_sigsbst_subspploidy)
 
 GC.2012.OCG_sigsbst_subspploidy <- rbind(GC.2012.OCG_sigsbst_subspploidy, sigGC.2012_subsp_ploidy_t)
 GC.2012.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_subspploidy))
-GC.2012.OCG_sigsbst_subspploidy_t$sig_rank <- as.numeric(GC.2012.OCG_sigsbst_subspploidy_t$sig_rank) 
-GC.2012.OCG_sigsbst_subspploidy_t <- GC.2012.OCG_sigsbst_subspploidy_t[order(GC.2012.OCG_sigsbst_subspploidy_t$sig_rank),] 
+GC.2012.OCG_sigsbst_subspploidy_t$sig_rank <- as.numeric(GC.2012.OCG_sigsbst_subspploidy_t$sig_rank)
+GC.2012.OCG_sigsbst_subspploidy_t <- GC.2012.OCG_sigsbst_subspploidy_t[order(GC.2012.OCG_sigsbst_subspploidy_t$sig_rank),]
 GC.2012.OCG_sigsbst_subspploidy_t <- subset(GC.2012.OCG_sigsbst_subspploidy_t, select=-c(sig_rank))
 GC.2012.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2012.OCG_sigsbst_subspploidy_t))
 
 #Build objects for plotting
-sbsp.plplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_subspploidy_t[,1:10], "subsp_ploidy" = md.OCG.GC.2012_sbst$Subsp_ploidy, check.names = FALSE)
-sbsp.plplotGC2012[,1:10] <- lapply(sbsp.plplotGC2012[,1:10], function(x) as.numeric(as.character(x)))
-sbsp.plplotGC2012[,1:10] <- log(sbsp.plplotGC2012[,1:10]+1)
+sbsp.plplotGC2012 <- data.frame(GC.2012.OCG_sigsbst_subspploidy_t[,1:7], "subsp_ploidy" = md.OCG.GC.2012_sbst$Subsp_ploidy, check.names = FALSE)
+sbsp.plplotGC2012[,1:7] <- lapply(sbsp.plplotGC2012[,1:7], function(x) as.numeric(as.character(x)))
+sbsp.plplotGC2012[,1:7] <- log(sbsp.plplotGC2012[,1:7]+1)
 sbsp.plplotGC2012_sub <- data.frame(sample=rownames(sbsp.plplotGC2012),sbsp.plplotGC2012, check.names = F)
 sbsp.plplotGC2012_sublong <- melt(sbsp.plplotGC2012_sub)
 
@@ -2807,12 +2762,12 @@ ANCOM_subsp_ploidy.GC12$W.taxa
 
 sbsp.plplotGC2012$subsp_ploidy <-  factor(sbsp.plplotGC2012$subsp_ploidy, levels = c("T_2n", "T_4n", "V_2n", "V_4n", "W_4n"))
 
-#### FIGURE FOR SUBSPECIES PLOIDY ####
-spl1 <- ggplot(sbsp.plplotGC2012_sublong, aes(y = value, x = subsp_ploidy, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
+# #### FIGURE FOR SUBSPECIES PLOIDY ####
+ggplot(sbsp.plplotGC2012_sublong, aes(y = value, x = subsp_ploidy, color=variable))+
+  geom_boxplot(outlier.shape = NA) +
   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
   scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
+  ylab("Log  rel. abundance") + xlab("Subspecies") +
   ggtitle("2012 GC ANCOM for Subspecies and Ploidy")+
   labs(color = "Compounds") +
   theme_classic()
@@ -2884,113 +2839,113 @@ ANCOM_subspecies_GC.2021$W.taxa
 sbsplotGC2021_sublong$subspecies <-  factor(sbsplotGC2021_sublong$subspecies, levels = c("T", "V", "W"))
 
 #### SUBSPECIES FIGURE TOP ANCOM COMPOUNDS 2021 GC ####
-sp3 <- ggplot(sbsplotGC2021_sublong, aes(y = value, x = subspecies, color=variable))+
+ggplot(sbsplotGC2021_sublong, aes(y = value, x = subspecies, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
+  scale_color_brewer(palette = "PRGn")+
   ylab("Log  rel. abundance") + xlab("Subspecies") + 
   ggtitle("2021 GC ANCOM for Subspecies")+theme_classic()
 
-## PLOIDY 2021 GC ####
-#Run ANCOM, specify variable
-ANCOM_ploidy_GC.21 <- ANCOM.main(OCG_GC_2021_sbst,md.OCG.GC.2021_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
-
-sigGC.2021_ploidy <- subset(ANCOM_ploidy_GC.21$W.taxa, ANCOM_ploidy_GC.21$W.taxa$W_stat > 0)[,1]
-sigGC.2021_ploidy <- as.data.frame(sigGC.2021_ploidy)
-row.names(sigGC.2021_ploidy) <- sigGC.2021_ploidy[37:1,1] 
-
-sigGC.2021_ploidy[,1] <- c(37:1) 
-sigGC.2021_ploidy_t <- t(sigGC.2021_ploidy) 
-sigGC.2021_ploidy_t <- as.data.frame(sigGC.2021_ploidy_t)
-colnames(sigGC.2021_ploidy_t) <- as.character(colnames(sigGC.2021_ploidy_t))
-print(colnames(sigGC.2021_ploidy_t))
-
-sigGC.2021_ploidy_t <- sigGC.2021_ploidy_t[,order(colnames(sigGC.2021_ploidy_t))]
-rownames(sigGC.2021_ploidy_t) <- c("sig_rank")
-
-GC.2021.OCG_sigsbst_ploidy <-  t(subset(t(OCG_GC_2021_sbst), colnames(OCG_GC_2021_sbst) %in% row.names(sigGC.2021_ploidy)))
-
-GC.2021.OCG_sigsbst_ploidy <- GC.2021.OCG_sigsbst_ploidy[,order(colnames(GC.2021.OCG_sigsbst_ploidy))]
-colnames(sigGC.2021_ploidy_t) == colnames(GC.2021.OCG_sigsbst_ploidy) #sanity check:TRUE
-
-GC.2021.OCG_sigsbst_ploidy <- rbind(GC.2021.OCG_sigsbst_ploidy, sigGC.2021_ploidy_t)
-GC.2021.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_ploidy))
-GC.2021.OCG_sigsbst_ploidy_t$sig_rank <- as.numeric(GC.2021.OCG_sigsbst_ploidy_t$sig_rank) 
-GC.2021.OCG_sigsbst_ploidy_t <- GC.2021.OCG_sigsbst_ploidy_t[order(GC.2021.OCG_sigsbst_ploidy_t$sig_rank),] 
-GC.2021.OCG_sigsbst_ploidy_t <- subset(GC.2021.OCG_sigsbst_ploidy_t, select=-c(sig_rank))
-GC.2021.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_ploidy_t))
-
-#Build objects for plotting
-plplotGC2021.ploidy <- data.frame(GC.2021.OCG_sigsbst_ploidy_t[,1:10], "ploidy" = md.OCG.GC.2021_sbst$Ploidy, check.names = FALSE)
-plplotGC2021.ploidy[,1:10] <- lapply(plplotGC2021.ploidy[,1:10], function(x) as.numeric(as.character(x)))
-plplotGC2021.ploidy[,1:10] <- log(plplotGC2021.ploidy[,1:10]+1)
-plplotGC2021.ploidy_sub <- data.frame(sample=rownames(plplotGC2021.ploidy),plplotGC2021.ploidy, check.names = F)
-plplotGC2021.ploidy_sublong <- melt(plplotGC2021.ploidy_sub)
-
-ANCOM_subspecies_GC.2021$W.taxa
-
-plplotGC2021.ploidy_sublong$ploidy<-  factor(plplotGC2021.ploidy_sublong$ploidy, levels = c("2n", "4n"))
-
-#### PLOIDY FIGURE TOP ANCOM COMPOUNDS 2021 GC ####
-pl2 <- ggplot(sbsplotGC2021.ploidy_sublong, aes(y = value, x = ploidy, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Ploidy") + 
-  ggtitle("2021 GC ANCOM for Ploidy")+
-  labs(color = "Compounds") +
-  theme_classic()
-
-## SIGNIFICANCE BY SUBSPECIES PLOIDY 2021 GC ####
-#Run ANCOM, specify variable
-ANCOM_subsp_ploidy.GC21 <- ANCOM.main(OCG_GC_2021_sbst, md.OCG.GC.2021_sbst,F,F,"Subsp_ploidy",NULL,NULL,F,NULL,2,.05,.9)
-
-sigGC.2021_subsp_ploidy <- subset(ANCOM_subsp_ploidy.GC21$W.taxa, ANCOM_subsp_ploidy.GC21$W.taxa$W_stat > 0)[,1]
-sigGC.2021_subsp_ploidy <- as.data.frame(sigGC.2021_subsp_ploidy)
-row.names(sigGC.2021_subsp_ploidy) <- sigGC.2021_subsp_ploidy[36:1,1]
-sigGC.2021_subsp_ploidy[,1] <- c(36:1)
-
-sigGC.2021_subsp_ploidy_t <- t(sigGC.2021_subsp_ploidy)
-sigGC.2021_subsp_ploidy_t <- as.data.frame(sigGC.2021_subsp_ploidy_t)
-colnames(sigGC.2021_subsp_ploidy_t) <- as.character(colnames(sigGC.2021_subsp_ploidy_t))
-print(colnames(sigGC.2021_subsp_ploidy_t))
-sigGC.2021_subsp_ploidy_t <- sigGC.2021_subsp_ploidy_t[,order(colnames(sigGC.2021_subsp_ploidy_t))]
-rownames(sigGC.2021_subsp_ploidy_t) <- c("sig_rank")
-
-#write.csv(ANCOM_subsp_ploidy$W.taxa, file = "data_csv/ANCOM/ANCOM_subsp_ploidy.csv")
-
-GC.2021.OCG_sigsbst_subspploidy <-  t(subset(t(OCG_GC_2021_sbst), colnames(OCG_GC_2021_sbst) %in% row.names(sigGC.2021_subsp_ploidy)))
-
-GC.2021.OCG_sigsbst_subspploidy <- GC.2021.OCG_sigsbst_subspploidy[,order(colnames(GC.2021.OCG_sigsbst_subspploidy))]
-colnames(sigGC.2021_subsp_ploidy_t) == colnames(GC.2021.OCG_sigsbst_subspploidy) #sanity check:TRUE
-
-GC.2021.OCG_sigsbst_subspploidy <- rbind(GC.2021.OCG_sigsbst_subspploidy, sigGC.2021_subsp_ploidy_t)
-GC.2021.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_subspploidy))
-GC.2021.OCG_sigsbst_subspploidy_t$sig_rank <- as.numeric(GC.2021.OCG_sigsbst_subspploidy_t$sig_rank) 
-GC.2021.OCG_sigsbst_subspploidy_t <- GC.2021.OCG_sigsbst_subspploidy_t[order(GC.2021.OCG_sigsbst_subspploidy_t$sig_rank),] 
-GC.2021.OCG_sigsbst_subspploidy_t <- subset(GC.2021.OCG_sigsbst_subspploidy_t, select=-c(sig_rank))
-GC.2021.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_subspploidy_t))
-
-#Build objects for plotting
-sbsp.plplotGC2021 <- data.frame(GC.2021.OCG_sigsbst_subspploidy_t[,1:10], "subsp_ploidy" = md.OCG.GC.2021_sbst$Subsp_ploidy, check.names = FALSE)
-sbsp.plplotGC2021[,1:10] <- lapply(sbsp.plplotGC2021[,1:10], function(x) as.numeric(as.character(x)))
-sbsp.plplotGC2021[,1:10] <- log(sbsp.plplotGC2021[,1:10]+1)
-sbsp.plplotGC2021_sub <- data.frame(sample=rownames(sbsp.plplotGC2021),sbsp.plplotGC2021, check.names = F)
-sbsp.plplotGC2021_sublong <- melt(sbsp.plplotGC2021_sub)
-
-ANCOM_subsp_ploidy.GC21$W.taxa
-
-sbsp.plplotGC2021$subsp_ploidy <-  factor(sbsp.plplotGC2021$subsp_ploidy, levels = c("T_2n", "T_4n", "V_2n", "V_4n", "W_4n"))
-
-#### FIGURE FOR SUBSPECIES PLOIDY 2021 GC ####
-spl2 <- ggplot(sbsp.plplotGC2021_sublong, aes(y = value, x = subsp_ploidy, color=variable))+
-  geom_boxplot(outlier.shape = NA) + 
-  geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
-  ggtitle("2021 GC ANCOM for Subspecies and Ploidy")+
-  labs(color = "Compounds") +
-  theme_classic()
+# ## PLOIDY 2021 GC ####
+# #Run ANCOM, specify variable
+# ANCOM_ploidy_GC.21 <- ANCOM.main(OCG_GC_2021_sbst,md.OCG.GC.2021_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
+# 
+# sigGC.2021_ploidy <- subset(ANCOM_ploidy_GC.21$W.taxa, ANCOM_ploidy_GC.21$W.taxa$W_stat > 0)[,1]
+# sigGC.2021_ploidy <- as.data.frame(sigGC.2021_ploidy)
+# row.names(sigGC.2021_ploidy) <- sigGC.2021_ploidy[37:1,1] 
+# 
+# sigGC.2021_ploidy[,1] <- c(37:1) 
+# sigGC.2021_ploidy_t <- t(sigGC.2021_ploidy) 
+# sigGC.2021_ploidy_t <- as.data.frame(sigGC.2021_ploidy_t)
+# colnames(sigGC.2021_ploidy_t) <- as.character(colnames(sigGC.2021_ploidy_t))
+# print(colnames(sigGC.2021_ploidy_t))
+# 
+# sigGC.2021_ploidy_t <- sigGC.2021_ploidy_t[,order(colnames(sigGC.2021_ploidy_t))]
+# rownames(sigGC.2021_ploidy_t) <- c("sig_rank")
+# 
+# GC.2021.OCG_sigsbst_ploidy <-  t(subset(t(OCG_GC_2021_sbst), colnames(OCG_GC_2021_sbst) %in% row.names(sigGC.2021_ploidy)))
+# 
+# GC.2021.OCG_sigsbst_ploidy <- GC.2021.OCG_sigsbst_ploidy[,order(colnames(GC.2021.OCG_sigsbst_ploidy))]
+# colnames(sigGC.2021_ploidy_t) == colnames(GC.2021.OCG_sigsbst_ploidy) #sanity check:TRUE
+# 
+# GC.2021.OCG_sigsbst_ploidy <- rbind(GC.2021.OCG_sigsbst_ploidy, sigGC.2021_ploidy_t)
+# GC.2021.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_ploidy))
+# GC.2021.OCG_sigsbst_ploidy_t$sig_rank <- as.numeric(GC.2021.OCG_sigsbst_ploidy_t$sig_rank) 
+# GC.2021.OCG_sigsbst_ploidy_t <- GC.2021.OCG_sigsbst_ploidy_t[order(GC.2021.OCG_sigsbst_ploidy_t$sig_rank),] 
+# GC.2021.OCG_sigsbst_ploidy_t <- subset(GC.2021.OCG_sigsbst_ploidy_t, select=-c(sig_rank))
+# GC.2021.OCG_sigsbst_ploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_ploidy_t))
+# 
+# #Build objects for plotting
+# plplotGC2021.ploidy <- data.frame(GC.2021.OCG_sigsbst_ploidy_t[,1:10], "ploidy" = md.OCG.GC.2021_sbst$Ploidy, check.names = FALSE)
+# plplotGC2021.ploidy[,1:10] <- lapply(plplotGC2021.ploidy[,1:10], function(x) as.numeric(as.character(x)))
+# plplotGC2021.ploidy[,1:10] <- log(plplotGC2021.ploidy[,1:10]+1)
+# plplotGC2021.ploidy_sub <- data.frame(sample=rownames(plplotGC2021.ploidy),plplotGC2021.ploidy, check.names = F)
+# plplotGC2021.ploidy_sublong <- melt(plplotGC2021.ploidy_sub)
+# 
+# ANCOM_subspecies_GC.2021$W.taxa
+# 
+# plplotGC2021.ploidy_sublong$ploidy<-  factor(plplotGC2021.ploidy_sublong$ploidy, levels = c("2n", "4n"))
+# 
+# #### PLOIDY FIGURE TOP ANCOM COMPOUNDS 2021 GC ####
+# pl2 <- ggplot(sbsplotGC2021.ploidy_sublong, aes(y = value, x = ploidy, color=variable))+
+#   geom_boxplot(outlier.shape = NA) + 
+#   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+#   scale_color_brewer(palette = "Spectral")+
+#   ylab("Log  rel. abundance") + xlab("Ploidy") + 
+#   ggtitle("2021 GC ANCOM for Ploidy")+
+#   labs(color = "Compounds") +
+#   theme_classic()
+# 
+# ## SIGNIFICANCE BY SUBSPECIES PLOIDY 2021 GC ####
+# #Run ANCOM, specify variable
+# ANCOM_subsp_ploidy.GC21 <- ANCOM.main(OCG_GC_2021_sbst, md.OCG.GC.2021_sbst,F,F,"Subsp_ploidy",NULL,NULL,F,NULL,2,.05,.9)
+# 
+# sigGC.2021_subsp_ploidy <- subset(ANCOM_subsp_ploidy.GC21$W.taxa, ANCOM_subsp_ploidy.GC21$W.taxa$W_stat > 0)[,1]
+# sigGC.2021_subsp_ploidy <- as.data.frame(sigGC.2021_subsp_ploidy)
+# row.names(sigGC.2021_subsp_ploidy) <- sigGC.2021_subsp_ploidy[36:1,1]
+# sigGC.2021_subsp_ploidy[,1] <- c(36:1)
+# 
+# sigGC.2021_subsp_ploidy_t <- t(sigGC.2021_subsp_ploidy)
+# sigGC.2021_subsp_ploidy_t <- as.data.frame(sigGC.2021_subsp_ploidy_t)
+# colnames(sigGC.2021_subsp_ploidy_t) <- as.character(colnames(sigGC.2021_subsp_ploidy_t))
+# print(colnames(sigGC.2021_subsp_ploidy_t))
+# sigGC.2021_subsp_ploidy_t <- sigGC.2021_subsp_ploidy_t[,order(colnames(sigGC.2021_subsp_ploidy_t))]
+# rownames(sigGC.2021_subsp_ploidy_t) <- c("sig_rank")
+# 
+# #write.csv(ANCOM_subsp_ploidy$W.taxa, file = "data_csv/ANCOM/ANCOM_subsp_ploidy.csv")
+# 
+# GC.2021.OCG_sigsbst_subspploidy <-  t(subset(t(OCG_GC_2021_sbst), colnames(OCG_GC_2021_sbst) %in% row.names(sigGC.2021_subsp_ploidy)))
+# 
+# GC.2021.OCG_sigsbst_subspploidy <- GC.2021.OCG_sigsbst_subspploidy[,order(colnames(GC.2021.OCG_sigsbst_subspploidy))]
+# colnames(sigGC.2021_subsp_ploidy_t) == colnames(GC.2021.OCG_sigsbst_subspploidy) #sanity check:TRUE
+# 
+# GC.2021.OCG_sigsbst_subspploidy <- rbind(GC.2021.OCG_sigsbst_subspploidy, sigGC.2021_subsp_ploidy_t)
+# GC.2021.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_subspploidy))
+# GC.2021.OCG_sigsbst_subspploidy_t$sig_rank <- as.numeric(GC.2021.OCG_sigsbst_subspploidy_t$sig_rank) 
+# GC.2021.OCG_sigsbst_subspploidy_t <- GC.2021.OCG_sigsbst_subspploidy_t[order(GC.2021.OCG_sigsbst_subspploidy_t$sig_rank),] 
+# GC.2021.OCG_sigsbst_subspploidy_t <- subset(GC.2021.OCG_sigsbst_subspploidy_t, select=-c(sig_rank))
+# GC.2021.OCG_sigsbst_subspploidy_t <- as.data.frame(t(GC.2021.OCG_sigsbst_subspploidy_t))
+# 
+# #Build objects for plotting
+# sbsp.plplotGC2021 <- data.frame(GC.2021.OCG_sigsbst_subspploidy_t[,1:10], "subsp_ploidy" = md.OCG.GC.2021_sbst$Subsp_ploidy, check.names = FALSE)
+# sbsp.plplotGC2021[,1:10] <- lapply(sbsp.plplotGC2021[,1:10], function(x) as.numeric(as.character(x)))
+# sbsp.plplotGC2021[,1:10] <- log(sbsp.plplotGC2021[,1:10]+1)
+# sbsp.plplotGC2021_sub <- data.frame(sample=rownames(sbsp.plplotGC2021),sbsp.plplotGC2021, check.names = F)
+# sbsp.plplotGC2021_sublong <- melt(sbsp.plplotGC2021_sub)
+# 
+# ANCOM_subsp_ploidy.GC21$W.taxa
+# 
+# sbsp.plplotGC2021$subsp_ploidy <-  factor(sbsp.plplotGC2021$subsp_ploidy, levels = c("T_2n", "T_4n", "V_2n", "V_4n", "W_4n"))
+# 
+# #### FIGURE FOR SUBSPECIES PLOIDY 2021 GC ####
+# spl2 <- ggplot(sbsp.plplotGC2021_sublong, aes(y = value, x = subsp_ploidy, color=variable))+
+#   geom_boxplot(outlier.shape = NA) + 
+#   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
+#   scale_color_brewer(palette = "Spectral")+
+#   ylab("Log  rel. abundance") + xlab("Subspecies") + 
+#   ggtitle("2021 GC ANCOM for Subspecies and Ploidy")+
+#   labs(color = "Compounds") +
+#   theme_classic()
 
 # LCMS ANCOM ####
 summary(rowSums(OCG_LCMS_3uL_subset)) #31016795
@@ -3018,14 +2973,14 @@ OCG_LCMS_sbst <- data.frame("Sample.ID" = row.names(OCG_LCMS_3uL_subset.a), OCG_
 row.names(OCG_LCMS_sbst) == row.names(md.OCG.LCMS.3_sbst) #TRUE
 
 ## SUBSPECIES LCMS ####
-ANCOM_subspecies_LCMS <- ANCOM.main(OCG_LCMS_sbst,md.OCG.LCMS.3_sbst,F,F,"Subspecies",NULL,NULL,F,NULL,2,.05,.9)
+ANCOM_subspecies_LCMS <- ANCOM.main(OCG_LCMS_sbst,md.OCG.LCMS.3_sbst,F,F,"Subspecies",NULL,NULL,F,NULL,2,.01,.9)
 
 #Create objects of significant compounds
 sigLCMS_subspecies <- subset(ANCOM_subspecies_LCMS$W.taxa, ANCOM_subspecies_LCMS$W.taxa$W_stat > 0)[,1]
 sigLCMS_subspecies <- as.data.frame(sigLCMS_subspecies) 
-row.names(sigLCMS_subspecies) <- sigLCMS_subspecies[302:1,1] 
+row.names(sigLCMS_subspecies) <- sigLCMS_subspecies[299:1,1] 
 
-sigLCMS_subspecies[,1] <- c(302:1) 
+sigLCMS_subspecies[,1] <- c(299:1) 
 sigLCMS_subspecies_t <- t(sigLCMS_subspecies) 
 sigLCMS_subspecies_t <- as.data.frame(sigLCMS_subspecies_t)
 colnames(sigLCMS_subspecies_t) <- as.character(colnames(sigLCMS_subspecies_t))
@@ -3066,53 +3021,55 @@ ggplot(sbsplotLCMS_sublong, aes(y = value, x = subspecies, color=variable))+
   ggtitle("LCMS ANCOM for Subspecies")+ 
   theme_classic()
 
-## PLOIDY LCMS ####
+## Location LCMS ####
 #Run ANCOM, specify variable
-ANCOM_ploidy_LCMS <- ANCOM.main(OCG_LCMS_sbst,md.OCG.LCMS.3_sbst,F,F,"Ploidy",NULL,NULL,F,NULL,2,.05,.9)
+ANCOM_loc_LCMS <- ANCOM.main(OCG_LCMS_sbst,md.OCG.LCMS.3_sbst,F,F,"Location",NULL,NULL,F,NULL,2,.05,.9)
 
-sigLCMS_ploidy <- subset(ANCOM_ploidy_LCMS$W.taxa, ANCOM_ploidy_LCMS$W.taxa$W_stat > 0)[,1]
-sigLCMS_ploidy <- as.data.frame(sigLCMS_ploidy)
-row.names(sigLCMS_ploidy) <- sigLCMS_ploidy[302:1,1] 
+sigLCMS_loc <- subset(ANCOM_loc_LCMS$W.taxa, ANCOM_loc_LCMS$W.taxa$W_stat > 0)[,1]
+sigLCMS_loc <- as.data.frame(sigLCMS_loc)
+row.names(sigLCMS_loc) <- sigLCMS_loc[302:1,1] 
 
-sigLCMS_ploidy[,1] <- c(302:1) 
-sigLCMS_ploidy_t <- t(sigLCMS_ploidy) 
-sigLCMS_ploidy_t <- as.data.frame(sigLCMS_ploidy_t)
-colnames(sigLCMS_ploidy_t) <- as.character(colnames(sigLCMS_ploidy_t))
-print(colnames(sigLCMS_ploidy_t))
+sigLCMS_loc[,1] <- c(302:1) 
+sigLCMS_loc_t <- t(sigLCMS_loc) 
+sigLCMS_loc_t <- as.data.frame(sigLCMS_loc_t)
+colnames(sigLCMS_loc_t) <- as.character(colnames(sigLCMS_loc_t))
+print(colnames(sigLCMS_loc_t))
 
-sigLCMS_ploidy_t <- sigLCMS_ploidy_t[,order(colnames(sigLCMS_ploidy_t))]
-rownames(sigLCMS_ploidy_t) <- c("sig_rank")
+sigLCMS_loc_t <- sigLCMS_loc_t[,order(colnames(sigLCMS_loc_t))]
+rownames(sigLCMS_loc_t) <- c("sig_rank")
 
-LCMS.OCG_sigsbst_ploidy <-  t(subset(t(OCG_LCMS_sbst), colnames(OCG_LCMS_sbst) %in% row.names(sigLCMS_ploidy)))
+LCMS.OCG_sigsbst_loc <-  t(subset(t(OCG_LCMS_sbst), colnames(OCG_LCMS_sbst) %in% row.names(sigLCMS_loc)))
 
-LCMS.OCG_sigsbst_ploidy <- LCMS.OCG_sigsbst_ploidy[,order(colnames(LCMS.OCG_sigsbst_ploidy))]
-colnames(sigLCMS_ploidy_t) == colnames(LCMS.OCG_sigsbst_ploidy) #sanity check:TRUE
+LCMS.OCG_sigsbst_loc <- LCMS.OCG_sigsbst_loc[,order(colnames(LCMS.OCG_sigsbst_loc))]
+colnames(sigLCMS_loc_t) == colnames(LCMS.OCG_sigsbst_loc) #sanity check:TRUE
 
-LCMS.OCG_sigsbst_ploidy <- rbind(LCMS.OCG_sigsbst_ploidy, sigLCMS_ploidy_t)
-LCMS.OCG_sigsbst_ploidy_t <- as.data.frame(t(LCMS.OCG_sigsbst_ploidy))
-LCMS.OCG_sigsbst_ploidy_t$sig_rank <- as.numeric(LCMS.OCG_sigsbst_ploidy_t$sig_rank) 
-LCMS.OCG_sigsbst_ploidy_t <- LCMS.OCG_sigsbst_ploidy_t[order(LCMS.OCG_sigsbst_ploidy_t$sig_rank),] 
-LCMS.OCG_sigsbst_ploidy_t <- subset(LCMS.OCG_sigsbst_ploidy_t, select=-c(sig_rank))
-LCMS.OCG_sigsbst_ploidy_t <- as.data.frame(t(LCMS.OCG_sigsbst_ploidy_t))
+LCMS.OCG_sigsbst_loc <- rbind(LCMS.OCG_sigsbst_loc, sigLCMS_loc_t)
+LCMS.OCG_sigsbst_loc_t <- as.data.frame(t(LCMS.OCG_sigsbst_loc))
+LCMS.OCG_sigsbst_loc_t$sig_rank <- as.numeric(LCMS.OCG_sigsbst_loc_t$sig_rank) 
+LCMS.OCG_sigsbst_loc_t <- LCMS.OCG_sigsbst_loc_t[order(LCMS.OCG_sigsbst_loc_t$sig_rank),] 
+LCMS.OCG_sigsbst_loc_t <- subset(LCMS.OCG_sigsbst_loc_t, select=-c(sig_rank))
+LCMS.OCG_sigsbst_loc_t <- as.data.frame(t(LCMS.OCG_sigsbst_loc_t))
 
 #Build objects for plotting
-plplotLCMS.ploidy <- data.frame(LCMS.OCG_sigsbst_ploidy_t[,1:10], "ploidy" = md.OCG.LCMS.3_sbst$Ploidy, check.names = FALSE)
-plplotLCMS.ploidy[,1:10] <- lapply(plplotLCMS.ploidy[,1:10], function(x) as.numeric(as.character(x)))
-plplotLCMS.ploidy[,1:10] <- log(plplotLCMS.ploidy[,1:10]+1)
-plplotLCMS.ploidy_sub <- data.frame(sample=rownames(plplotLCMS.ploidy),plplotLCMS.ploidy, check.names = F)
-plplotLCMS.ploidy_sublong <- melt(plplotLCMS.ploidy_sub)
+plplotLCMS.loc <- data.frame(LCMS.OCG_sigsbst_loc_t[,1:10], "location" = md.OCG.LCMS.3_sbst$Location, check.names = FALSE)
+plplotLCMS.loc[,1:10] <- lapply(plplotLCMS.loc[,1:10], function(x) as.numeric(as.character(x)))
+plplotLCMS.loc[,1:10] <- log(plplotLCMS.loc[,1:10]+1)
+plplotLCMS.loc_sub <- data.frame(sample=rownames(plplotLCMS.loc),plplotLCMS.loc, check.names = F)
+plplotLCMS.loc_sublong <- melt(plplotLCMS.loc_sub)
 
-ANCOM_ploidy_LCMS$W.taxa
+ANCOM_loc_LCMS$W.taxa
 
-plplotLCMS.ploidy_sublong$ploidy<-  factor(plplotLCMS.ploidy_sublong$ploidy, levels = c("2n", "4n"))
+levels(md.OCG.LCMS.3_sbst$Location)
+
+plplotLCMS.loc_sublong$location<-  factor(plplotLCMS.loc_sublong$location, levels = c("AZ", "CA", "CO", "ID", "MT", "NM", "NV", "OR", "UT", "WA", "WY"))
 
 #### PLOIDY FIGURE TOP ANCOM COMPOUNDS LCMS ####
-ggplot(plplotLCMS.ploidy_sublong, aes(y = value, x = ploidy, color=variable))+
+ggplot(plplotLCMS.loc_sublong, aes(y = value, x = location, color=variable))+
   geom_boxplot(outlier.shape = NA) + 
   geom_point(position=position_dodge(width=0.75), aes(group=variable), alpha =.4) +
-  scale_color_brewer(palette = "Spectral")+
-  ylab("Log  rel. abundance") + xlab("Subspecies") + 
-  ggtitle("LCMS ANCOM for Ploidy")+
+  scale_color_brewer(palette = "PRGn")+
+  ylab("Log  rel. abundance") + xlab("Location") + 
+  ggtitle("LCMS ANCOM for Location")+
   labs(color = "Compounds") +
   theme_classic()
 
@@ -3218,70 +3175,190 @@ ggplot(plotLCMS.yr_sublong, aes(y = value, x = year, color=variable))+
   theme_classic()
 
 # ANCOM BC #### 
-## Make phyloseq object
-row.names(OCG_GC_2012_subset) == row.names(md.OCG.GC.2012) #TRUE
-compound_table_GC12 <- otu_table(as.matrix(OCG_GC_2012_subset), taxa_are_rows = FALSE) #create the feature table
-md_GC12_phy <- sample_data(md.OCG.2012) #make metadata into sample data to create phyloseq
-physeqGC12 <- phyloseq(compound_table_GC12, md_GC12_phy) #create phyloseq object for ANCOM BC
 
 ## GC 2012 SUBSPECIES ANCOMBC ####
-result_GC12 <- ancombc2( 
-  data = physeqGC12, assay_name = "counts", tax_level = NULL,
-  fix_formula = "Subsp_ploidy",
-  rand_formula = "(1|Plant)",
-  p_adj_method = "fdr",
-  group = "Subsp_ploidy", #change variable of interest
-  alpha = 0.05
-)
+#filter metadata to fit gc 2012 data
+#data
+gc12 <- read.csv("data_csv/OCG_GC_2012_cleaned.csv", header=TRUE)
+meta <- read.csv("data_csv/metadata_OCG.csv", header=TRUE)
 
-#iter_control = list(tol = 1e-5, max_iter = 200, 
-                    #verbose = FALSE)
+rownames(gc12) <- gc12$Description
+rownames(meta) <- meta$Description
 
-ancomGC12res_df <- result_GC12$res
+#filter metadata to fit lcms data
+meta_gc12 <- subset(meta, row.names(meta) %in% row.names(gc12))
+gc12_filt <- subset(gc12, row.names(gc12) %in% row.names(meta_gc12))
 
-## Make phyloseq object
-row.names(OCG_GC_2021_subset) == row.names(md.OCG.GC.2021) #TRUE
-compound_table_GC21 <- otu_table(as.matrix(OCG_GC_2021_subset), taxa_are_rows = FALSE) #create the feature table
-md_GC21_phy <- sample_data(md.OCG.2021) #make metadata into sample data to create phyloseq
-physeqGC21 <- phyloseq(compound_table_GC21, md_GC21_phy) #create phyloseq object for ANCOM BC
+dim(meta_gc12) #157 rows
+dim(gc12_filt) #157 rows
+
+meta_gc12 <- meta_gc12[order(row.names(meta_gc12)),] # order samples alphabetically
+gc12_filt <- gc12_filt[order(row.names(gc12_filt)),] # order samples alphabetically
+
+rownames(gc12_filt) == rownames(meta_gc12) # TRUE
+
+gc12_filt <- gc12_filt[,-1]
+rounded_matrix_gc12 <- as.matrix(gc12_filt)
+rounded_matrix_gc12 <- round(rounded_matrix_gc12)
+rounded_matrix_gc12<- rounded_matrix_gc12
+rounded_matrix_gc12[is.na(rounded_matrix_gc12)] <- 0
+rounded_matrix_gc12 <- as.data.frame(rounded_matrix_gc12)
+
+# Create the tse object
+assays_gc12 = S4Vectors::SimpleList(counts = t(rounded_matrix_gc12))
+smd_gc12 = S4Vectors::DataFrame(meta_gc12)
+tse_gc12 = TreeSummarizedExperiment::TreeSummarizedExperiment(assays = assays_gc12, colData = smd_gc12)
+
+output_gc12 = ancombc2(data = tse_gc12, assay_name = "counts", tax_level = NULL,
+                  fix_formula = "Subspecies", rand_formula = NULL,
+                  p_adj_method = "fdr", pseudo_sens = TRUE,
+                  prv_cut = 0.10, lib_cut = 1000, s0_perc = 0.05,
+                  group = "Subspecies", struc_zero = FALSE, neg_lb = FALSE,
+                  alpha = 0.05, n_cl = 2, verbose = TRUE,
+                  global = TRUE, pairwise = TRUE, 
+                  dunnet = FALSE, trend = FALSE,
+                  iter_control = list(tol = 1e-5, max_iter = 20, 
+                                      verbose = FALSE),
+                  em_control = list(tol = 1e-5, max_iter = 100),
+                  lme_control = NULL, 
+                  mdfdr_control = list(fwer_ctrl_method = "fdr", B = 100), 
+                  trend_control = NULL)
+
+saveRDS(output_gc12, "ancombc_GC12_elle_fdr.RDS")
+output.GC12 <- readRDS("ancombc_GC12_elle_fdr.RDS")
+
+res12 <- output_gc12$res
+pair12 <- output_gc12$res_pair
+
+colnames(pair12)[colnames(pair12) == "lfc_SubspeciesV"] <- "lfc_SubspeciesV_T"
+colnames(pair12)[colnames(pair12) == "lfc_SubspeciesW"] <- "lfc_SubspeciesW_T"
+colnames(pair12)[colnames(pair12) == "lfc_SubspeciesW_SubspeciesV"] <- "lfc_SubspeciesW_V"
+
+colnames(pair12)[colnames(pair12) == "se_SubspeciesV"] <- "se_SubspeciesV_T"
+colnames(pair12)[colnames(pair12) == "se_SubspeciesW"] <- "se_SubspeciesW_T"
+colnames(pair12)[colnames(pair12) == "se_SubspeciesW_SubspeciesV"] <- "se_SubspeciesW_V"
+
+colnames(pair12)[colnames(pair12) == "diff_SubspeciesV"] <- "diff_SubspeciesV_T"
+colnames(pair12)[colnames(pair12) == "diff_SubspeciesW"] <- "diff_SubspeciesW_T"
+colnames(pair12)[colnames(pair12) == "diff_SubspeciesW_SubspeciesV"] <- "diff_SubspeciesW_V"
+
+dim(pair12) 
+#40  19
+
+all_pair_sig_gc12<- subset(pair12, diff_SubspeciesV_T == TRUE |diff_SubspeciesW_T == TRUE | diff_SubspeciesW_V == TRUE)
+#7 19
+
+all_pair_sig_gc12_filt <- all_pair_sig_gc12[,c(1:7,17:19)]
+
+res_long_gc12 <- all_pair_sig_gc12_filt %>%
+  gather(key = "key", value = "value", -taxon) %>%
+  separate(key, into = c("measure", "subspecies"), sep = "_Subspecies") %>%
+  spread(measure, value)
+
+res_long_gc12 <- res_long_gc12 %>%
+  mutate(diff = as.logical(diff))
+
+res_long_gc12_filt <- subset(res_long_gc12, diff == "TRUE")
+
+ggplot(res_long_gc12_filt, aes(x = taxon, y = lfc, color = subspecies)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lfc - se, ymax = lfc + se), width = 0.2) +
+  theme_minimal() + facet_wrap(~subspecies, ncol=1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")+
+  ggtitle("2012 GC")
+
 
 ## GC 2021 SUBSPECIES ANCOMBC ####
-result_GC21 <- ancombc2( 
-  data = physeqGC21, assay_name = "counts", tax_level = NULL,
-  fix_formula = "Subspecies + Ploidy",
-  rand_formula = "(1|Plant)",
-  p_adj_method = "fdr",
-  group = "Subspecies", #change variable of interest
-  alpha = 0.05
-)
+#filter metadata to fit gc 2012 data
+#data
+gc21 <- read.csv("data_csv/OCG_GC_2021.csv", header=TRUE)
 
-#iter_control = list(tol = 1e-5, max_iter = 200, 
-#verbose = FALSE)
+rownames(gc21) <- gc21$Description
+rownames(meta) <- meta$Description
 
-ancomGC21res_df <- result_GC21$res
+#filter metadata to fit lcms data
+meta_gc21 <- subset(meta, row.names(meta) %in% row.names(gc21))
+gc21_filt <- subset(gc21, row.names(gc21) %in% row.names(meta_gc21))
 
-##LCMS SUBSPECIES ANCOMBC ####
-# Create phyloseq object
-row.names(OCG_LCMS_3uL_subset) == row.names(md.OCG.LCMS.3) #TRUE
-compound_table_LCMS <- otu_table(as.matrix(OCG_LCMS_3uL_subset), taxa_are_rows = FALSE) #create the feature table
-md_LCMS_phy <- sample_data(md.OCG.LCMS.3) #make metadata into sample data to create phyloseq
-physeqLCMS <- phyloseq(compound_table_LCMS, md_LCMS_phy) #create phyloseq object for ANCOM BC
+dim(meta_gc21) #70 rows
+dim(gc21_filt) #70 rows
 
-# Create TreeSummarizedExperimentFromPhyloseq with mia 
-tse = mia::makeTreeSummarizedExperimentFromPhyloseq(physeqLCMS)
+meta_gc21 <- meta_gc21[order(row.names(meta_gc21)),] # order samples alphabetically
+gc21_filt <- gc21_filt[order(row.names(gc21_filt)),] # order samples alphabetically
 
-result_LCMS_sub <- ancombc2( 
-  data = tse, assay_name = "counts", tax_level = NULL,
-  fix_formula = "Subspecies",
-  rand_formula = "(1|Plant)",
-  p_adj_method = "fdr",
-  group = "Subspecies", #change variable of interest
-  alpha = 0.05,
-  iter_control = list(tol = 1e-5, max_iter = 200, 
-                                   verbose = FALSE)
-)
+rownames(gc21_filt) == rownames(meta_gc21)
 
-ancomLCMSres_df <- result_LCMS_sub$res
+gc21_filt <- gc21_filt[,-1]
+rounded_matrix_gc21 <- as.matrix(gc21_filt)
+rounded_matrix_gc21 <- round(rounded_matrix_gc21)
+rounded_matrix_gc21<- rounded_matrix_gc21
+rounded_matrix_gc21[is.na(rounded_matrix_gc21)] <- 0
+rounded_matrix_gc21 <- as.data.frame(rounded_matrix_gc21)
+
+# Create the tse object
+assays21 = S4Vectors::SimpleList(counts = t(rounded_matrix_gc21))
+smd21 = S4Vectors::DataFrame(meta_gc21)
+tse21 = TreeSummarizedExperiment::TreeSummarizedExperiment(assays = assays21, colData = smd21)
+
+output21 = ancombc2(data = tse21, assay_name = "counts", tax_level = NULL,
+                  fix_formula = "Subspecies", rand_formula = NULL,
+                  p_adj_method = "fdr", pseudo_sens = TRUE,
+                  prv_cut = 0.10, lib_cut = 1000, s0_perc = 0.05,
+                  group = "Subspecies", struc_zero = FALSE, neg_lb = FALSE,
+                  alpha = 0.05, n_cl = 2, verbose = TRUE,
+                  global = TRUE, pairwise = TRUE, 
+                  dunnet = FALSE, trend = FALSE,
+                  iter_control = list(tol = 1e-5, max_iter = 20, 
+                                      verbose = FALSE),
+                  em_control = list(tol = 1e-5, max_iter = 100),
+                  lme_control = NULL, 
+                  mdfdr_control = list(fwer_ctrl_method = "fdr", B = 100), 
+                  trend_control = NULL)
+
+# saveRDS(output, "ancombc_GC21_elle_fdr.RDS")
+output.GC21 <- readRDS("ancombc_GC21_elle_fdr.RDS")
+
+res21 <- output21$res
+pair21 <- output21$res_pair
+
+colnames(pair21)[colnames(pair21) == "lfc_SubspeciesV"] <- "lfc_SubspeciesV_T"
+colnames(pair21)[colnames(pair21) == "lfc_SubspeciesW"] <- "lfc_SubspeciesW_T"
+colnames(pair21)[colnames(pair21) == "lfc_SubspeciesW_SubspeciesV"] <- "lfc_SubspeciesW_V"
+
+colnames(pair21)[colnames(pair21) == "se_SubspeciesV"] <- "se_SubspeciesV_T"
+colnames(pair21)[colnames(pair21) == "se_SubspeciesW"] <- "se_SubspeciesW_T"
+colnames(pair21)[colnames(pair21) == "se_SubspeciesW_SubspeciesV"] <- "se_SubspeciesW_V"
+
+colnames(pair21)[colnames(pair21) == "diff_SubspeciesV"] <- "diff_SubspeciesV_T"
+colnames(pair21)[colnames(pair21) == "diff_SubspeciesW"] <- "diff_SubspeciesW_T"
+colnames(pair21)[colnames(pair21) == "diff_SubspeciesW_SubspeciesV"] <- "diff_SubspeciesW_V"
+
+dim(pair21) 
+#36  19
+
+all_pair_sig21 <- subset(pair21, diff_SubspeciesV_T == TRUE |diff_SubspeciesW_T == TRUE | diff_SubspeciesW_V == TRUE)
+#2 10
+
+all_pair_sig_filt21 <- all_pair_sig21[,c(1:7,17:19)]
+
+res_long21 <- all_pair_sig_filt21 %>%
+  gather(key = "key", value = "value", -taxon) %>%
+  separate(key, into = c("measure", "subspecies"), sep = "_Subspecies") %>%
+  spread(measure, value)
+
+res_long21 <- res_long21 %>%
+  mutate(diff = as.logical(diff))
+
+res_long_filt21 <- subset(res_long21, diff == "TRUE")
+
+ggplot(res_long_filt21, aes(x = taxon, y = lfc, color = subspecies)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lfc - se, ymax = lfc + se), width = 0.2) +
+  theme_minimal() + facet_wrap(~subspecies, ncol=1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")+
+  ggtitle("2021 GC")
 
 
 # ANCOM BC LCMS ####
@@ -3334,9 +3411,9 @@ tse = TreeSummarizedExperiment::TreeSummarizedExperiment(assays = assays, colDat
 output = ancombc2(data = tse, assay_name = "counts", tax_level = NULL,
                   fix_formula = "Subspecies", rand_formula = NULL,
                   p_adj_method = "fdr", pseudo_sens = TRUE,
-                  prv_cut = 0.10, lib_cut = 1000, s0_perc = 0.05,
+                  prv_cut = 0.40, lib_cut = 1000, s0_perc = 0.05,
                   group = "Subspecies", struc_zero = FALSE, neg_lb = FALSE,
-                  alpha = 0.05, n_cl = 2, verbose = TRUE,
+                  alpha = 0.001, n_cl = 2, verbose = TRUE,
                   global = TRUE, pairwise = TRUE, 
                   dunnet = FALSE, trend = FALSE,
                   iter_control = list(tol = 1e-5, max_iter = 20, 
@@ -3365,10 +3442,10 @@ colnames(pair)[colnames(pair) == "diff_SubspeciesW"] <- "diff_SubspeciesW_T"
 colnames(pair)[colnames(pair) == "diff_SubspeciesW_SubspeciesV"] <- "diff_SubspeciesW_V"
 
 dim(pair) 
-#302  19
+#244  19
 
 all_pair_sig <- subset(pair, diff_SubspeciesV_T == TRUE |diff_SubspeciesW_T == TRUE | diff_SubspeciesW_V == TRUE)
-#123 19
+#116 19
 
 all_pair_sig_filt <- all_pair_sig[,c(1:7,17:19)]
 
@@ -3387,4 +3464,59 @@ ggplot(res_long_filt, aes(x = taxon, y = lfc, color = subspecies)) +
   geom_errorbar(aes(ymin = lfc - se, ymax = lfc + se), width = 0.2) +
   theme_minimal() + facet_wrap(~subspecies, ncol=1) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-  geom_hline(yintercept = 0, linetype = "dashed", color = "black")
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")+
+  ggtitle("LCMS")
+
+
+#Creating a map of sites ####
+install.packages(c("ggplot2", "sf", "maps", "mapdata"))
+library(ggplot2)
+library(sf)
+library(maps)
+library(mapdata)
+
+# Add the coordinates for the orchard
+orchard_location <- data.frame(
+  Longitude = -115.998, # Note: Longitude is negative for west
+  Latitude = 43.322
+)
+
+usa_map <- map_data("state")
+western_states <- c("california", "oregon", "washington", "idaho", "nevada", 
+                    "arizona", "utah", "colorado", "wyoming", "montana", "new mexico")
+western_map <- subset(usa_map, region %in% western_states)
+
+state_centroids <- data.frame(state.center, state.abb)
+state_centroids <- subset(state_centroids, tolower(state.name) %in% western_states)
+main_labels <- subset(state_centroids, !state.abb %in% c("NV", "UT"))
+
+# Adjust positions for NV and UT
+shifted_labels <- state_centroids
+shifted_labels[shifted_labels$state.abb == "NV", c("y")] <- 
+  shifted_labels[shifted_labels$state.abb == "NV", c("y")] + 1  # Move NV up
+shifted_labels[shifted_labels$state.abb == "UT", c("y")] <- 
+  shifted_labels[shifted_labels$state.abb == "UT", c("y")] + 1 # Move UT up
+
+
+ggplot() +
+  geom_polygon(data = western_map, aes(x = long, y = lat, group = group), 
+               fill = "tan", color = "black") +
+  geom_point(data = md.OCG, aes(x = Longitude, y = Latitude), 
+             color = "navy", size = 2) +
+  geom_text(data = main_labels, aes(x = x, y = y, label = state.abb), 
+            color = "Black", size = 4, fontface = "plain") +
+  geom_text(data = subset(shifted_labels, state.abb %in% c("NV", "UT")), 
+            aes(x = x, y = y, label = state.abb), 
+            color = "black", size = 4, fontface = "plain")+
+  # Add the white star point
+  geom_point(data = orchard_location, aes(x = Longitude, y = Latitude), 
+             shape = 7, color = "white", size = 4) +
+  # Add the label
+  # annotate("text", x = -115.998, y = 43.35, 
+  #          color = "black", size = 3, fontface = "bold", hjust = -0.16) +
+  coord_fixed(1.3) +
+  theme_minimal() +
+  labs(x = "Longitude", y = "Latitude")
+
+
+
