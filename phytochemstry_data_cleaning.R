@@ -2,18 +2,11 @@
 setwd("/Users/ellehorwath/Documents/Orchard_Common_Garden/commongarden")
 
 #Packages
-cran_packages <- c("dplyr", "readr", "tidyr", "tidyverse")
 
-# Function to install and load CRAN packages
-install_and_load_cran <- function(pkg) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg, dependencies = TRUE)
-    library(pkg, character.only = TRUE)
-  }
-}
-
-# Install and load all CRAN packages
-sapply(cran_packages, install_and_load_cran)
+library(dplyr)
+library(readr)
+library(tidyr)
+library(tidyverse)
 
 # Read raw data in
 ##METADATA READ IN
@@ -31,6 +24,8 @@ md.OCG.2012 <- subset(md.OCG, md.OCG$Year=="2012")
 sum(duplicated(md.OCG.2012$`Garden Plant ID`)) #7
 md.OCG.2021 <- subset(md.OCG, md.OCG$Year=="2021")
 sum(duplicated(md.OCG.2021$`Garden Plant ID`))
+
+#Read in climate data and merge with metadata
 
 write.csv(md.OCG, file = "data_csv/metadata_OCG.csv")
 

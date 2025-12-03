@@ -241,9 +241,9 @@ plot(OCG_GC_w_RT_2021$RT002, OCG_GC_w_RT_2021$C002, type = "b",
 
 # LCMS RT plot
 ## 3UL LCMS RAW DATA READ IN
-OCG_LCMS_3uL <- read.csv("data_csv/OCG_LCMS_3uL_cleaned_w_RT.csv", head=T, check.names = F,stringsAsFactors = T, row.names = 1) #120 of 929 variables
+OCG_LCMS_3uL_RT <- read.csv("data_csv/OCG_LCMS_3uL_cleaned_w_RT.csv", head=T, check.names = F,stringsAsFactors = T, row.names = 1) #120 of 929 variables
 
-df_long_lcms <- OCG_LCMS_3uL %>%
+df_long_lcms <- OCG_LCMS_3uL_RT %>%
   pivot_longer(cols = starts_with("RT"), names_to = "Retention_Time_Column", values_to = "Retention_Time") %>%
   pivot_longer(cols = starts_with("C"), names_to = "Peak_Area_Column", values_to = "Peak_Area") %>%
   mutate(
@@ -255,7 +255,7 @@ df_long_lcms <- OCG_LCMS_3uL %>%
 
 ggplot(df_long_lcms, aes(Retention_Time, Peak_Area, color = Compound))+
   geom_line()+
-  theme_clean()+
+  theme_classic() +
   theme(legend.position = "none")+
   scale_x_continuous(breaks = seq(1,30, by = 1))+
   labs(x = "Retention time (min)", y = "Peak Area", title = "LCMS")

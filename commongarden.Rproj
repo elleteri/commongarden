@@ -2,7 +2,7 @@ Version: 1.0
 ProjectId: f80da35b-5106-4cba-a23c-91c1afab6fa5
 
 RestoreWorkspace: Default
-SaveWorkspace: Default
+SaveWorkspace: No
 AlwaysSaveHistory: Default
 
 EnableCodeIndexing: Yes
@@ -12,3 +12,5 @@ Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+ProjectName: common garden phytochemistry
