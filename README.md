@@ -1,31 +1,22 @@
 # commongarden
-This repository contains scripts on cleaning, analyzing, and visualizing microbial and chemical 
-ecology data. 
+This repository contains the script for analyzing, and visualizing the LC-MS and GC phytochemistry data of sagebrush leaves of a commmon garden in Orchard, ID.
 
-The goal of this study is to investigate the relationship between plant chemistry and 
-leaf microbiome in a common garden setting with co-occurring subspecies. We sampled sagebrush leaves 
-from over 70 plants in both 2012 and 2021. For leaf chemical analyses, we measured nitrogen and 
-carbon stable isotopes, Liquid Column Mass Spectrometry (LCMS), as well as Gas Chromatography (GC). We did fungal
-metabarcoding to examine microbial community composition across host subspecies, ploidy, and 
-chemistry. Ongoing analyses will connect distinct chemical peaks with differences in microbial taxa. 
+The goal of this study is to investigate plant chemistry in a common garden setting with co-occurring subspecies. We sampled sagebrush leaves from over 70 plants in both 2012 and 2021. For leaf chemical analyses we conducted Liquid Column Mass Spectrometry (LCMS) and Gas Chromatography (GC).
 
 Script: 
-1. OCG_data_cleaning_analyses_&_visualization.R
-   - The first part of this script is cleaning a fungal amplicon sequencing table compiled from the plants sampled in the common garden. Analyses techniques include permanovas, pairwise adonis, shannon diversity, effective species number calculatins, and linear modeling. Visualization includes NMDS plots, and box plots. Pairwise adonis and PERMANOVAS were done to look at differences between different subspecies, ploidy number, and subspecies ploidy combined in their microbial community composition. To delve into fungal community composition seen on the plants, Metacoder and ANCOM are performed based on the ASV and taxonomy data.
-   - After microbial analyses, this script contains chemistry data (LCMS and GC). LCMS (1uL & 3uL) and GC samples prepared from 2012 and 2021 are cleaned and subsetted to the existing metadata. PCA, NMDS. PcoA, Binary jaccard, permanovas, pairwise adonis are all performed to explore the chemical compostion between subspecies, ploidy, subspecies ploidy, and year.
-   - This script then contains a procrustes analysis on the chemistry data and microbial data of the scripts above. A mantel test is run at the end. These analyses are performed to assess relationships hypothesized between the chemical and microbial data.
-   - Stable isotope analyses between years and subspecies is done at the end of this script.
+1. orchard_phytochemistry_analysis_&_figures.R
+   First an analysis of compound richness across subspecies:cytotype levels, ecoregion, and year while controlling for plant ID using a       generalized linear mixed model for both GC and LC-MS. Figures depicting compound richness across subspecies:cytotype groups and year for    both datasets are generated here.
+   Then we prepared data for PCAs with scaling and threshold definition (see paper for details and tested betadispersion for GC and LC-MS.    Our PCA figures for GC and LC-MS data were then generated and PERMANOVAs to look at chemical variation across subspecies:cytotype and       ecoregion.
+   We subsetted our data to subspecies:cytotypes for each chemistry dataset for partial mantel tests across sptial and climate data from       the origin populations the seeds were collected. We performed PCAs using selected climate data for the LC-MS T_2n subspecies:cytotype       group and plotted these figures using ordisurf.
+   We used ANCOM-BC2 to test differential abundance of compounds for our T_2n group across ecoregions.
+   We performed a Procrustes analysis to look for correlation between LC-MS and GC data.
+   Lastly used shape files from https://www.epa.gov/eco-research/level-iii-and-iv-ecoregions-continental-united-states to created a map of our seed-origin populations in the Western US colored by Level III ecoregions. 
   
 Folders: 
-1. nmds
-   - contains nmds rda files from the code to prevent having to rerun metaMDS.
-2. jnmds
-   - contains rda files from binary jaccards run from the code to prevent having to rerun. 
-3. data_csv
+1. data_csv_format
    - contains all of the csv files needed for the above script
-4. RAWDATAFILES
-   - included until publication for cleaning and organizing raw data files. 
-
+   a. us_eco_l3_state_boundaries
+      - contains the necessary shape files to create the ecoregion map (Figure 1)
 
    
 
