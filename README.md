@@ -1,5 +1,5 @@
 # commongarden
-This repository contains the script for analyzing, and visualizing the LC-MS and GC phytochemistry data of sagebrush leaves of a commmon garden in Orchard, ID.
+This repository contains the script for analyzing, and visualizing the LC-MS and GC phytochemistry data of sagebrush leaves from a commmon garden in Orchard, ID.
 
 The goal of this study is to investigate plant chemistry in a common garden setting with co-occurring subspecies. We sampled sagebrush leaves from over 70 plants in both 2012 and 2021. For leaf chemical analyses we conducted Liquid Column Mass Spectrometry (LCMS) and Gas Chromatography (GC).
 
