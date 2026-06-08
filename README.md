@@ -19,7 +19,7 @@ Folders:
       - contains the necessary shape files to create the ecoregion map (Figure 1)
 2. supplementary_materials
    - contains supplementary csv file with metadata corresponding to individual plant samples and the statistical tests they were included in
-   a. supp_table_1
+   a. Supplementary_dataset_11_19_25
 
    
 
