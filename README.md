@@ -17,6 +17,9 @@ Folders:
    - contains all of the csv files needed for the above script
    a. us_eco_l3_state_boundaries
       - contains the necessary shape files to create the ecoregion map (Figure 1)
+2. supplementary_materials
+   - contains supplementary csv file with metadata corresponding to individual plant samples and the statistical tests they were included in
+   a. supp_table_1
 
    
 
