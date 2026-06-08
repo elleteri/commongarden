@@ -1,0 +1,237 @@
+﻿Sample ID,Plant,Subsp_ploidy,Year,Population,Latitude,Longitude,Ecoregion,Included in GC?,Included in LC-MS?,Included in climate and spatial analyses,Climate PERMANOVAs
+AZT.1.10_2012,AZT.1.10,T_4n,2012,Desert View,35.91738,-111.77287,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZT.1.3_2012,AZT.1.3,T_4n,2012,Desert View,35.91738,-111.77287,Arizona/New Mexico Mountains,Yes,No,No,No
+AZT.1.3_2021,AZT.1.3,T_4n,2021,Desert View,35.91738,-111.77287,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZT.1.7_2012,AZT.1.7,T_4n,2012,Desert View,35.91738,-111.77287,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZT.1.7_2021,AZT.1.7,T_4n,2021,Desert View,35.91738,-111.77287,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZTW.1.5_2012,AZTW.1.5,T_4n,2012,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZTW.1.5_2021,AZTW.1.5,T_4n,2021,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZTW.1.7_2012,AZTW.1.7,T_4n,2012,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,No,No,No
+AZTW.1.7_2021,AZTW.1.7,T_4n,2021,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZTW.1.8_2012,AZTW.1.8,T_4n,2012,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,Yes,No,No
+AZTW.1.8_2021,AZTW.1.8,T_4n,2021,Williams,35.82478,-112.13125,Arizona/New Mexico Mountains,Yes,Yes,No,No
+CAT.1.1_2012,CAT.1.1,T_2n,2012,Smoke Creek,40.5414,-119.9194,Northern Basin and Range,Yes,No,Yes,No
+CAT.1.1_2021,CAT.1.1,T_2n,2021,Smoke Creek,40.5414,-119.9194,Northern Basin and Range,Yes,Yes,Yes,Yes
+CAT.1.5_2012,CAT.1.5,T_2n,2012,Smoke Creek,40.5414,-119.9194,Northern Basin and Range,Yes,Yes,Yes,Yes
+CAT.1.5_2021,CAT.1.5,T_2n,2021,Smoke Creek,40.5414,-119.9194,Northern Basin and Range,Yes,Yes,Yes,Yes
+CAT.2.4_2012,CAT.2.4,T_2n,2012,Benton B,37.7973,-118.5704,Central Basin and Range,Yes,Yes,Yes,Yes
+CAT.2.4_2021,CAT.2.4,T_2n,2021,Benton B,37.7973,-118.5704,Central Basin and Range,Yes,Yes,Yes,Yes
+CAT.2.7_2012,CAT.2.7,T_2n,2012,Benton B,37.7973,-118.5704,Central Basin and Range,Yes,No,Yes,No
+CAT.2.9_2012,CAT.2.9,T_2n,2012,Benton B,37.7973,-118.5704,Central Basin and Range,Yes,No,Yes,No
+CAT.2.9_2021,CAT.2.9,T_2n,2021,Benton B,37.7973,-118.5704,Central Basin and Range,Yes,Yes,Yes,Yes
+CAV.1.10_2012,CAV.1.10,V_2n,2012,Jack's Valley,40.5049,-120.5617,Sierra Nevada,Yes,No,No,No
+CAV.1.4_2012,CAV.1.4,V_2n,2012,Jack's Valley,40.5049,-120.5617,Sierra Nevada,Yes,No,No,No
+CAV.1.6_2012,CAV.1.6,V_2n,2012,Jack's Valley,40.5049,-120.5617,Sierra Nevada,Yes,No,No,No
+CAV.1.7_2012,CAV.1.7,V_2n,2012,Jack's Valley,40.5049,-120.5617,Sierra Nevada,Yes,No,No,No
+CAV.1.9_2012,CAV.1.9,V_2n,2012,Jack's Valley,40.5049,-120.5617,Sierra Nevada,Yes,No,No,No
+CAV.2.10_2012,CAV.2.10,V_2n,2012,Benton V,37.7234,-118.5926,Central Basin and Range,Yes,No,No,No
+CAV.2.6_2012,CAV.2.6,V_2n,2012,Benton V,37.7234,-118.5926,Central Basin and Range,Yes,No,No,No
+CAV.2.7_2012,CAV.2.7,V_2n,2012,Benton V,37.7234,-118.5926,Central Basin and Range,Yes,No,No,No
+CAV.3.6_2012,CAV.3.6,V_4n,2012,Jucamba,32.6458,-116.1864,Southern and Baja California Pine-Oak Mountains,Yes,No,No,No
+CAV.4.1_2012,CAV.4.1,V_4n,2012,Tejon Pass,34.8251,-118.8724,"California Coastal Sage, Chaparral, and Oak Woodlands",Yes,No,No,No
+CAV.4.4_2012,CAV.4.4,V_4n,2012,Tejon Pass,34.8251,-118.8724,"California Coastal Sage, Chaparral, and Oak Woodlands",Yes,No,No,No
+CAVW.3.1_2012,CAVW.3.1,V_2n,2012,Fredonyer Peak,40.6328,-120.6064,Northern Basin and Range,Yes,No,No,No
+CAVW.3.5_2012,CAVW.3.5,V_2n,2012,Fredonyer Peak,40.6328,-120.6064,Northern Basin and Range,Yes,No,No,No
+CAVW.3.8_2012,CAVW.3.8,V_2n,2012,Fredonyer Peak,40.6328,-120.6064,Northern Basin and Range,Yes,No,No,No
+COVW.2.2_2012,COVW.2.2,V_4n,2012,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,No,No,No
+COVW.2.2_2021,COVW.2.2,V_4n,2021,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,Yes,No,No
+COVW.2.3_2012,COVW.2.3,V_4n,2012,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,No,No,No
+COVW.2.3_2021,COVW.2.3,V_4n,2021,Meeker,40.1813,-108.4555,Colorado Plateaus,No,Yes,No,No
+COVW.2.6_2012,COVW.2.6,V_4n,2012,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,No,No,No
+COVW.2.7_2012,COVW.2.7,V_4n,2012,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,No,No,No
+COVW.2.7_2021,COVW.2.7,V_4n,2021,Meeker,40.1813,-108.4555,Colorado Plateaus,Yes,Yes,No,No
+COW.1.2_2012,COW.1.2,W_4n,2012,Rifle A,39.6127,-107.81,Colorado Plateaus,Yes,No,No,No
+COW.1.2_2021,COW.1.2,W_4n,2021,Rifle A,39.6127,-107.81,Colorado Plateaus,Yes,Yes,No,No
+COW.1.8_2012,COW.1.8,W_4n,2012,Rifle A,39.6127,-107.81,Colorado Plateaus,Yes,No,No,No
+IDT.1.10_2012,IDT.1.10,T_2n,2012,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.10_2021,IDT.1.10,T_2n,2021,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.2_2012,IDT.1.2,T_2n,2012,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,No,Yes,No
+IDT.1.2_2021,IDT.1.2,T_2n,2021,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.3_2012,IDT.1.3,T_2n,2012,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.3_2021,IDT.1.3,T_2n,2021,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.4_2012,IDT.1.4,T_2n,2012,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.6_2012,IDT.1.6,T_2n,2012,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.1.6_2021,IDT.1.6,T_2n,2021,Old Oregon Trail Rd,43.09619,-115.65692,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.2.4_2012,IDT.2.4,T_2n,2012,Orchard,43.33708,-116.00814,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.2.4_2021,IDT.2.4,T_2n,2021,Orchard,43.33708,-116.00814,Snake River Plain,Yes,Yes,Yes,Yes
+IDT.3.3_2012,IDT.3.3,T_2n,2012,Hwy 95 hilltop,43.3366,-116.9641,Northern Basin and Range,Yes,Yes,Yes,Yes
+IDT.3.5_2012,IDT.3.5,T_2n,2012,Hwy 95 hilltop,43.3366,-116.9641,Northern Basin and Range,Yes,Yes,Yes,Yes
+IDT.3.5_2021,IDT.3.5,T_2n,2021,Hwy 95 hilltop,43.3366,-116.9641,Northern Basin and Range,Yes,Yes,Yes,Yes
+IDT.3.9_2012,IDT.3.9,T_2n,2012,Hwy 95 hilltop,43.3366,-116.9641,Northern Basin and Range,Yes,Yes,Yes,Yes
+IDT.3.9_2021,IDT.3.9,T_2n,2021,Hwy 95 hilltop,43.3366,-116.9641,Northern Basin and Range,Yes,No,Yes,No
+IDV.2.7_2012,IDV.2.7,V_2n,2012,Dunnigan Cr,43.6776,-115.9738,Idaho Batholith,Yes,No,No,No
+IDV.2.8_2012,IDV.2.8,V_2n,2012,Dunnigan Cr,43.6776,-115.9738,Idaho Batholith,Yes,No,No,No
+IDV.3.4_2012,IDV.3.4,V_2n,2012,Stanley,44.259,-114.6402,Idaho Batholith,Yes,No,No,No
+IDV.3.5_2012,IDV.3.5,V_2n,2012,Stanley,44.259,-114.6402,Idaho Batholith,Yes,No,No,No
+IDV.3.7_2012,IDV.3.7,V_2n,2012,Stanley,44.259,-114.6402,Idaho Batholith,Yes,No,No,No
+IDV.3.8_2012,IDV.3.8,V_2n,2012,Stanley,44.259,-114.6402,Idaho Batholith,Yes,No,No,No
+IDV.5.1_2012,IDV.5.1,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDV.5.10_2012,IDV.5.10,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDV.5.2_2012,IDV.5.2,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDV.5.7_2012,IDV.5.7,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDV.5.8_2012,IDV.5.8,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDV.5.9_2012,IDV.5.9,V_2n,2012,Pearl Rd,43.8385,-116.2559,Idaho Batholith,Yes,No,No,No
+IDW.1.2_2012,IDW.1.2,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.2_2021,IDW.1.2,W_4n,2021,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,Yes,Yes,No
+IDW.1.3_2012,IDW.1.3,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.4_2012,IDW.1.4,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.4_2021,IDW.1.4,W_4n,2021,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,Yes,Yes,No
+IDW.1.5_2012,IDW.1.5,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.5_2021,IDW.1.5,W_4n,2021,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,Yes,Yes,No
+IDW.1.6_2012,IDW.1.6,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.6_2021,IDW.1.6,W_4n,2021,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,Yes,Yes,No
+IDW.1.7_2012,IDW.1.7,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.1.7_2021,IDW.1.7,W_4n,2021,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,Yes,Yes,No
+IDW.1.8_2012,IDW.1.8,W_4n,2012,Old Oregon Trail Rd,43.0931,-115.6528,Snake River Plain,Yes,No,Yes,No
+IDW.2.2_2012,IDW.2.2,W_4n,2012,Orchard Enclosure ,43.3274,-116.0037,Snake River Plain,Yes,No,Yes,No
+IDW.2.3_2012,IDW.2.3,W_4n,2012,Orchard Enclosure ,43.3274,-116.0037,Snake River Plain,Yes,No,Yes,No
+IDW.2.3_2021,IDW.2.3,W_4n,2021,Orchard Enclosure ,43.3274,-116.0037,Snake River Plain,Yes,Yes,Yes,No
+IDW.3.10_2012,IDW.3.10,W_4n,2012,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,No,Yes,No
+IDW.3.10_2021,IDW.3.10,W_4n,2021,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,Yes,Yes,No
+IDW.3.2_2012,IDW.3.2,W_4n,2012,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,No,Yes,No
+IDW.3.4_2012,IDW.3.4,W_4n,2012,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,No,Yes,No
+IDW.3.4_2021,IDW.3.4,W_4n,2021,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,Yes,Yes,No
+IDW.3.6_2012,IDW.3.6,W_4n,2012,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,No,Yes,No
+IDW.3.6_2021,IDW.3.6,W_4n,2021,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,Yes,Yes,No
+IDW.3.8_2012,IDW.3.8,W_4n,2012,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,No,Yes,No
+IDW.3.8_2021,IDW.3.8,W_4n,2021,Sommer Camp Rd,43.4657,-116.8531,Snake River Plain,Yes,Yes,Yes,No
+MTT.1.6_2012,MTT.1.6,T_2n,2012,Bridger Crk,45.2056,-108.8256,Wyoming Basin,Yes,No,Yes,No
+MTT.1.6_2021,MTT.1.6,T_2n,2021,Bridger Crk,45.2056,-108.8256,Wyoming Basin,No,Yes,Yes,Yes
+MTV.1.10_2012,MTV.1.10,V_2n,2012,Tie Flat Rd,45.1724,-108.4559,Middle Rockies,Yes,No,No,No
+MTW.1.2_2012,MTW.1.2,W_4n,2012,Powderville,45.6545,-105.1545,Northwestern Great Plains,Yes,No,Yes,No
+MTW.1.2_2021,MTW.1.2,W_4n,2021,Powderville,45.6545,-105.1545,Northwestern Great Plains,Yes,Yes,Yes,No
+MTW.1.7_2012,MTW.1.7,W_4n,2012,Powderville,45.6545,-105.1545,Northwestern Great Plains,Yes,No,Yes,No
+MTW.3.4_2012,MTW.3.4,W_4n,2012,Pryor Mtn,45.2066,-108.7832,Wyoming Basin,Yes,No,Yes,No
+MTW.3.4_2021,MTW.3.4,W_4n,2021,Pryor Mtn,45.2066,-108.7832,Wyoming Basin,Yes,Yes,Yes,No
+MTW.3.7_2012,MTW.3.7,W_4n,2012,Pryor Mtn,45.2066,-108.7832,Wyoming Basin,Yes,No,Yes,No
+MTW.3.7.R_2012,MTW.3.7,W_4n,2012,Pryor Mtn,45.2066,-108.7832,Wyoming Basin,Yes,No,Yes,No
+MTW.3.8_2012,MTW.3.8,T_2n,2012,Pryor Mtn,45.2066,-108.7832,Wyoming Basin,Yes,No,Yes,No
+NMT.1.6_2012,NMT.1.6,T_4n,2012,Penistaja,35.9802,-107.2257,Arizona/ New Mexico Plateau,Yes,No,No,No
+NMT.1.6_2021,NMT.1.6,T_4n,2021,Penistaja,35.9802,-107.2257,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.1.9_2012,NMT.1.9,T_4n,2012,Penistaja,35.9802,-107.2257,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.1.9_2021,NMT.1.9,T_4n,2021,Penistaja,35.9802,-107.2257,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.3_2012,NMT.2.3,T_4n,2012,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,No,No,No
+NMT.2.3_2021,NMT.2.3,T_4n,2021,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.4_2012,NMT.2.4,T_4n,2012,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.4_2021,NMT.2.4,T_4n,2021,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.5_2012,NMT.2.5,T_4n,2012,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,No,No,No
+NMT.2.5_2021,NMT.2.5,T_4n,2021,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.6_2012,NMT.2.6,T_4n,2012,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,No,No,No
+NMT.2.6_2021,NMT.2.6,T_4n,2021,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.8_2012,NMT.2.8,T_4n,2012,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NMT.2.8_2021,NMT.2.8,T_4n,2021,San Luis Mesa,35.7572,-107.1478,Arizona/ New Mexico Plateau,Yes,Yes,No,No
+NVT.1.6_2012,NVT.1.6,T_2n,2012,Currant B,38.7971,-115.3921,Central Basin and Range,Yes,Yes,Yes,Yes
+NVT.2.8_2012,NVT.2.8,T_2n,2012,Currant B,38.7971,-115.3921,Central Basin and Range,Yes,No,Yes,No
+NVT.2.9_2012,NVT.2.9,T_2n,2012,Currant B,38.7971,-115.3921,Central Basin and Range,Yes,No,Yes,No
+NVTW.1.10_2012,NVTW.1.10,T_2n,2012,Austin,39.4728,-117.0497,Central Basin and Range,Yes,No,Yes,No
+NVTW.1.10_2021,NVTW.1.10,T_2n,2021,Austin,39.4728,-117.0497,Central Basin and Range,Yes,Yes,Yes,Yes
+NVTW.1.3_2012,NVTW.1.3,T_2n,2012,Austin,39.4728,-117.0497,Central Basin and Range,Yes,Yes,Yes,Yes
+NVTW.1.6_2012,NVTW.1.6,T_2n,2012,Austin,39.4728,-117.0497,Central Basin and Range,Yes,No,Yes,No
+NVV.2.5_2012,NVV.2.5,V_2n,2012,Currant V,38.8183,-115.2835,Central Basin and Range,Yes,No,No,No
+NVV.2.5_2021,NVV.2.5,V_2n,2021,Currant V,38.8183,-115.2835,Central Basin and Range,Yes,Yes,No,No
+NVV.2.9_2012,NVV.2.9,V_2n,2012,Currant V,38.8183,-115.2835,Central Basin and Range,Yes,No,No,No
+NVV.3.4_2012,NVV.3.4,V_4n,2012,Robber's Roost,36.3046,-115.6168,Mojave Basin and Range,Yes,No,No,No
+NVV.3.5_2012,NVV.3.5,V_4n,2012,Robber's Roost,36.3046,-115.6168,Mojave Basin and Range,Yes,No,No,No
+ORT.1.1_2012,ORT.1.1,T_2n,2012,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.1.1_2021,ORT.1.1,T_2n,2021,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.1.5_2012,ORT.1.5,T_2n,2012,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,No,No,No,No
+ORT.1.6_2012,ORT.1.6,T_2n,2012,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.1.6_2021,ORT.1.6,T_2n,2021,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.1.8_2012,ORT.1.8,T_2n,2012,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,No,Yes,No
+ORT.1.9_2012,ORT.1.9,T_2n,2012,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.1.9_2021,ORT.1.9,T_2n,2021,Jordan Valley,42.9745,-117.1854,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.2.10_2012,ORT.2.10,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.3_2012,ORT.2.3,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.3_2021,ORT.2.3,T_2n,2021,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.4_2012,ORT.2.4,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.4_2021,ORT.2.4,T_2n,2021,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.5_2012,ORT.2.5,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.5_2021,ORT.2.5,T_2n,2021,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.6_2012,ORT.2.6,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.9_2012,ORT.2.9,T_2n,2012,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.2.9_2021,ORT.2.9,T_2n,2021,Echo,45.7589,-119.2076,Columbia Plateau,Yes,Yes,Yes,Yes
+ORT.3.1_2012,ORT.3.1,T_2n,2012,Beatty Butte T,42.3263,-119.3665,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.3.10_2012,ORT.3.10,T_2n,2012,Beatty Butte T,42.3263,-119.3665,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.3.5_2012,ORT.3.5,T_2n,2012,Beatty Butte T,42.3263,-119.3665,Northern Basin and Range,Yes,Yes,Yes,Yes
+ORT.3.7_2012,ORT.3.7,T_2n,2012,Beatty Butte T,42.3263,-119.3665,Northern Basin and Range,Yes,No,Yes,Yes
+ORTV.2.4_2012,ORTV.2.4,T_2n,2012,Beatty Butte V,42.3208,-119.3539,Northern Basin and Range,No,No,No,No
+ORTW.2.1_2012,ORTW.2.1,T_2n,2012,Beatty Butte W,42.3166,-119.3928,Northern Basin and Range,Yes,No,Yes,Yes
+ORV.1.1_2012,ORV.1.1,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.10_2012,ORV.1.10,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.10_2021,ORV.1.10,V_4n,2021,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.3_2012,ORV.1.3,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.4_2012,ORV.1.4,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.5_2012,ORV.1.5,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.6_2012,ORV.1.6,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORV.1.8_2012,ORV.1.8,V_4n,2012,Lookout Mtn,44.4883,-117.3233,Blue Mountains,Yes,No,No,No
+ORW.1.1_2012,ORW.1.1,W_4n,2012,West of Juntura,43.7853,-118.2594,Northern Basin and Range,Yes,No,Yes,No
+ORW.1.1_2021,ORW.1.1,W_4n,2021,West of Juntura,43.7853,-118.2594,Northern Basin and Range,Yes,Yes,Yes,No
+UTT.1.1_2012,UTT.1.1,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.1_2021,UTT.1.1,T_2n,2021,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,No,Yes,Yes,Yes
+UTT.1.2_2012,UTT.1.2,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.5_2012,UTT.1.5,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.5_2021,UTT.1.5,T_2n,2021,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,Yes
+UTT.1.6_2012,UTT.1.6,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.6_2021,UTT.1.6,T_2n,2021,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.8_2012,UTT.1.8,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTT.1.9_2012,UTT.1.9,T_2n,2012,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,Yes
+UTT.1.9_2021,UTT.1.9,T_2n,2021,Canyon B,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,Yes
+UTT.2.3_2012,UTT.2.3,T_2n,2012,La Sal B,38.306,-109.3876,Colorado Plateaus,Yes,Yes,Yes,Yes
+UTT.3.10_2012,UTT.3.10,T_2n,2012,Kanab,37.0402,-112.2642,Colorado Plateaus,Yes,Yes,Yes,Yes
+UTT.3.3_2012,UTT.3.3,T_2n,2012,Kanab,37.0402,-112.2642,Colorado Plateaus,Yes,Yes,Yes,Yes
+UTV.1.7_2012,UTV.1.7,V_2n,2012,Basin Exclosure,39.3413,-111.5221,Wasatch and Uinta Mountains,Yes,No,No,No
+UTV.3.3_2012,UTV.3.3,V_4n,2012,La Sal V,38.3413,-109.2173,Southern Rockies,No,Yes,No,No
+UTV.3.4_2012,UTV.3.4,V_4n,2012,La Sal V,38.3413,-109.2173,Southern Rockies,Yes,No,No,No
+UTV.3.5_2012,UTV.3.5,V_4n,2012,La Sal V,38.3413,-109.2173,Southern Rockies,Yes,No,No,No
+UTV.3.5_2021,UTV.3.5,V_4n,2021,La Sal V,38.3413,-109.2173,Southern Rockies,No,Yes,No,No
+UTW.1.1_2012,UTW.1.1,W_4n,2012,La Sal W,38.3279,-109.4352,Colorado Plateaus,Yes,No,Yes,No
+UTW.1.1_2021,UTW.1.1,W_4n,2021,La Sal W,38.3279,-109.4352,Colorado Plateaus,Yes,Yes,Yes,No
+UTW.1.10_2012,UTW.1.10,W_4n,2012,La Sal W,38.3279,-109.4352,Colorado Plateaus,No,No,No,No
+UTW.1.10_2021,UTW.1.10,W_4n,2021,La Sal W,38.3279,-109.4352,Colorado Plateaus,Yes,Yes,Yes,No
+UTW.1.4_2012,UTW.1.4,W_4n,2012,La Sal W,38.3279,-109.4352,Colorado Plateaus,Yes,No,Yes,No
+UTW.1.4_2021,UTW.1.4,W_4n,2021,La Sal W,38.3279,-109.4352,Colorado Plateaus,Yes,Yes,Yes,No
+UTW.2.10_2012,UTW.2.10,W_4n,2012,Scooby,41.8566,-113.049,Central Basin and Range,Yes,No,Yes,No
+UTW.2.3_2012,UTW.2.3,W_4n,2012,Scooby,41.8566,-113.049,Central Basin and Range,Yes,No,Yes,No
+UTW.2.3_2021,UTW.2.3,W_4n,2021,Scooby,41.8566,-113.049,Central Basin and Range,Yes,Yes,Yes,No
+UTW.2.5_2012,UTW.2.5,W_4n,2012,Scooby,41.8566,-113.049,Central Basin and Range,Yes,No,Yes,No
+UTW.2.6_2012,UTW.2.6,W_4n,2012,Scooby,41.8566,-113.049,Central Basin and Range,Yes,No,Yes,No
+UTWV.2.1_2012,UTWV.2.1,W_4n,2012,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTWV.2.1_2021,UTWV.2.1,W_4n,2021,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,No
+UTWV.2.10_2012,UTWV.2.10,W_4n,2012,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,No,No,No,No
+UTWV.2.10_2021,UTWV.2.10,W_4n,2021,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,No
+UTWV.2.6_2012,UTWV.2.6,W_4n,2012,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTWV.2.6_2021,UTWV.2.6,W_4n,2021,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,No
+UTWV.2.7_2012,UTWV.2.7,W_4n,2012,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTWV.2.7_2021,UTWV.2.7,W_4n,2021,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,No
+UTWV.2.8_2012,UTWV.2.8,W_4n,2012,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,No,Yes,No
+UTWV.2.8_2021,UTWV.2.8,W_4n,2021,Canyon V,37.9933,-112.5087,Wasatch and Uinta Mountains,Yes,Yes,Yes,No
+WAT.1.3_2012,WAT.1.3,T_2n,2012,Lind,46.7419,-118.2278,Columbia Plateau,Yes,Yes,Yes,Yes
+WAT.1.3_2021,WAT.1.3,T_2n,2021,Lind,46.7419,-118.2278,Columbia Plateau,Yes,Yes,Yes,Yes
+WAT.1.4_2012,WAT.1.4,T_2n,2012,Lind,46.7419,-118.2278,Columbia Plateau,Yes,No,Yes,No
+WAT.1.4_2021,WAT.1.4,T_2n,2021,Lind,46.7419,-118.2278,Columbia Plateau,No,No,No,No
+WAT.1.6_2012,WAT.1.6,T_2n,2012,Lind,46.7419,-118.2278,Columbia Plateau,Yes,Yes,Yes,Yes
+WAT.1.6_2021,WAT.1.6,T_2n,2021,Lind,46.7419,-118.2278,Columbia Plateau,Yes,Yes,Yes,Yes
+WAT.1.9_2012,WAT.1.9,T_2n,2012,Lind,46.7419,-118.2278,Columbia Plateau,Yes,No,Yes,No
+WAT.1.9_2021,WAT.1.9,T_2n,2021,Lind,46.7419,-118.2278,Columbia Plateau,No,No,No,No
+WAT.2.1_2012,WAT.2.1,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.1_2021,WAT.2.1,T_4n,2021,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.10_2012,WAT.2.10,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.3_2012,WAT.2.3,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,No,No,No
+WAT.2.4_2012,WAT.2.4,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,No,No,No
+WAT.2.4_2021,WAT.2.4,T_4n,2021,Crab Creek,46.9488,-119.2371,Columbia Plateau,No,Yes,No,No
+WAT.2.7_2012,WAT.2.7,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.8_2012,WAT.2.8,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,No,No,No
+WAT.2.8_2021,WAT.2.8,T_4n,2021,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.9_2012,WAT.2.9,T_4n,2012,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAT.2.9_2021,WAT.2.9,T_4n,2021,Crab Creek,46.9488,-119.2371,Columbia Plateau,Yes,Yes,No,No
+WAW.1.1_2012,WAW.1.1,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.2_2012,WAW.1.2,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.2_2021,WAW.1.2,W_4n,2021,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,Yes,Yes,No
+WAW.1.3_2012,WAW.1.3,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.3_2021,WAW.1.3,W_4n,2021,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,Yes,Yes,No
+WAW.1.4_2012,WAW.1.4,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.5_2012,WAW.1.5,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.6_2012,WAW.1.6,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WAW.1.6_2021,WAW.1.6,W_4n,2021,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,No,Yes,Yes,No
+WAW.1.7_2012,WAW.1.7,W_4n,2012,Saddle Mtn,46.7672,-119.4727,Columbia Plateau,Yes,No,Yes,No
+WYW.1.2_2012,WYW.1.2,W_4n,2012,Burma Road,42.6006,-109.8341,Wyoming Basin,Yes,No,Yes,No
